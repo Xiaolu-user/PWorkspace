@@ -1,0 +1,14 @@
+node_modules/
+out/
+release/
+.cache/
+test-results/
+*.log
+*.sqlite*
+*.db
+*.db-*
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
