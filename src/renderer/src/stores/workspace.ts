@@ -3,11 +3,18 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { AppInfo, Bookmark, Dashboard, Note, Preferences, Result, Task } from '../../../shared/types'
 import { unwrap, report } from '../lib/api'
+import { defaultAppearance, type ModuleKey } from '../../../shared/appearance'
 
 export const useWorkspace = defineStore('workspace', () => {
   const tasks = ref<Task[]>([]); const notes = ref<Note[]>([]); const bookmarks = ref<Bookmark[]>([])
   const dashboard = ref<Dashboard>({ today: [], overdue: [], recentNotes: [], bookmarks: [], totalTodo: 0, totalDone: 0, noteCount: 0, bookmarkCount: 0 })
-  const info = ref<AppInfo | null>(null); const preferences = ref<Preferences>({ closeBehavior: 'tray', trayExplained: false })
+  const info = ref<AppInfo | null>(null); const preferences = ref<Preferences>({ closeBehavior: 'tray', trayExplained: false, appearance: defaultAppearance() })
+  const now = ref(Date.now())
+  function moduleStyle(key: ModuleKey): Record<string, string | number> {
+    const appearance = preferences.value.appearance
+    return { '--module-scale': appearance.modules[key].scale / 100, '--text-scale': appearance.fontScale * appearance.modules[key].fontScale / 10000 }
+  }
+  async function acknowledge(task: Task): Promise<void> { await mutate(() => window.workbench.tasks.acknowledge(task.id), '已知晓，完成前会保持置顶高亮') }
   const loading = ref(false); const error = ref(''); const revision = ref(0)
   let requestId = 0
   async function refresh(): Promise<boolean> {
@@ -34,5 +41,5 @@ export const useWorkspace = defineStore('workspace', () => {
       return true
     } catch (cause) { report(cause); return false }
   }
-  return { tasks, notes, bookmarks, dashboard, info, preferences, loading, error, revision, refresh, mutate }
+  return { tasks, notes, bookmarks, dashboard, info, preferences, loading, error, revision, refresh, mutate, now, moduleStyle, acknowledge }
 })

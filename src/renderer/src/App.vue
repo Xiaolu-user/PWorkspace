@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watchEffect } from 'vue'
 import { localDate } from '../../shared/date'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -10,6 +10,13 @@ import { useEditor } from './stores/editor'
 import { unwrap, report } from './lib/api'
 const route = useRoute(); const router = useRouter(); const workspace = useWorkspace(); const editor = useEditor()
 const search = ref(''); const addTask = ref(false); const now = ref(new Date())
+watchEffect(() => {
+  const appearance = workspace.preferences.appearance
+  const style = document.documentElement.style
+  style.setProperty('--text-scale', String(appearance.fontScale / 100))
+  style.setProperty('--dialog-scale', String(appearance.dialogScale / 100))
+  style.setProperty('--dialog-text-scale', String(appearance.fontScale * appearance.dialogFontScale / 10000))
+})
 const todayLabel = computed(() => now.value.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' }))
 const navigation = [{ path: '/', icon: 'grid', label: '今日概览' }, { path: '/tasks', icon: 'list', label: '我的待办' }, { path: '/?panel=courses', icon: 'calendar', label: '课程表' }, { path: '/?panel=fitness', icon: 'fitness', label: '健身计划' }, { path: '/?panel=files', icon: 'folder', label: '常用资料' }, { path: '/notes', icon: 'document', label: '随手笔记' }, { path: '/bookmarks', icon: 'link', label: '常用链接' }]
 let unsubscribe: (() => void) | undefined; let clock: ReturnType<typeof setInterval>
@@ -23,7 +30,7 @@ async function onKeyboard(event: KeyboardEvent): Promise<void> {
 }
 onMounted(async () => {
   window.addEventListener('keydown', onKeyboard)
-  clock = setInterval(() => { const before = now.value.toDateString(); now.value = new Date(); if (now.value.toDateString() !== before) void workspace.refresh() }, 30000)
+  clock = setInterval(() => { const before = now.value.toDateString(); now.value = new Date(); workspace.now = now.value.getTime(); if (now.value.toDateString() !== before) void workspace.refresh() }, 1000)
   if (window.workbench) {
     unsubscribe = window.workbench.app.onRequestClose(async token => {
       try { const allow = await editor.requestLeave(); unwrap(await window.workbench.app.respondClose(token, allow)) } catch (cause) { report(cause) }

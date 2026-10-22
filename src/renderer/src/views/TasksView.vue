@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { Task } from '../../../shared/types'
 import { isOverdue, localDate } from '../../../shared/date'
+import { compareReminderTasks } from '../../../shared/reminders'
 import { useWorkspace } from '../stores/workspace'
 import { confirmDelete } from '../lib/api'
 import AppIcon from '../components/AppIcon.vue'
@@ -22,7 +23,7 @@ const tabs = computed(() => [
 const filtered = computed(() => workspace.tasks.filter(task => {
   const status = filter.value === 'all' || (filter.value === 'overdue' ? isOverdue(task, today.value) : task.status === filter.value)
   return status && (priority.value === 'all' || task.priority === priority.value) && (task.title + '\n' + task.description).toLocaleLowerCase().includes(query.value.trim().toLocaleLowerCase())
-}))
+}).sort((a, b) => compareReminderTasks(a, b, workspace.now)))
 const visible = computed(() => filtered.value.slice((page.value - 1) * pageSize, page.value * pageSize))
 watch([filter, query, priority], () => { page.value = 1 })
 watch(() => filtered.value.length, length => { page.value = Math.min(page.value, Math.max(1, Math.ceil(length / pageSize))) })

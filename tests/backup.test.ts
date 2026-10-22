@@ -88,7 +88,7 @@ describe('备份、恢复、升级与回退', () => {
     const original = f.repository.createTask(task())
     f.store.close()
     const legacy = new Database(f.store.path)
-    legacy.exec('DROP INDEX tasks_status_due; DROP INDEX notes_updated; DROP INDEX bookmarks_group; PRAGMA user_version = 1')
+    legacy.exec('ALTER TABLE tasks DROP COLUMN reminderAcknowledgedAt; ALTER TABLE tasks DROP COLUMN dueTime; ALTER TABLE tasks DROP COLUMN remindBefore; ALTER TABLE tasks DROP COLUMN reminderSentAt; DROP INDEX tasks_status_due; DROP INDEX notes_updated; DROP INDEX bookmarks_group; PRAGMA user_version = 1')
     legacy.close()
     const reopened = new DatabaseStore(f.store.path)
     try {
@@ -105,7 +105,7 @@ describe('备份、恢复、升级与回退', () => {
     const legacyPath = join(f.root, 'legacy.db')
     await f.backup.create(legacyPath)
     const legacy = new Database(legacyPath)
-    legacy.exec('DROP INDEX tasks_status_due; DROP INDEX notes_updated; DROP INDEX bookmarks_group; PRAGMA user_version = 1')
+    legacy.exec('ALTER TABLE tasks DROP COLUMN reminderAcknowledgedAt; ALTER TABLE tasks DROP COLUMN dueTime; ALTER TABLE tasks DROP COLUMN remindBefore; ALTER TABLE tasks DROP COLUMN reminderSentAt; DROP INDEX tasks_status_due; DROP INDEX notes_updated; DROP INDEX bookmarks_group; PRAGMA user_version = 1')
     legacy.close()
     f.repository.removeTask(original.id)
     await f.backup.restore(legacyPath)

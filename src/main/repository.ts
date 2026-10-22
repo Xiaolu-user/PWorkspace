@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import type { Bookmark, BookmarkInput, Dashboard, Note, NoteInput, Preferences, SearchResults, Task, TaskInput } from '../shared/types'
 import { localDate } from '../shared/date'
+import { reminderTimestamp, isReminderActive } from '../shared/reminders'
+import { normalizeAppearance } from '../shared/appearance'
 import { DatabaseStore } from './database'
 import { AppError } from './errors'
 import * as validate from './validation'
@@ -16,17 +18,32 @@ export class Repository {
   createTask(input: unknown): Task {
     const data = validate.taskInput(input)
     const now = new Date().toISOString()
-    const row: Task = { ...data, id: randomUUID(), createdAt: now, updatedAt: now }
-    this.store.connection.prepare('INSERT INTO tasks (id,title,description,status,dueDate,priority,createdAt,updatedAt) VALUES (@id,@title,@description,@status,@dueDate,@priority,@createdAt,@updatedAt)').run(row)
+    const row: Task = { ...data, dueTime: data.dueTime ?? null, remindBefore: data.remindBefore ?? null, reminderSentAt: null, reminderAcknowledgedAt: null, id: randomUUID(), createdAt: now, updatedAt: now }
+    this.store.connection.prepare('INSERT INTO tasks (id,title,description,status,dueDate,priority,dueTime,remindBefore,reminderSentAt,reminderAcknowledgedAt,createdAt,updatedAt) VALUES (@id,@title,@description,@status,@dueDate,@priority,@dueTime,@remindBefore,@reminderSentAt,@reminderAcknowledgedAt,@createdAt,@updatedAt)').run(row)
     return row
   }
   updateTask(taskId: unknown, input: unknown): Task {
     const old = this.task(taskId)
-    const row = { ...old, ...validate.taskInput(input), updatedAt: new Date().toISOString() }
-    this.store.connection.prepare('UPDATE tasks SET title=@title,description=@description,status=@status,dueDate=@dueDate,priority=@priority,updatedAt=@updatedAt WHERE id=@id').run(row)
+    const data = validate.taskInput(input)
+    const row = { ...old, ...data, updatedAt: new Date().toISOString() }
+    if (old.dueDate !== row.dueDate || old.dueTime !== row.dueTime || old.remindBefore !== row.remindBefore) { row.reminderSentAt = null; row.reminderAcknowledgedAt = null }
+    this.store.connection.prepare('UPDATE tasks SET title=@title,description=@description,status=@status,dueDate=@dueDate,priority=@priority,dueTime=@dueTime,remindBefore=@remindBefore,reminderSentAt=@reminderSentAt,reminderAcknowledgedAt=@reminderAcknowledgedAt,updatedAt=@updatedAt WHERE id=@id').run(row)
     return row
   }
   removeTask(taskId: unknown): void { this.remove('tasks', taskId) }
+  acknowledgeReminder(taskId: unknown): Task {
+    const task = this.task(taskId)
+    if (!isReminderActive(task)) throw new AppError('VALIDATION', '这条待办当前没有需要确认的提醒')
+    this.store.connection.prepare('UPDATE tasks SET reminderAcknowledgedAt=COALESCE(reminderAcknowledgedAt,?) WHERE id=?').run(new Date().toISOString(), task.id)
+    return this.task(task.id)
+  }
+  dueReminders(now = Date.now()): Task[] {
+    const tasks = this.store.connection.prepare("SELECT * FROM tasks WHERE status='todo' AND remindBefore IS NOT NULL AND reminderSentAt IS NULL AND reminderAcknowledgedAt IS NULL").all() as Task[]
+    return tasks.filter(task => { const time = reminderTimestamp(task); return time !== null && time <= now }).sort((a, b) => reminderTimestamp(a)! - reminderTimestamp(b)!)
+  }
+  markReminderSent(task: Task): void {
+    this.store.connection.prepare("UPDATE tasks SET reminderSentAt=? WHERE id=? AND status='todo' AND dueDate=? AND dueTime=? AND remindBefore=? AND reminderSentAt IS NULL").run(new Date().toISOString(), task.id, task.dueDate, task.dueTime, task.remindBefore)
+  }
   notes(): Note[] { return this.store.connection.prepare('SELECT * FROM notes ORDER BY updatedAt DESC, id').all() as Note[] }
   note(noteId: unknown): Note {
     const row = this.store.connection.prepare('SELECT * FROM notes WHERE id = ?').get(validate.id(noteId)) as Note | undefined
@@ -99,11 +116,16 @@ export class Repository {
   }
   preferences(): Preferences {
     const raw = this.readSetting<Partial<Preferences> | null>('preferences', null)
-    return { closeBehavior: raw?.closeBehavior === 'quit' ? 'quit' : 'tray', trayExplained: raw?.trayExplained === true }
+    return { closeBehavior: raw?.closeBehavior === 'quit' ? 'quit' : 'tray', trayExplained: raw?.trayExplained === true, appearance: normalizeAppearance(raw?.appearance) }
   }
   setCloseBehavior(value: unknown): Preferences {
     if (value !== 'tray' && value !== 'quit') throw new AppError('VALIDATION', '关闭窗口的设置不正确')
     const preferences = { ...this.preferences(), closeBehavior: value } as Preferences
+    this.writeSetting('preferences', preferences)
+    return preferences
+  }
+  setAppearance(value: unknown): Preferences {
+    const preferences = { ...this.preferences(), appearance: normalizeAppearance(value) }
     this.writeSetting('preferences', preferences)
     return preferences
   }

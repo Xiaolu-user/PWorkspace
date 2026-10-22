@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto'
 import { AppError } from './errors'
 
 export const APPLICATION_ID = 0x57424b31
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 4
 const schemas: Record<string, string[]> = {
   tasks: ['id', 'title', 'description', 'status', 'dueDate', 'priority', 'createdAt', 'updatedAt'],
   notes: ['id', 'title', 'body', 'createdAt', 'updatedAt'],
@@ -22,6 +22,11 @@ export function validateDatabase(db: Database.Database): number {
     const found = db.prepare(`PRAGMA table_info("${table}")`).all() as { name: string }[]
     if (!columns.every(column => found.some(item => item.name === column))) throw new AppError('INCOMPATIBLE', '备份的数据结构不完整')
   }
+  if (version >= 3) {
+    const columns = db.prepare('PRAGMA table_info(tasks)').all() as { name: string }[]
+    if (!['dueTime', 'remindBefore', 'reminderSentAt'].every(name => columns.some(column => column.name === name))) throw new AppError('INCOMPATIBLE', '备份的提醒数据结构不完整')
+  }
+  if (version >= 4 && !(db.prepare('PRAGMA table_info(tasks)').all() as { name: string }[]).some(column => column.name === 'reminderAcknowledgedAt')) throw new AppError('INCOMPATIBLE', '备份的提醒确认数据结构不完整')
   return version
 }
 
@@ -47,6 +52,14 @@ export function migrateDatabase(db: Database.Database): void {
     if (version < 2) {
       db.exec('CREATE INDEX tasks_status_due ON tasks(status, dueDate); CREATE INDEX notes_updated ON notes(updatedAt DESC); CREATE INDEX bookmarks_group ON bookmarks("group");')
       db.pragma('user_version = 2')
+    }
+    if (version < 3) {
+      db.exec('ALTER TABLE tasks ADD COLUMN dueTime TEXT; ALTER TABLE tasks ADD COLUMN remindBefore INTEGER; ALTER TABLE tasks ADD COLUMN reminderSentAt TEXT;')
+      db.pragma('user_version = 3')
+    }
+    if (version < 4) {
+      db.exec('ALTER TABLE tasks ADD COLUMN reminderAcknowledgedAt TEXT')
+      db.pragma('user_version = 4')
     }
   })()
 }

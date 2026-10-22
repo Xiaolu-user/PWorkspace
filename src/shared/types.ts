@@ -1,12 +1,12 @@
 export type Status = 'todo' | 'done'
 export type Priority = 'low' | 'normal' | 'high'
-export interface TaskInput { title: string; description: string; status: Status; dueDate: string | null; priority: Priority }
-export interface Task extends TaskInput { id: string; createdAt: string; updatedAt: string }
+export interface TaskInput { title: string; description: string; status: Status; dueDate: string | null; priority: Priority; dueTime?: string | null; remindBefore?: number | null }
+export interface Task extends TaskInput { id: string; createdAt: string; updatedAt: string; dueTime: string | null; remindBefore: number | null; reminderSentAt: string | null; reminderAcknowledgedAt: string | null }
 export interface NoteInput { title: string; body: string }
 export interface Note extends NoteInput { id: string; createdAt: string; updatedAt: string }
 export interface BookmarkInput { title: string; url: string; group: string }
 export interface Bookmark extends BookmarkInput { id: string; createdAt: string; updatedAt: string }
-export interface Preferences { closeBehavior: 'tray' | 'quit'; trayExplained: boolean }
+export interface Preferences { closeBehavior: 'tray' | 'quit'; trayExplained: boolean; appearance: import('./appearance').Appearance }
 export interface Dashboard { today: Task[]; overdue: Task[]; recentNotes: Note[]; bookmarks: Bookmark[]; totalTodo: number; totalDone: number; noteCount: number; bookmarkCount: number }
 export interface SearchResults { tasks: Task[]; notes: Note[]; bookmarks: Bookmark[] }
 export interface AppInfo { version: string; dataPath: string; backupPath: string; startupWarning: string | null }
@@ -28,6 +28,7 @@ export interface WorkbenchAPI {
     create(input: TaskInput): Promise<Result<Task>>
     update(id: string, input: TaskInput): Promise<Result<Task>>
     remove(id: string): Promise<Result<void>>
+    acknowledge(id: string): Promise<Result<Task>>
   }
   notes: {
     list(): Promise<Result<Note[]>>
@@ -48,6 +49,7 @@ export interface WorkbenchAPI {
     info(): Promise<Result<AppInfo>>
     preferences(): Promise<Result<Preferences>>
     setCloseBehavior(value: 'tray' | 'quit'): Promise<Result<Preferences>>
+    setAppearance(value: import('./appearance').Appearance): Promise<Result<Preferences>>
     openExternal(url: string): Promise<Result<void>>
     openDataDirectory(): Promise<Result<void>>
     ready(): Promise<Result<void>>

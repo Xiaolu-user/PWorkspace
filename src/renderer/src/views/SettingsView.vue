@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { defaultAppearance, moduleLabels, type Appearance } from '../../../shared/appearance'
 import { ElMessage } from 'element-plus'
 import { useWorkspace } from '../stores/workspace'
 import { useEditor } from '../stores/editor'
@@ -8,6 +9,15 @@ import AppIcon from '../components/AppIcon.vue'
 const workspace = useWorkspace(); const editor = useEditor()
 const operation = ref<'backup' | 'restore' | null>(null); const savingPreference = ref(false)
 const latestBackup = ref(''); const recoveryBackup = ref('')
+const appearance = ref<Appearance>(defaultAppearance()); const savingAppearance = ref(false)
+watch(() => workspace.preferences.appearance, value => { appearance.value = JSON.parse(JSON.stringify(value)) }, { immediate: true })
+async function saveAppearance(): Promise<void> {
+  if (savingAppearance.value) return
+  savingAppearance.value = true
+  try { workspace.preferences = unwrap(await window.workbench.app.setAppearance(JSON.parse(JSON.stringify(appearance.value)))); ElMessage.success('显示设置已保存并生效') }
+  catch (error) { report(error) } finally { savingAppearance.value = false }
+}
+async function resetAppearance(): Promise<void> { appearance.value = defaultAppearance(); await saveAppearance() }
 async function setBehavior(value: unknown): Promise<void> {
   if (savingPreference.value) return
   if (value !== 'tray' && value !== 'quit') return
@@ -36,6 +46,10 @@ async function restoreBackup(): Promise<void> {
 </script>
 <template>
   <div class="settings-layout">
+    <section class="panel settings-section appearance-settings"><div class="panel-heading"><h2><AppIcon name="setting" />模块与文字大小</h2><el-button :disabled="savingAppearance || !!operation" @click="resetAppearance">恢复默认大小</el-button></div><p class="appearance-description">保存后立即生效，重启仍保留。模块缩放调整整个卡片，文字缩放可单独进一步调整。</p>
+      <el-form label-position="top" :disabled="savingAppearance || !!operation" class="appearance-form"><div class="appearance-global"><el-form-item label="全局文字大小（%）"><el-input-number v-model="appearance.fontScale" aria-label="全局文字大小" :min="90" :max="160" :step="5" /></el-form-item><el-form-item label="弹窗大小（%）"><el-input-number v-model="appearance.dialogScale" aria-label="弹窗大小" :min="100" :max="150" :step="5" /></el-form-item><el-form-item label="弹窗文字大小（%）"><el-input-number v-model="appearance.dialogFontScale" aria-label="弹窗文字大小" :min="100" :max="150" :step="5" /></el-form-item></div>
+      <div class="appearance-module-row appearance-module-header"><span>首页模块</span><span>模块缩放（%）</span><span>文字缩放（%）</span></div><div v-for="(label, key) in moduleLabels" :key="key" class="appearance-module-row"><strong>{{ label }}</strong><el-input-number v-model="appearance.modules[key].scale" :aria-label="label + '模块大小'" :min="80" :max="140" :step="5" /><el-input-number v-model="appearance.modules[key].fontScale" :aria-label="label + '文字大小'" :min="80" :max="160" :step="5" /></div><div class="appearance-actions"><el-button type="primary" :loading="savingAppearance" @click="saveAppearance">保存显示设置</el-button></div></el-form>
+    </section>
     <section class="panel settings-section"><div class="panel-heading"><h2><AppIcon name="monitor" :size="20" />桌面体验</h2></div><div class="setting-row"><div><strong>关闭窗口时</strong><p>你可以让工作台在托盘等待，也可以直接退出。</p></div><el-radio-group :model-value="workspace.preferences.closeBehavior" :disabled="savingPreference || !!operation" @update:model-value="setBehavior"><el-radio-button value="tray">留在托盘</el-radio-button><el-radio-button value="quit">退出软件</el-radio-button></el-radio-group></div><div class="setting-note"><AppIcon name="done" :size="16" /> 真正退出前，会提醒你保存尚未保存的笔记。</div></section>
     <section class="panel settings-section"><div class="panel-heading"><h2><AppIcon name="folder" :size="20" />数据与备份</h2><span class="local-badge"><span class="status-dot"></span>仅保存在本机</span></div>
       <div class="data-path"><span>数据文件夹</span><code>{{ workspace.info?.dataPath || '正在读取…' }}</code><el-button :disabled="!!operation" @click="openDirectory"><AppIcon name="folder" :size="16" />打开文件夹</el-button></div>

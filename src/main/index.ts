@@ -1,10 +1,11 @@
-import { app, BrowserWindow, dialog, ipcMain, nativeImage, screen, shell, Tray, Menu, type IpcMainInvokeEvent } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, nativeImage, screen, shell, Tray, Menu, Notification, powerMonitor, type IpcMainInvokeEvent } from 'electron'
 import { existsSync, mkdirSync } from 'node:fs'
 import { isAbsolute, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { randomUUID } from 'node:crypto'
 import { channels } from '../shared/channels'
-import type { ErrorCode, Result } from '../shared/types'
+import type { ErrorCode, Result, Task } from '../shared/types'
+import { ReminderService } from './reminders'
 import { DatabaseStore } from './database'
 import { Repository } from './repository'
 import { Planner } from './planner'
@@ -14,6 +15,7 @@ import { Logger } from './logger'
 import { externalUrl } from './validation'
 
 app.setName('PersonalWorkbench')
+if (process.platform === 'win32') app.setAppUserModelId('local.personal.workbench')
 const customData = process.env.WORKBENCH_DATA_DIR
 const userData = customData && isAbsolute(customData) ? customData : join(app.getPath('appData'), 'PersonalWorkbench')
 mkdirSync(userData, { recursive: true })
@@ -29,6 +31,8 @@ let rendererReady = false
 let pendingClose: string | null = null
 let startupWarning: string | null = null
 let boundsTimer: ReturnType<typeof setTimeout> | undefined
+let reminderTimer: ReturnType<typeof setInterval> | undefined
+const activeNotifications = new Set<Notification>()
 // Normalize HTTP addresses so Vite's origin and Chromium's trailing slash compare equally.
 const rendererURL = new URL(process.env.ELECTRON_RENDERER_URL || pathToFileURL(join(__dirname, '../renderer/index.html')).href).href
 
@@ -56,6 +60,31 @@ function reveal(): void {
   if (!window || window.isDestroyed()) return
   if (window.isMinimized()) window.restore()
   window.show(); window.focus()
+}
+function deliverReminder(task: Task): Promise<boolean> {
+  const title = `待办提醒：${task.title}`
+  const content = `${task.dueDate} ${task.dueTime}${task.description ? '\n' + task.description.slice(0, 150) : ''}`
+  const balloon = (): boolean => {
+    if (!tray || tray.isDestroyed()) return false
+    tray.displayBalloon({ title, content })
+    return true
+  }
+  if (!Notification.isSupported()) return Promise.resolve(balloon())
+  return new Promise(resolve => {
+    const notification = new Notification({ title, body: content })
+    activeNotifications.add(notification)
+    const timeout = setTimeout(() => finish(false), 10000)
+    function finish(shown: boolean): void { clearTimeout(timeout); resolve(shown) }
+    notification.once('show', () => finish(true))
+    notification.once('failed', (_event, error) => {
+      logger.error('reminder-notification', new Error(error))
+      activeNotifications.delete(notification)
+      finish(balloon())
+    })
+    notification.once('click', () => { reveal(); activeNotifications.delete(notification) })
+    notification.once('close', () => activeNotifications.delete(notification))
+    notification.show()
+  })
 }
 function requestQuit(): void {
   if (forceQuit) return
@@ -99,6 +128,8 @@ function registerHandlers(): void {
   })
   handle(channels.localRemove, id => planner.remove(id))
   handle(channels.taskList, () => repository.tasks())
+  handle(channels.taskAcknowledge, key => repository.acknowledgeReminder(key))
+  handle(channels.setAppearance, value => repository.setAppearance(value))
   handle(channels.taskGet, key => repository.task(key))
   handle(channels.taskCreate, input => repository.createTask(input))
   handle(channels.taskUpdate, (key, input) => repository.updateTask(key, input))
@@ -201,6 +232,7 @@ function createWindow(): void {
   tray.setToolTip('拾光工作台')
   tray.setContextMenu(Menu.buildFromTemplate([{ label: '打开拾光工作台', click: reveal }, { type: 'separator' }, { label: '退出', click: requestQuit }]))
   tray.on('click', reveal)
+  tray.on('balloon-click', reveal)
   if (process.env.ELECTRON_RENDERER_URL) void window.loadURL(rendererURL)
   else void window.loadFile(join(__dirname, '../renderer/index.html'))
 }
@@ -210,7 +242,7 @@ else {
   app.on('second-instance', reveal)
   app.on('activate', reveal)
   app.on('before-quit', event => { if (!forceQuit) { event.preventDefault(); requestQuit() } })
-  app.on('will-quit', () => { clearTimeout(boundsTimer); try { store?.close() } catch (error) { logger.error('close-database', error) }; tray?.destroy() })
+  app.on('will-quit', () => { clearTimeout(boundsTimer); clearInterval(reminderTimer); try { store?.close() } catch (error) { logger.error('close-database', error) }; tray?.destroy() })
   void app.whenReady().then(async () => {
     try {
       store = new DatabaseStore(join(userData, 'data/workbench.db'))
@@ -219,6 +251,11 @@ else {
       try { await backup.automatic() } catch (error) { startupWarning = '今天的自动备份未成功，请在设置中手动备份并检查磁盘空间和目录权限。'; logger.error('automatic-backup', error) }
       registerHandlers()
       createWindow()
+      const reminders = new ReminderService(repository, deliverReminder)
+      const checkReminders = (): void => { void reminders.check().catch(error => logger.error('reminders', error)) }
+      reminderTimer = setInterval(checkReminders, 15000)
+      powerMonitor.on('resume', checkReminders)
+      checkReminders()
     } catch (error) {
       logger.error('startup', error)
       dialog.showErrorBox('拾光工作台无法启动', `${error instanceof AppError ? error.message : '无法打开或初始化数据库，请检查磁盘空间及目录权限。'}\n\n原有文件已保留，数据位置：\n${join(userData, 'data')}\n\n日志位置：\n${join(userData, 'logs')}`)
