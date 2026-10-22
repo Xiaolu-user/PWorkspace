@@ -12,6 +12,6 @@ export const router = createRouter({ history: createWebHashHistory(), routes: [
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ] })
 router.beforeEach(async (to, from) => {
-  if (from.path === '/notes' && to.fullPath !== from.fullPath) return useEditor().requestLeave()
+  if ((from.path === '/notes' && to.fullPath !== from.fullPath) || (from.path === '/' && to.path !== '/')) return useEditor().requestLeave()
   return true
 })

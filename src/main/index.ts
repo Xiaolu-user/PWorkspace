@@ -7,6 +7,7 @@ import { channels } from '../shared/channels'
 import type { ErrorCode, Result } from '../shared/types'
 import { DatabaseStore } from './database'
 import { Repository } from './repository'
+import { Planner } from './planner'
 import { BackupService } from './backup'
 import { AppError } from './errors'
 import { Logger } from './logger'
@@ -76,6 +77,27 @@ function persistBounds(): void {
   catch (error) { logger.error('windowBounds', error) }
 }
 function registerHandlers(): void {
+  const planner = new Planner(repository)
+  handle(channels.plannerGet, async () => {
+    const data = planner.get()
+    data.entries = await Promise.all(data.entries.map(async entry => {
+      try { return { ...entry, icon: (await app.getFileIcon(entry.path, { size: 'normal' })).toDataURL() } } catch { return entry }
+    }))
+    return data
+  })
+  handle(channels.semesterSave, value => planner.semester(value))
+  handle(channels.workoutsSave, value => planner.workouts(value))
+  handle(channels.localPick, async kind => {
+    if (!['app', 'file', 'folder'].includes(kind as string)) throw new AppError('VALIDATION', '选择类型不正确')
+    const result = await dialog.showOpenDialog(window!, { title: kind === 'app' ? '选择应用程序或快捷方式' : '添加资料入口（保留原文件位置）', properties: kind === 'folder' ? ['openDirectory', 'multiSelections'] : ['openFile', 'multiSelections'], ...(kind === 'app' ? { filters: [{ name: '应用或快捷方式', extensions: ['exe', 'lnk'] }] } : {}) })
+    if (!result.canceled) planner.add(result.filePaths, kind === 'app' ? 'app' : 'file')
+  })
+  handle(channels.localOpen, async id => {
+    const entry = planner.entry(id)
+    if (!existsSync(entry.path)) throw new AppError('IO', '原文件已移动或删除，请重新添加入口')
+    if (await shell.openPath(entry.path)) throw new AppError('IO', '无法打开此文件，请检查关联的应用程序')
+  })
+  handle(channels.localRemove, id => planner.remove(id))
   handle(channels.taskList, () => repository.tasks())
   handle(channels.taskGet, key => repository.task(key))
   handle(channels.taskCreate, input => repository.createTask(input))
@@ -121,7 +143,7 @@ function registerHandlers(): void {
     const selection = await dialog.showOpenDialog(window!, { title: '选择工作台备份', properties: ['openFile'], filters: [{ name: '工作台数据库备份', extensions: ['db'] }] })
     if (selection.canceled || !selection.filePaths[0]) return null
     backup.inspect(selection.filePaths[0])
-    const confirmation = await dialog.showMessageBox(window!, { type: 'warning', title: '恢复备份', message: '恢复会替换当前全部任务、笔记、链接和设置。', detail: '开始前会校验备份，并保留一份恢复前的数据备份。是否继续？', buttons: ['取消', '恢复并替换'], defaultId: 0, cancelId: 0, noLink: true })
+    const confirmation = await dialog.showMessageBox(window!, { type: 'warning', title: '恢复备份', message: '恢复会替换当前任务、笔记、链接、课程、健身计划、资料入口和设置（不会替换原始资料文件）。', detail: '开始前会校验备份，并保留一份恢复前的数据备份。是否继续？', buttons: ['取消', '恢复并替换'], defaultId: 0, cancelId: 0, noLink: true })
     if (confirmation.response !== 1) return null
     const result = await backup.restore(selection.filePaths[0])
     startupWarning = null

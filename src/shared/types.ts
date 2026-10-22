@@ -14,6 +14,14 @@ export interface BackupResult { path: string; safetyBackup?: string }
 export type ErrorCode = 'VALIDATION' | 'NOT_FOUND' | 'BUSY' | 'DATABASE' | 'BACKUP' | 'INCOMPATIBLE' | 'IO' | 'UNAUTHORIZED' | 'INTERNAL'
 export type Result<T> = { ok: true; data: T } | { ok: false; error: { code: ErrorCode; message: string } }
 export interface WorkbenchAPI {
+  planner: {
+    get(): Promise<Result<import('./planner').PlannerData>>
+    semester(value: import('./planner').Semester): Promise<Result<void>>
+    workouts(value: import('./planner').Workout[]): Promise<Result<void>>
+    pick(kind: 'app' | 'file' | 'folder'): Promise<Result<void>>
+    open(id: string): Promise<Result<void>>
+    remove(id: string): Promise<Result<void>>
+  }
   tasks: {
     list(): Promise<Result<Task[]>>
     get(id: string): Promise<Result<Task>>

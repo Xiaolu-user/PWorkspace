@@ -4,12 +4,12 @@ import { ElMessage } from 'element-plus'
 import type { Task, TaskInput } from '../../../shared/types'
 import { isValidDate } from '../../../shared/date'
 import { useWorkspace } from '../stores/workspace'
-const props = defineProps<{ modelValue: boolean; task?: Task | null }>()
+const props = defineProps<{ modelValue: boolean; task?: Task | null; defaultDate?: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 const workspace = useWorkspace(); const saving = ref(false)
 const form = reactive<TaskInput>({ title: '', description: '', status: 'todo', dueDate: null, priority: 'normal' })
 function setVisible(value: boolean): void { if (!saving.value) emit('update:modelValue', value) }
-watch(() => props.modelValue, value => { if (value) Object.assign(form, props.task ? { title: props.task.title, description: props.task.description, status: props.task.status, dueDate: props.task.dueDate, priority: props.task.priority } : { title: '', description: '', status: 'todo', dueDate: null, priority: 'normal' }) })
+watch(() => props.modelValue, value => { if (value) Object.assign(form, props.task ? { title: props.task.title, description: props.task.description, status: props.task.status, dueDate: props.task.dueDate, priority: props.task.priority } : { title: '', description: '', status: 'todo', dueDate: props.defaultDate || null, priority: 'normal' }) })
 async function submit(): Promise<void> {
   if (saving.value) return
   if (!form.title.trim()) { ElMessage.warning('请填写任务标题'); return }

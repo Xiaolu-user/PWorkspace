@@ -1,4 +1,5 @@
 export const channels = {
+  plannerGet: 'wb:planner:get', semesterSave: 'wb:planner:semester', workoutsSave: 'wb:planner:workouts', localPick: 'wb:local:pick', localOpen: 'wb:local:open', localRemove: 'wb:local:remove',
   taskList: 'wb:task:list', taskGet: 'wb:task:get', taskCreate: 'wb:task:create', taskUpdate: 'wb:task:update', taskRemove: 'wb:task:remove',
   noteList: 'wb:note:list', noteGet: 'wb:note:get', noteSave: 'wb:note:save', noteRemove: 'wb:note:remove',
   bookmarkList: 'wb:bookmark:list', bookmarkCreate: 'wb:bookmark:create', bookmarkUpdate: 'wb:bookmark:update', bookmarkRemove: 'wb:bookmark:remove',
