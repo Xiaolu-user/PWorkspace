@@ -1,4 +1,5 @@
 export const channels = {
+  weatherSearch: 'wb:weather:search', weatherCurrent: 'wb:weather:current',
   taskAcknowledge: 'wb:task:acknowledge', setAppearance: 'wb:app:setAppearance',
   plannerGet: 'wb:planner:get', semesterSave: 'wb:planner:semester', workoutsSave: 'wb:planner:workouts', localPick: 'wb:local:pick', localOpen: 'wb:local:open', localRemove: 'wb:local:remove',
   taskList: 'wb:task:list', taskGet: 'wb:task:get', taskCreate: 'wb:task:create', taskUpdate: 'wb:task:update', taskRemove: 'wb:task:remove',

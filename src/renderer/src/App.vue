@@ -9,10 +9,21 @@ import { useWorkspace } from './stores/workspace'
 import { useEditor } from './stores/editor'
 import { unwrap, report } from './lib/api'
 const route = useRoute(); const router = useRouter(); const workspace = useWorkspace(); const editor = useEditor()
+const changingTheme = ref(false)
+async function toggleTheme(): Promise<void> {
+  if (changingTheme.value) return
+  changingTheme.value = true
+  try { workspace.preferences = unwrap(await window.workbench.app.setAppearance({ ...JSON.parse(JSON.stringify(workspace.preferences.appearance)), theme: workspace.preferences.appearance.theme === 'dark' ? 'light' : 'dark' })) }
+  catch (error) { report(error) } finally { changingTheme.value = false }
+}
 const search = ref(''); const addTask = ref(false); const now = ref(new Date())
 watchEffect(() => {
   const appearance = workspace.preferences.appearance
+  document.documentElement.dataset.theme = appearance.theme
+  document.documentElement.classList.toggle('dark', appearance.theme === 'dark')
   const style = document.documentElement.style
+  style.setProperty('--wallpaper-color', appearance.backgroundColor)
+  style.setProperty('--wallpaper-image', appearance.backgroundImage ? `url("${appearance.backgroundImage}")` : 'none')
   style.setProperty('--text-scale', String(appearance.fontScale / 100))
   style.setProperty('--dialog-scale', String(appearance.dialogScale / 100))
   style.setProperty('--dialog-text-scale', String(appearance.fontScale * appearance.dialogFontScale / 10000))
@@ -50,10 +61,10 @@ onBeforeUnmount(() => { clearInterval(clock); unsubscribe?.(); window.removeEven
       <nav class="primary-nav" aria-label="主要导航"><router-link v-for="item in navigation" :key="item.path" :to="item.path" :aria-label="item.label" :data-tooltip="item.label" :class="{ active: route.path === item.path }"><AppIcon :name="item.icon" :size="20" /><span>{{ item.label }}</span><small v-if="item.path === '/tasks' && workspace.dashboard.totalTodo">{{ workspace.dashboard.totalTodo }}</small></router-link></nav>
       <div class="sidebar-divider"></div>
       <button class="quick-create" aria-label="快速添加任务" data-tooltip="快速添加任务" @click="addTask = true"><AppIcon name="plus" :size="18" /><span>快速添加任务</span></button>
-      <div class="sidebar-bottom"><div class="local-card"><span class="local-card-icon"><AppIcon name="lock" :size="17" /></span><div><strong>你的数据，只在本机</strong><p>离线也能安心记录</p></div><span class="status-dot"></span></div><router-link to="/settings" class="settings-nav" aria-label="设置与备份" data-tooltip="设置与备份" :class="{ active: route.path === '/settings' }"><AppIcon name="setting" :size="19" /><span>设置与备份</span></router-link><div class="profile"><span class="avatar">我</span><div><strong>我的工作台</strong><small>留一点时间，给自己</small></div><AppIcon name="sun" :size="19" /></div></div>
+      <div class="sidebar-bottom"><div class="local-card"><span class="local-card-icon"><AppIcon name="lock" :size="17" /></span><div><strong>你的数据，只在本机</strong><p>离线也能安心记录</p></div><span class="status-dot"></span></div><button class="theme-toggle" :disabled="changingTheme" :aria-label="workspace.preferences.appearance.theme === 'dark' ? '切换日间模式' : '切换夜间模式'" :data-tooltip="workspace.preferences.appearance.theme === 'dark' ? '切换日间模式' : '切换夜间模式'" @click="toggleTheme"><AppIcon :name="workspace.preferences.appearance.theme === 'dark' ? 'sun' : 'moon'" :size="22" /></button><router-link to="/settings" class="settings-nav" aria-label="设置与备份" data-tooltip="设置与备份" :class="{ active: route.path === '/settings' }"><AppIcon name="setting" :size="19" /><span>设置与备份</span></router-link><div class="profile"><span class="avatar">我</span><div><strong>我的工作台</strong><small>留一点时间，给自己</small></div><AppIcon name="sun" :size="19" /></div></div>
     </aside>
     <div class="main-shell">
-      <header class="topbar"><div class="breadcrumb">我的空间 <span>/</span><strong>{{ route.meta.title }}</strong></div><div class="topbar-right"><el-input v-model="search" class="global-search" placeholder="搜索任务、笔记、链接" aria-label="全局搜索" clearable @keydown.enter="doSearch"><template #prefix><AppIcon name="search" :size="17" /></template><template #suffix><kbd>↵</kbd></template></el-input><span class="topbar-divider"></span><span class="online-status"><span class="status-dot"></span>本地模式</span></div></header>
+      <header class="topbar"><div class="breadcrumb"><strong class="toolbar-brand">拾光工作台</strong><template v-if="route.path !== '/'"><span>/</span><span>{{ route.meta.title }}</span></template></div><div class="topbar-right"><el-input v-model="search" class="global-search" placeholder="搜索任务、笔记、链接" aria-label="全局搜索" clearable @keydown.enter="doSearch"><template #prefix><AppIcon name="search" :size="17" /></template><template #suffix><kbd>↵</kbd></template></el-input><span class="topbar-divider"></span><span class="online-status"><span class="status-dot"></span>本地模式</span></div></header>
       <main class="page-scroll">
         <div v-if="route.path !== '/'" class="page-header"><div><div class="eyebrow">{{ route.path === '/' ? todayLabel : 'MY PERSONAL SPACE' }}</div><h1>{{ route.meta.title }}<span v-if="route.path === '/'" class="title-dot">.</span></h1><p>{{ route.meta.subtitle }}</p></div><el-button v-if="route.path === '/' || route.path === '/tasks'" type="primary" class="primary-add" @click="addTask = true"><AppIcon name="plus" :size="17" />添加任务</el-button></div>
         <div v-if="workspace.error" class="error-banner" role="alert"><AppIcon name="warning" /><span>{{ workspace.error }}</span><el-button text :loading="workspace.loading" @click="workspace.refresh">重新加载</el-button></div>

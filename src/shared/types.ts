@@ -14,6 +14,7 @@ export interface BackupResult { path: string; safetyBackup?: string }
 export type ErrorCode = 'VALIDATION' | 'NOT_FOUND' | 'BUSY' | 'DATABASE' | 'BACKUP' | 'INCOMPATIBLE' | 'IO' | 'UNAUTHORIZED' | 'INTERNAL'
 export type Result<T> = { ok: true; data: T } | { ok: false; error: { code: ErrorCode; message: string } }
 export interface WorkbenchAPI {
+  weather: { search(query: string): Promise<Result<import('./appearance').WeatherLocation[]>>; current(): Promise<Result<import('./weather').Weather | null>> }
   planner: {
     get(): Promise<Result<import('./planner').PlannerData>>
     semester(value: import('./planner').Semester): Promise<Result<void>>

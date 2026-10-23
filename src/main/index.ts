@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, nativeImage, screen, shell, Tray, Menu, Notification, powerMonitor, type IpcMainInvokeEvent } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, nativeImage, nativeTheme, screen, shell, Tray, Menu, Notification, powerMonitor, type IpcMainInvokeEvent } from 'electron'
 import { existsSync, mkdirSync } from 'node:fs'
 import { isAbsolute, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto'
 import { channels } from '../shared/channels'
 import type { ErrorCode, Result, Task } from '../shared/types'
 import { ReminderService } from './reminders'
+import { WeatherService } from './weather'
 import { DatabaseStore } from './database'
 import { Repository } from './repository'
 import { Planner } from './planner'
@@ -106,6 +107,9 @@ function persistBounds(): void {
   catch (error) { logger.error('windowBounds', error) }
 }
 function registerHandlers(): void {
+  const weather = new WeatherService()
+  handle(channels.weatherSearch, query => weather.search(query))
+  handle(channels.weatherCurrent, () => weather.current(repository.preferences().appearance.weatherLocation))
   const planner = new Planner(repository)
   handle(channels.plannerGet, async () => {
     const data = planner.get()
@@ -129,7 +133,12 @@ function registerHandlers(): void {
   handle(channels.localRemove, id => planner.remove(id))
   handle(channels.taskList, () => repository.tasks())
   handle(channels.taskAcknowledge, key => repository.acknowledgeReminder(key))
-  handle(channels.setAppearance, value => repository.setAppearance(value))
+  handle(channels.setAppearance, value => {
+    const preferences = repository.setAppearance(value)
+    nativeTheme.themeSource = preferences.appearance.theme
+    window?.setBackgroundColor(preferences.appearance.theme === 'dark' ? '#151c24' : '#eef1f5')
+    return preferences
+  })
   handle(channels.taskGet, key => repository.task(key))
   handle(channels.taskCreate, input => repository.createTask(input))
   handle(channels.taskUpdate, (key, input) => repository.updateTask(key, input))
@@ -182,6 +191,7 @@ function registerHandlers(): void {
   })
 }
 function createWindow(): void {
+  nativeTheme.themeSource = repository.preferences().appearance.theme
   const saved = repository.readSetting<Record<string, unknown> | null>('windowBounds', null)
   let width = 1320; let height = 860; let x: number | undefined; let y: number | undefined
   if (saved && ['width', 'height', 'x', 'y'].every(key => typeof saved[key] === 'number' && Number.isFinite(saved[key]))) {
@@ -191,7 +201,7 @@ function createWindow(): void {
   }
   const iconPath = app.isPackaged ? join(process.resourcesPath, 'icon.png') : join(app.getAppPath(), 'resources/icon.png')
   const icon = existsSync(iconPath) ? nativeImage.createFromPath(iconPath) : nativeImage.createEmpty()
-  window = new BrowserWindow({ width, height, x, y, minWidth: 960, minHeight: 640, title: '拾光工作台', backgroundColor: '#f6f7f9', show: false, icon, autoHideMenuBar: true,
+  window = new BrowserWindow({ width, height, x, y, minWidth: 960, minHeight: 640, title: '拾光工作台', backgroundColor: nativeTheme.shouldUseDarkColors ? '#151c24' : '#eef1f5', show: false, icon, autoHideMenuBar: true,
     webPreferences: { preload: join(__dirname, '../preload/index.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, spellcheck: false }
   })
   Menu.setApplicationMenu(null)
