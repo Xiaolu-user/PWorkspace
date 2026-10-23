@@ -142,9 +142,31 @@ html[data-theme] .calendar-task small, html[data-theme] .calendar-task span,html
 html[data-theme='dark'] .tint-0,html[data-theme='dark'] .tint-1,html[data-theme='dark'] .tint-2,html[data-theme='dark'] .tint-3 { background:var(--surface-hover);color:var(--primary); }
 .note-index .el-input__wrapper,.icon-button.accent,.empty-icon,.note-index-heading small,.group-tag,.priority,.priority.low,.tab-strip button span { background:var(--surface);color:var(--secondary); }
 .empty-state.compact strong { color:var(--secondary); }
-html[data-theme='dark'] .calendar-day .calendar-festivals,html[data-theme='dark'] .calendar-date-details { color:#dfb46e; }
-html[data-theme='dark'] .calendar-holiday-tag { color:#e4ae7b; }
-html[data-theme='dark'] .calendar-holiday-tag.work { color:#a7bacd; }
+/* Calendar semantics keep their configured colors in both themes and selected days. */
+html[data-theme] .task-calendar-dialog [data-kind='festival'] { --calendar-event-color:var(--calendar-festival);color:var(--calendar-festival); }
+html[data-theme] .task-calendar-dialog [data-kind='solarTerm'] { --calendar-event-color:var(--calendar-solarTerm);color:var(--calendar-solarTerm); }
+html[data-theme] .calendar-event-dots { display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:6px;padding:5px; }
+html[data-theme] .calendar-event-dot { display:block;width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:var(--calendar-event-color);box-shadow:0 0 0 1px #ffffff55; }
+html[data-theme] .calendar-day.selected .calendar-event-name { background:#001b2370;border-radius:5px;padding:1px 5px; }
+html[data-theme] .calendar-holiday-tag,html[data-theme] .holiday-legend,html[data-theme] .calendar-schedule-detail { color:var(--calendar-rest); }
+html[data-theme] .calendar-holiday-tag.work,html[data-theme] .work-legend,html[data-theme] .calendar-schedule-detail.work { color:var(--calendar-work); }
+html[data-theme] .calendar-holiday-tag { background:color-mix(in srgb,var(--calendar-rest) 12%,transparent);border-radius:4px;padding:1px 3px; }
+html[data-theme] .calendar-holiday-tag.work { background:color-mix(in srgb,var(--calendar-work) 12%,transparent); }
+html[data-theme] .calendar-lunar { color:var(--calendar-lunar); }
+html[data-theme] .calendar-day small:not(.calendar-day-spacer) { color:var(--calendar-todo); }
+html[data-theme] .calendar-day.selected small:not(.calendar-day-spacer) { background:#001b2370;border-radius:4px;padding:0 3px; }
+html[data-theme] .calendar-legend { display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px; }
+html[data-theme] .calendar-event-details { list-style:none;padding:0;margin:9px 0;display:flex;flex-direction:column;gap:7px; }
+html[data-theme] .calendar-event-detail { display:flex;gap:9px;align-items:baseline;overflow-wrap:anywhere; }
+html[data-theme] .calendar-event-detail>span { flex-shrink:0;border:1px solid currentColor;border-radius:5px;padding:0 5px;font-size:.85em; }
+html[data-theme] .calendar-event-detail>strong { font-weight:550; }
+html[data-theme] .calendar-schedule-detail { display:flex;gap:8px;align-items:center; }
+html[data-theme] .calendar-schedule-detail b { font-size:1.1em; }
+.calendar-color-controls { padding:0 24px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px; }
+.calendar-color-controls label { display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line); }
+.calendar-color-controls label>span { flex:1; }.calendar-color-controls code { color:var(--secondary);font-size:12px; }
+.calendar-color-controls input { width:44px;height:34px;border:1px solid var(--line);padding:2px;border-radius:8px;background:var(--surface);cursor:pointer; }
+.calendar-color-preview { margin:22px 24px 0;padding:16px;border:1px solid var(--line);background:var(--surface);border-radius:12px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center; }
 html[data-theme='dark'] .priority.high,html[data-theme='dark'] .error-banner { background:#493928;color:#efd0a3;border-color:#84623d; }
 html[data-theme='dark'] .el-button--primary { color:#102b22; }
 @media(min-width:1550px) { .home-card { padding:24px; }.time-card p { font-size:calc(12px * var(--text-scale)); } }

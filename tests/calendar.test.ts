@@ -29,4 +29,12 @@ describe('日历跳转与节假日', () => {
     expect(calendarInfo('2027-01-01').scheduleKnown).toBe(false)
     expect(calendarInfo('2027-01-01').names).toContain('元旦节')
   })
+  it('节气与节日分别分类，多节日完整保留且不重复', () => {
+    expect(calendarInfo('2026-10-23').entries).toContainEqual({ name: '霜降', kind: 'solarTerm' })
+    const national = calendarInfo('2026-10-01')
+    expect(national.entries).toContainEqual({ name: '国庆节', kind: 'festival' })
+    expect(national.entries.length).toBeGreaterThan(1)
+    expect(national.entries.map(entry => entry.name)).toEqual(national.names)
+    expect(new Set(national.names).size).toBe(national.names.length)
+  })
 })

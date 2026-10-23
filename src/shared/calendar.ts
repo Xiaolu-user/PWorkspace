@@ -17,9 +17,11 @@ export function advanceDate(date: string, amount: number, unit: 'year' | 'month'
   return isValidDate(result) ? result : null
 }
 
-export function calendarInfo(date: string): { names: string[]; lunar: string; holiday: string; work: boolean; scheduleKnown: boolean } {
+export function calendarInfo(date: string): { names: string[]; entries: { name: string; kind: 'festival' | 'solarTerm' }[]; lunar: string; holiday: string; work: boolean; scheduleKnown: boolean } {
   const [year, month, day] = date.split('-').map(Number)
   const solar = Solar.fromYmd(year, month, day); const lunar = solar.getLunar()
   const holiday = HolidayUtil.getHoliday(date)
-  return { names: [...new Set([...solar.getFestivals(), ...lunar.getFestivals(), ...solar.getOtherFestivals(), ...lunar.getOtherFestivals(), lunar.getJieQi(), holiday && !holiday.isWork() ? holiday.getName() : ''].filter(Boolean))], lunar: `${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`, holiday: holiday?.getName() || '', work: holiday?.isWork() || false, scheduleKnown: HolidayUtil.getHolidays(year).length > 0 }
+  const term = lunar.getJieQi()
+  const names = [...new Set([...solar.getFestivals(), ...lunar.getFestivals(), ...solar.getOtherFestivals(), ...lunar.getOtherFestivals(), term, holiday && !holiday.isWork() ? holiday.getName() : ''].filter(Boolean))]
+  return { names, entries: names.map(name => ({ name, kind: name === term ? 'solarTerm' : 'festival' })), lunar: `${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`, holiday: holiday?.getName() || '', work: holiday?.isWork() || false, scheduleKnown: HolidayUtil.getHolidays(year).length > 0 }
 }

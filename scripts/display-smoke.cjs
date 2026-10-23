@@ -35,7 +35,7 @@ async function main() {
   await calendar.getByRole('spinbutton',{name:'跳转数量',exact:true}).fill('10')
   await calendar.getByRole('button',{name:'跳转',exact:true}).click()
   assert.equal(await calendar.locator('[data-date="2026-10-30"]').getAttribute('aria-pressed'),'true')
-  assert.match(await calendar.locator('[data-date="2026-10-01"] .calendar-festivals').textContent(), /国庆节/)
+  assert.ok(await calendar.locator('[data-date="2026-10-01"] .calendar-event-dot').count() > 1)
   assert.match(await calendar.locator('[data-date="2026-10-10"] .calendar-holiday-tag').textContent(), /班/)
   await page.screenshot({ animations: "disabled", path:join(output,'calendar-holidays.png')})
   await selectOption(calendar,'跳转单位','月')

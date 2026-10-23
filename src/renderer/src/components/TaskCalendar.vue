@@ -13,6 +13,7 @@ import ReminderNotice from './ReminderNotice.vue'
 const props = defineProps<{ modelValue: boolean; today: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 const workspace = useWorkspace()
+const calendarStyle = computed(() => Object.fromEntries(Object.entries(workspace.preferences.appearance.calendarColors).map(([key, color]) => ['--calendar-' + key, color])))
 const selectedDate = ref(props.today)
 const month = ref(new Date(`${props.today}T12:00:00`))
 const editing = ref(false); const selectedTask = ref<Task | null>(null)
@@ -60,7 +61,7 @@ async function toggle(task: Task): Promise<void> {
 </script>
 
 <template>
-  <el-dialog :model-value="modelValue" title="日历与待办" width="820px" class="task-calendar-dialog" :close-on-click-modal="false" :close-on-press-escape="!editing" @update:model-value="emit('update:modelValue', $event)">
+  <el-dialog :model-value="modelValue" title="日历与待办" width="820px" class="task-calendar-dialog" :style="calendarStyle" :close-on-click-modal="false" :close-on-press-escape="!editing" @update:model-value="emit('update:modelValue', $event)">
     <div class="calendar-layout">
       <section class="calendar-month" aria-label="月历">
         <header class="calendar-toolbar">
@@ -72,16 +73,16 @@ async function toggle(task: Task): Promise<void> {
         </header>
         <div class="calendar-weekdays" aria-hidden="true"><span v-for="day in ['一', '二', '三', '四', '五', '六', '日']" :key="day">{{ day }}</span></div>
         <div class="calendar-days">
-          <button v-for="day in days" :key="day.date" :data-date="day.date" class="calendar-day" :class="{ outside: !day.current, selected: day.date === selectedDate, today: day.date === today }" :aria-pressed="day.date === selectedDate" :aria-current="day.date === today ? 'date' : undefined" :aria-label="`${day.date}，${day.count ? day.count + ' 项待办' : '暂无待办'}`" @click="chooseDate(day.date)">
-            <span class="calendar-festivals" :title="day.info.names.join('、')">{{ day.info.names.join(' · ') || '\u00a0' }}</span><span>{{ day.number }}<i v-if="day.info.holiday" class="calendar-holiday-tag" :class="{ work: day.info.work }" :title="day.info.holiday + (day.info.work ? '补班' : '放假')">{{ day.info.work ? '班' : '休' }}</i></span><small v-if="day.count" :class="{ 'all-done': !day.pending }">{{ day.count }} 项</small><small v-else class="calendar-day-spacer" aria-hidden="true">&nbsp;</small>
+          <button v-for="day in days" :key="day.date" :data-date="day.date" class="calendar-day" :class="{ outside: !day.current, selected: day.date === selectedDate, today: day.date === today }" :aria-pressed="day.date === selectedDate" :aria-current="day.date === today ? 'date' : undefined" :aria-label="`${day.date}，${day.count ? day.count + ' 项待办' : '暂无待办'}${day.info.names.length ? '，' + day.info.names.join('、') : ''}${day.info.holiday ? '，' + (day.info.work ? '补班' : '放假') : ''}`" @click="chooseDate(day.date)">
+            <span class="calendar-festivals" :title="day.info.names.join('、')" :aria-label="day.info.names.length > 1 ? day.info.names.length + ' 个节日或节气，选中查看详情' : undefined"><span v-if="day.info.entries.length > 1" class="calendar-event-dots" aria-hidden="true"><i v-for="entry in day.info.entries" :key="entry.name" class="calendar-event-dot" :data-kind="entry.kind"></i></span><span v-else-if="day.info.entries.length" class="calendar-event-name" :data-kind="day.info.entries[0].kind">{{ day.info.entries[0].name }}</span></span><span class="calendar-day-number">{{ day.number }}<i v-if="day.info.holiday" class="calendar-holiday-tag" :class="{ work: day.info.work }" :title="day.info.holiday + (day.info.work ? '补班' : '放假')">{{ day.info.work ? '班' : '休' }}</i></span><small v-if="day.count" :class="{ 'all-done': !day.pending }">{{ day.count }} 项</small><small v-else class="calendar-day-spacer" aria-hidden="true">&nbsp;</small>
           </button>
         </div>
         <p class="calendar-help">选择日期，查看或添加当天待办。</p>
-        <p class="calendar-help">节日 / 节气 · <span class="holiday-legend">休</span> 放假 · <span class="work-legend">班</span> 补班<span v-if="!selectedInfo.scheduleKnown"> · 所选年份调休安排未收录</span></p>
+        <p class="calendar-help calendar-legend"><span class="calendar-event-name" data-kind="festival">● 节日</span><span class="calendar-event-name" data-kind="solarTerm">● 节气</span><span><b class="holiday-legend">休</b> 放假</span><span><b class="work-legend">班</b> 补班</span><span>多个圆点表示多项节日，选中查看</span><span v-if="!selectedInfo.scheduleKnown">所选年份调休安排未收录</span></p>
       </section>
       <section class="calendar-agenda" aria-label="所选日期待办">
         <header><span>{{ selectedDate === today ? '今天' : selectedDate.slice(0, 4) + ' 年' }}</span><h3 aria-live="polite">{{ selectedLabel }}</h3><p>{{ tasks.length }} 项待办 · {{ tasks.filter(task => task.status === 'done').length }} 项已完成</p></header>
-        <p class="calendar-date-details">{{ selectedInfo.lunar }}<span v-for="name in selectedInfo.names" :key="name"> · {{ name }}</span><span v-if="selectedInfo.holiday"> · {{ selectedInfo.holiday }}{{ selectedInfo.work ? '补班' : '放假' }}</span></p>
+        <div class="calendar-date-details"><p class="calendar-lunar">{{ selectedInfo.lunar }}</p><ul v-if="selectedInfo.entries.length" class="calendar-event-details"><li v-for="entry in selectedInfo.entries" :key="entry.name" class="calendar-event-detail" :data-kind="entry.kind"><span>{{ entry.kind === 'solarTerm' ? '节气' : '节日' }}</span><strong>{{ entry.name }}</strong></li></ul><p v-if="selectedInfo.holiday" class="calendar-schedule-detail" :class="{ work: selectedInfo.work }"><b>{{ selectedInfo.work ? '班' : '休' }}</b>{{ selectedInfo.holiday }}{{ selectedInfo.work ? '补班' : '放假' }}</p></div>
         <el-button type="primary" class="calendar-add" @click="add"><AppIcon name="plus" :size="16" />添加当天待办</el-button>
         <div class="calendar-agenda-list">
           <div v-for="task in tasks" :key="task.id" class="calendar-task" :class="{ completed: task.status === 'done', 'reminder-active': isReminderActive(task, workspace.now), 'reminder-flashing': isReminderActive(task, workspace.now) && !task.reminderAcknowledgedAt }">
@@ -143,15 +144,13 @@ async function toggle(task: Task): Promise<void> {
 .calendar-jump .el-select { width:72px }
 .calendar-jump .el-button { padding:7px 10px;min-height:38px }
 .calendar-jump :deep(.el-input__wrapper),.calendar-jump :deep(.el-select__wrapper) { min-height:38px }
-.calendar-day { min-height:84px;padding:7px 3px;justify-content:flex-start }
-.calendar-day .calendar-festivals { display:block;flex:1;width:100%;font-size:calc(10px * var(--text-scale,1));line-height:1.35;min-height:2.7em;overflow-wrap:anywhere;color:#bc7c34;white-space:normal }
-.calendar-day.selected .calendar-festivals { color:#fff0c7 }
+.calendar-day { min-height:84px;padding:5px 3px;justify-content:flex-start }
+.calendar-day .calendar-festivals { display:flex;align-items:center;justify-content:center;width:100%;font-size:calc(10px * var(--text-scale,1));line-height:1.35;min-height:2.2em;overflow-wrap:anywhere;white-space:normal }
+.calendar-day-number { line-height:1.2 }
+.calendar-day small { line-height:1.3 }
 .calendar-day>span:not(.calendar-festivals) { position:relative }
-.calendar-holiday-tag { font-size:calc(9px * var(--text-scale,1));font-style:normal;color:#ae5a36;margin-left:4px }
-.calendar-holiday-tag.work { color:#657b8c }
-.calendar-day.selected .calendar-holiday-tag { color:#fff0c7 }
-.calendar-date-details { color:#a77541;font-size:calc(12px * var(--text-scale,1));margin-top:12px;line-height:1.8 }
-.holiday-legend { color:#ae5a36 }.work-legend { color:#657b8c }
+.calendar-holiday-tag { font-size:calc(10px * var(--text-scale,1));font-style:normal;font-weight:750;margin-left:4px }
+.calendar-date-details { font-size:calc(12px * var(--text-scale,1));margin-top:12px;line-height:1.8 }
 .calendar-agenda-list { max-height:440px }
 .calendar-task { flex-wrap:wrap }
 .calendar-task>.reminder-notice { flex-basis:100%;margin-left:26px }
