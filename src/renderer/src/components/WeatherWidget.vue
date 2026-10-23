@@ -3,7 +3,7 @@ import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useWorkspace } from '../stores/workspace'
 import { unwrap } from '../lib/api'
 import { weatherDescription, type Weather } from '../../../shared/weather'
-import AppIcon from './AppIcon.vue'
+import WeatherSymbol from './WeatherSymbol.vue'
 const ws = useWorkspace()
 const weather = ref<Weather | null>(null), error = ref(''), loading = ref(false)
 let version = 0, timer: ReturnType<typeof setInterval>
@@ -23,13 +23,13 @@ onBeforeUnmount(() => { version++; clearInterval(timer) })
 <template>
   <div class="weather-widget" aria-label="天气">
     <template v-if="weather">
-      <AppIcon :name="!weather.isDay && weather.code <= 2 ? 'moon' : description!.icon" :size="44" />
+      <WeatherSymbol :kind="!weather.isDay && weather.code <= 2 ? 'moon' : description!.icon" />
       <strong class="weather-temperature">{{ weather.temperature }}°</strong><span>{{ description?.label }}</span>
       <small>{{ weather.low }}° – {{ weather.high }}°</small>
       <router-link to="/settings#background" :title="ws.preferences.appearance.weatherLocation?.name">{{ ws.preferences.appearance.weatherLocation?.name.split(' · ')[0] }}</router-link>
-      <small v-if="error" title="显示的是上次获取的数据">更新失败 · 上次数据</small>
-      <small v-else :title="new Date(weather.updatedAt).toLocaleString('zh-CN')">{{ new Date(weather.updatedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) }} 更新</small>
+      <small v-if="error" class="weather-updated" title="显示的是上次获取的数据">更新失败 · 上次数据</small>
+      <small v-else class="weather-updated" :title="new Date(weather.updatedAt).toLocaleString('zh-CN')">{{ new Date(weather.updatedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) }} 更新</small>
     </template>
-    <template v-else><AppIcon name="cloudSun" :size="38" /><span>{{ loading ? '获取天气中' : error ? '天气暂不可用' : '今日天气' }}</span><button v-if="error" class="text-link" :title="error" @click="refresh">重新获取</button><router-link v-else-if="!loading" to="/settings#background">选择城市 →</router-link></template>
+    <template v-else><WeatherSymbol kind="cloudSun" /><span>{{ loading ? '获取天气中' : error ? '天气暂不可用' : '今日天气' }}</span><button v-if="error" class="text-link" :title="error" @click="refresh">重新获取</button><router-link v-else-if="!loading" to="/settings#background">选择城市 →</router-link></template>
   </div>
 </template>
