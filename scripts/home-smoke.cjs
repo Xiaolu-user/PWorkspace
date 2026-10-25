@@ -32,7 +32,7 @@ async function main() {
   await page.getByPlaceholder('选择开学日期').fill('2026-09-01'); await page.getByPlaceholder('选择开学日期').press('Enter')
   await page.getByRole('button', { name: '添加课程', exact: false }).click()
   await page.getByRole('textbox', { name: '课程名称', exact: true }).fill('高等数学')
-  await page.getByRole('button', { name: '保存计划' }).click()
+  await page.getByRole('button', { name: '保存课程表' }).click()
   await page.getByRole('dialog').waitFor({ state: 'hidden' })
   assert.equal((await api('planner', 'get')).semester.courses[0].title, '高等数学'); checks.push('学期课程表单保存')
   for (let i = 0; i < 2; i++) {

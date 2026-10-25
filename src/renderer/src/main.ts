@@ -6,6 +6,7 @@ import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import './styles.css'
 import './glass.css'
+import './course-planner.css'
 import App from './App.vue'
 import { router } from './router'
 
