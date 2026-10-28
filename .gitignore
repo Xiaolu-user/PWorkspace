@@ -3,6 +3,7 @@ out/
 release/
 .cache/
 test-results/
+.workbuddy/
 *.log
 *.sqlite*
 *.db
