@@ -52,7 +52,7 @@ html[data-theme='dark'] .app-shell::before { background: #090f19d9; }
 .home-grid { grid-template-columns: minmax(280px, 1fr) minmax(300px, 1.08fr) minmax(290px, 1.12fr); gap: 18px; min-height: calc(100vh - 130px); }
 .home-card { padding: 22px; }
 .home-card h2, .card-label { font-size: calc(18px * var(--text-scale)); letter-spacing: -.3px; color: var(--ink); }
-.home-caption, .muted, .home-task small, .home-empty, .home-empty small, .file-hint, .file-row small, .idea-input small, .idea-row small, .course-row small, .task-progress { color: var(--secondary); }
+.home-caption, .muted, .home-task small, .home-empty, .home-empty small, .file-hint, .file-row small, .idea-input small, .idea-row small, .task-progress { color: var(--secondary); }
 .home-card h2 .el-icon, .card-label .el-icon { color: var(--primary); }
 .time-card { min-height: 236px; container-type: inline-size; justify-content: flex-start; }
 .time-weather { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); align-items: center; gap: 18px; flex: 1; margin-top: 10px; }
@@ -67,14 +67,14 @@ html[data-theme='dark'] .app-shell::before { background: #090f19d9; }
 .weather-widget small { color: var(--secondary); font-size: calc(clamp(11px, 3cqw, 13px) * var(--text-scale)); }
 .weather-widget .weather-updated { font-size: calc(10px * var(--text-scale)); }
 .weather-widget a { color: var(--primary); max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.home-task, .shortcut-open, .shortcut-placeholder, .idea-input, .idea-row, .week-strip button, .file-add, .note-index, .note-card, .quick-link, .data-path, .setting-note, .backup-policy { background: var(--surface); border-color: var(--glass-edge); }
+.home-task, .shortcut-open, .shortcut-placeholder, .idea-input, .idea-row, .file-add, .note-index, .note-card, .quick-link, .data-path, .setting-note, .backup-policy { background: var(--surface); border-color: var(--glass-edge); }
 .home-task { border-radius: 14px; padding: 15px 12px; margin-bottom: 8px; }
 .home-task strong { font-weight: 600; }
 .home-task.completed strong { color: var(--secondary); }
 .home-task input { width: 19px; height: 19px; accent-color: #168463; }
 .icon-button { color: var(--secondary); }
 .icon-button:hover, .shortcut-open:hover, .note-index-item:hover, .quick-link:hover { background: var(--surface-hover); color: var(--primary); border-color: var(--glass-edge); }
-.soft-button, .compact-tabs button.active, .week-strip .active, .note-index-item.active { background: var(--accent-soft); color: var(--primary); border-color: var(--line); }
+.soft-button, .compact-tabs button.active, .week-nav-buttons button.active, .note-index-item.active { background: var(--accent-soft); color: var(--primary); border-color: var(--line); }
 .soft-button { border: 1px solid var(--glass-edge); }
 .compact-tabs button { background: var(--surface); color: var(--secondary); border-radius: 9px; }
 .shortcut-grid { grid-template-columns: repeat(4,minmax(0,1fr)); height: 256px; max-height: 256px; gap: 9px; }
@@ -85,14 +85,20 @@ html[data-theme='dark'] .app-shell::before { background: #090f19d9; }
 .idea-input { border-radius: 14px; min-height: 220px; }
 .idea-input textarea, .note-title-input, .note-body-input { color: var(--ink); }
 .idea-input textarea::placeholder, .note-title-input::placeholder, .note-body-input::placeholder { color: var(--secondary); }
-.week-strip { gap: 5px; }
-.week-strip button { padding: 9px 0; color: var(--secondary); border: 1px solid var(--glass-edge); border-radius: 10px; }
-.week-strip .is-today strong { border-bottom-color: var(--primary); }
-.week-overview { display: none; }
-.course-agenda { margin-top: 14px; }
-.course-row { padding: 13px 0; flex-wrap: wrap; border-color: var(--line); }
-.course-row>span { color: var(--secondary); }
-.course-status { color: var(--primary)!important; }
+/* Whole-week course grid: neutral chrome, course colors stay configured. */
+.week-nav strong { color: var(--ink); }
+.week-grid-head>div, .week-grid-head>i, .period-cell { background: var(--surface); border-color: var(--line); }
+.week-grid-head small { color: var(--secondary); }
+.week-grid-head strong { color: var(--secondary); }
+.week-grid-head .today small, .week-grid-head .today strong { color: var(--primary); }
+.day-lane { border-color: var(--line); }
+.day-lane.today { background-color: color-mix(in srgb, var(--primary) 7%, transparent); }
+.grid-rule { border-top-color: var(--line); }
+.week-sep { color: color-mix(in srgb, var(--secondary) 32%, transparent); }
+.week-nav-buttons button { background: var(--surface); border-color: var(--line); color: var(--secondary); }
+.course-block { background: color-mix(in srgb, var(--course-color, #9674cc) 16%, var(--popup)); color: color-mix(in srgb, var(--course-color, #9674cc) 72%, var(--ink)); }
+.course-block:hover { filter: brightness(1.04); }
+html[data-theme='dark'] .course-block:hover { filter: brightness(1.15); }
 .workout-summary { color: var(--ink); }.workout-summary>strong { color: var(--primary); }
 .task-progress>div { background: var(--line); }
 .file-row { padding: 5px 0; border-color: var(--line); }

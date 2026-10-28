@@ -2,7 +2,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { Planner } from '../src/main/planner'
-import { coursesOn, semesterWeek, upgradeSemester, parseWeeks, formatWeeks, courseOccurrences, courseConflicts, type Semester, type LegacySemester } from '../src/shared/planner'
+import { coursesOn, semesterWeek, upgradeSemester, parseWeeks, formatWeeks, courseOccurrences, courseConflicts, courseTimeSlots, courseSlotSpan, type Semester, type LegacySemester } from '../src/shared/planner'
+import { normalizeAppearance } from '../src/shared/appearance'
 import { fixture } from './helpers'
 const semester: LegacySemester = { title: '2026秋季', startDate: '2026-09-02', weeks: 18, courses: [{ id: '', title: '高等数学', room: 'A302', day: 3, start: '08:00', end: '09:40', firstWeek: 1, lastWeek: 18, parity: 'even' }] }
 describe('首页计划与本地入口', () => {
@@ -104,6 +105,30 @@ describe('首页计划与本地入口', () => {
     }
     const draft = structuredClone(value); draft.courses[0].schedules[1].id = draft.courses[0].schedules[0].id
     expect(() => p.semester(draft)).toThrow()
+  })
+})
+describe('本周课程时间轴', () => {
+  it('只为已排课程的时间生成行，同一起点合并为最长结束时间并忽略无效时段', () => {
+    const slots = courseTimeSlots([
+      { start: '13:30', end: '15:05' }, { start: '08:00', end: '11:25' },
+      { start: '08:00', end: '09:40' }, { start: '09:50', end: '11:25' },
+      { start: '25:00', end: '26:00' }, { start: '16:00', end: '15:00' }, { start: '', end: '10:00' }
+    ])
+    expect(slots).toEqual([{ start: '08:00', end: '11:25' }, { start: '09:50', end: '11:25' }, { start: '13:30', end: '15:05' }])
+  })
+  it('长课时跨越多行，没有安排的时间不占行高', () => {
+    const slots = courseTimeSlots([{ start: '08:00', end: '09:40' }, { start: '09:50', end: '11:25' }, { start: '13:30', end: '15:05' }])
+    expect(courseSlotSpan(slots, '08:00', '11:25')).toEqual({ first: 0, last: 1 })
+    expect(courseSlotSpan(slots, '08:00', '09:40')).toEqual({ first: 0, last: 0 })
+    expect(courseSlotSpan(slots, '13:30', '15:05')).toEqual({ first: 2, last: 2 })
+    expect(courseSlotSpan([], '08:00', '09:40')).toEqual({ first: 0, last: 0 })
+  })
+  it('课程卡片字号在 80%–160% 内归一化，旧数据回落到默认值', () => {
+    expect(normalizeAppearance({}).courseFontScale).toBe(100)
+    expect(normalizeAppearance({ courseFontScale: 130 }).courseFontScale).toBe(130)
+    expect(normalizeAppearance({ courseFontScale: 400 }).courseFontScale).toBe(160)
+    expect(normalizeAppearance({ courseFontScale: 10 }).courseFontScale).toBe(80)
+    expect(normalizeAppearance({ courseFontScale: 'large' }).courseFontScale).toBe(100)
   })
 })
 function flexibleSemester(): Semester {

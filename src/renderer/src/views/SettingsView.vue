@@ -43,7 +43,7 @@ async function saveAppearance(): Promise<void> {
   try { workspace.preferences = unwrap(await window.workbench.app.setAppearance(JSON.parse(JSON.stringify(appearance.value)))); ElMessage.success('显示设置已保存并生效') }
   catch (error) { report(error) } finally { savingAppearance.value = false }
 }
-async function resetAppearance(): Promise<void> { const defaults = defaultAppearance(); Object.assign(appearance.value, { fontScale: defaults.fontScale, dialogScale: defaults.dialogScale, dialogFontScale: defaults.dialogFontScale, modules: defaults.modules }); await saveAppearance() }
+async function resetAppearance(): Promise<void> { const defaults = defaultAppearance(); Object.assign(appearance.value, { fontScale: defaults.fontScale, dialogScale: defaults.dialogScale, dialogFontScale: defaults.dialogFontScale, courseFontScale: defaults.courseFontScale, modules: defaults.modules }); await saveAppearance() }
 async function resetCalendarColors(): Promise<void> { appearance.value.calendarColors = defaultCalendarColors(); await saveAppearance() }
 async function setBehavior(value: unknown): Promise<void> {
   if (savingPreference.value) return

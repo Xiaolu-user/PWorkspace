@@ -70,6 +70,27 @@ export function coursesOn(semester: Semester | LegacySemester, date: string): Co
   if (!isValidDate(semester.startDate) || !isValidDate(date)) return []
   return courseOccurrences(semester, semesterWeek(semester.startDate, date)).filter(c => c.date === date && !c.cancelled)
 }
+export interface CourseTimeSlot { start: string; end: string }
+// Home week grid rows come from the times actually arranged, so unused periods take no vertical space.
+export function courseTimeSlots(courses: { start: string; end: string }[]): CourseTimeSlot[] {
+  const ends = new Map<string, string>()
+  for (const course of courses) {
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(course.start) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(course.end) || course.start >= course.end) continue
+    const known = ends.get(course.start)
+    if (!known || course.end > known) ends.set(course.start, course.end)
+  }
+  return [...ends].map(([start, end]) => ({ start, end })).sort((a, b) => a.start.localeCompare(b.start))
+}
+// A lesson occupies every row whose start falls inside its time range, so long lessons span slot rows.
+export function courseSlotSpan(slots: CourseTimeSlot[], start: string, end: string): { first: number; last: number } {
+  if (!slots.length) return { first: 0, last: 0 }
+  let first = slots.findIndex(slot => slot.start === start)
+  if (first < 0) first = slots.findIndex(slot => slot.start > start)
+  if (first < 0) first = slots.length - 1
+  let last = first
+  for (let index = first; index < slots.length && slots[index].start < end; index++) last = index
+  return { first, last }
+}
 export function courseConflicts(occurrences: CourseOccurrence[]): { first: CourseOccurrence; second: CourseOccurrence }[] {
   const active = occurrences.filter(c => !c.cancelled && c.start && c.end && c.start < c.end).sort((a, b) => a.week - b.week || a.day - b.day || a.start.localeCompare(b.start))
   const conflicts: { first: CourseOccurrence; second: CourseOccurrence }[] = []

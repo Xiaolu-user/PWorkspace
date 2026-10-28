@@ -2,6 +2,15 @@
 .course-planner-dialog .el-dialog__body { flex: 1; min-height: 0; overflow: auto; padding-right: 6px; }
 .course-planner-dialog .el-dialog__footer { padding-top: 18px; border-top: 1px solid var(--line); }
 .course-planner-subtitle { color: var(--secondary); font-size: calc(12px * var(--text-scale)); line-height: 1.65; margin: 0 0 16px; }
+.course-font-setting { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 16px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.course-font-setting > .el-icon { color: var(--primary); }
+.course-font-label { font-size: calc(12px * var(--text-scale)); color: var(--ink); }
+.course-font-setting .el-input-number { width: 118px; }
+.course-font-unit { margin-left: -4px; color: var(--secondary); font-size: calc(12px * var(--text-scale)); }
+.course-font-preview { display: flex; flex-direction: column; gap: 1px; padding: 5px 10px; border-left: 3px solid #9674cc; border-radius: 7px; background: color-mix(in srgb, #9674cc 14%, var(--surface)); color: #6b4f96; line-height: 1.4; }
+.course-font-preview strong { font-size: calc(10px * var(--preview-scale, 1)); font-weight: 600; }
+.course-font-preview small { font-size: calc(9px * var(--preview-scale, 1)); font-variant-numeric: tabular-nums; }
+.course-font-hint { flex: 1 1 220px; color: var(--secondary); font-size: calc(11px * var(--text-scale)); line-height: 1.6; }
 .course-planner-dialog .semester-fields { display: grid; grid-template-columns: 1fr 1fr 190px; gap: 16px; margin-bottom: 8px; }
 .course-planner-dialog .semester-fields .el-date-editor { width: 100%; }
 .course-planner-columns { display: grid; grid-template-columns: 210px minmax(360px, 1fr) minmax(250px, .65fr); gap: 18px; align-items: start; padding-bottom: 16px; }

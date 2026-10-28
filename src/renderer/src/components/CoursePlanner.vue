@@ -3,10 +3,13 @@ import { computed, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { emptySemester, upgradeSemester, courseOccurrences, courseConflicts, parseWeeks, formatWeeks, type Semester, type Course, type CourseSchedule, type CourseOccurrence, type CourseTime } from '../../../shared/planner'
 import { unwrap, report } from '../lib/api'
+import { useWorkspace } from '../stores/workspace'
 import AppIcon from './AppIcon.vue'
 const props = defineProps<{ modelValue: boolean; semester: Semester }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean]; saved: [] }>()
+const ws = useWorkspace()
 const draft = ref<Semester>(emptySemester()), saving = ref(false), query = ref(''), selectedId = ref(''), expanded = ref('')
+const courseFont = ref(ws.preferences.appearance.courseFontScale)
 const weekInputs = ref<Record<string, string>>({}), showAll = ref(false)
 const days = ['一', '二', '三', '四', '五', '六', '日']
 const selected = computed(() => draft.value.courses.find(c => c.id === selectedId.value))
@@ -30,6 +33,7 @@ watch(() => props.modelValue, open => {
   draft.value = JSON.parse(JSON.stringify(upgradeSemester(props.semester)))
   selectedId.value = draft.value.courses[0]?.id || ''; expanded.value = draft.value.courses[0]?.schedules[0]?.id || ''
   query.value = ''; showAll.value = false; editing.value = null; weekInputs.value = {}
+  courseFont.value = ws.preferences.appearance.courseFontScale
 }, { immediate: true })
 function choose(course: Course): void { selectedId.value = course.id; expanded.value = course.schedules[0]?.id || ''; showAll.value = false }
 function makeSchedule(): CourseSchedule { return { id: crypto.randomUUID(), day: 1, start: '08:00', end: '09:40', room: '', weeks: Array.from({ length: weekCount.value }, (_, i) => i + 1), exceptions: [] } }
@@ -97,6 +101,7 @@ async function save(): Promise<void> {
       catch { return }
     }
     unwrap(await window.workbench.planner.semester(JSON.parse(JSON.stringify(draft.value))))
+    if (courseFont.value !== ws.preferences.appearance.courseFontScale) ws.preferences = unwrap(await window.workbench.app.setAppearance(JSON.parse(JSON.stringify({ ...ws.preferences.appearance, courseFontScale: courseFont.value }))))
     ElMessage.success('课程表已保存'); emit('saved'); emit('update:modelValue', false)
   } catch (e) { report(e) } finally { saving.value = false }
 }
@@ -104,6 +109,15 @@ async function save(): Promise<void> {
 <template>
   <el-dialog :model-value="modelValue" title="学期课程" width="1200px" class="course-planner-dialog" :close-on-click-modal="false" :show-close="!saving" :close-on-press-escape="!saving && !editing" @update:model-value="emit('update:modelValue', $event)">
     <p class="course-planner-subtitle">一门课程，多条上课安排。周一作为每周起点。</p>
+    <div class="course-font-setting">
+      <AppIcon name="notebook" :size="16" />
+      <span class="course-font-label">首页课程文字大小</span>
+      <el-input-number v-model="courseFont" aria-label="首页课程文字大小" :min="80" :max="160" :step="5" :disabled="saving" />
+      <span class="course-font-unit" aria-hidden="true">%</span>
+      <span class="course-font-preview" aria-hidden="true" title="首页课程块效果预览" :style="{ '--preview-scale': courseFont / 100 }"><strong>机器学习</strong><small>13:30–15:05 · 獐子岛 226</small></span>
+      <el-button text :disabled="saving || courseFont === 100" @click="courseFont = 100">恢复默认</el-button>
+      <small class="course-font-hint">只影响首页“本周课程”中的课程名称、时间与教室，保存课程表后生效。</small>
+    </div>
     <el-form label-position="top" :disabled="saving" class="semester-fields"><el-form-item label="学期名称"><el-input v-model="draft.title" placeholder="例如：2026 秋季学期" maxlength="100" /></el-form-item><el-form-item label="第一周内的开学日期"><el-date-picker v-model="draft.startDate" value-format="YYYY-MM-DD" placeholder="选择开学日期" /></el-form-item><el-form-item label="学期周数"><el-input-number v-model="draft.weeks" aria-label="学期周数" :min="1" :max="52" /></el-form-item></el-form>
     <div class="course-planner-columns">
       <aside class="course-picker"><header><h3>我的课程</h3><el-button :disabled="saving" @click="addCourse">＋ 添加课程</el-button></header><el-input v-model="query" aria-label="搜索课程" placeholder="搜索课程" clearable /><div class="course-picker-list"><button v-for="c in filtered" :key="c.id" class="course-picker-item" :class="{ active:c.id===selectedId }" :aria-pressed="c.id===selectedId" :disabled="saving" @click="choose(c)"><i :style="{ background:c.color }"></i><span><strong>{{ c.title || '未命名课程' }}</strong><small>{{ c.schedules.length }} 条安排 · {{ count(c) }} 次上课</small></span></button><p v-if="!filtered.length" class="course-empty">{{ query ? '没有匹配的课程' : '点击“添加课程”，开始安排学期。' }}</p></div></aside>

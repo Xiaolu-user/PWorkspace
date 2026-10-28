@@ -353,25 +353,46 @@ kbd { font-size:calc(11px * var(--text-scale, 1)); border: 1px solid #dfe5df; pa
 .courses-card { flex:1.6 }
 .courses-card h2 .el-icon { color:#9674cc }
 .courses-card .text-link,.fitness-card .text-link { font-size:calc(11px * var(--text-scale, 1));white-space:nowrap }
-.week-strip { display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:13px }
-.week-strip button { border:0;background:#f7f8fa;border-radius:7px;padding:5px 0;color:#6d7687;font-size:calc(11px * var(--text-scale, 1));display:flex;flex-direction:column;gap:2px;align-items:center }
-.week-strip button strong { font-weight:500 }
-.week-strip .active { color:#7b54bb;background:#eee7fb }
-.week-strip .is-today strong { border-bottom:2px solid #a78bc9 }
-.week-overview { display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-height:88px;max-height:145px;overflow:auto;margin:9px 0;background:repeating-linear-gradient(0deg,transparent,transparent 27px,#eef0f4 28px);border:1px solid #edf0f4;border-radius:6px }
-.week-overview>div { border-right:1px solid #edf0f4;padding:3px 1px }
-.week-overview>div.current { background:#f1eafa55 }
-.week-overview button { display:block;width:100%;border:0;border-radius:4px;background:#e9e1f5;color:#7d64a9;margin-bottom:4px;padding:3px 2px;font-size:calc(9px * var(--text-scale, 1));word-break:break-all;line-height:1.4 }
-.week-overview button:nth-child(even) { background:#dcefe7;color:#427a67 }
-.week-overview button span { display:block;font-size:calc(9px * var(--text-scale, 1)) }
-.course-subhead { justify-content:space-between;font-size:calc(12px * var(--text-scale, 1));margin:13px 0 5px }
-.course-agenda { max-height:160px;overflow:auto }
-.course-row { display:flex;align-items:center;gap:8px;border-bottom:1px solid #eff1f2;padding:8px 0;font-size:calc(11px * var(--text-scale, 1)) }
-.course-row>span { white-space:nowrap;font-variant-numeric:tabular-nums }
-.course-row>div { flex:1;min-width:0 }
-.course-row strong { display:block;overflow-wrap:anywhere;font-weight:550 }
-.course-row small { display:block;color:#8c97a0;font-size:calc(10px * var(--text-scale, 1)) }
-.course-status { white-space:nowrap;color:#709984!important }
+.week-nav { display:flex;align-items:center;gap:8px;margin:12px 0 9px }
+.week-nav strong { font-size:calc(13px * var(--text-scale,1));font-weight:600;color:#3c3c50 }
+.week-nav .week-range { color:#8c97a0;font-size:calc(11px * var(--text-scale,1));font-variant-numeric:tabular-nums }
+.week-nav-buttons { margin-left:auto;display:flex;gap:5px }
+.week-nav-buttons button { border:1px solid #e3e6ea;background:#fff;border-radius:7px;min-width:26px;height:24px;padding:0 8px;color:#6d7687;font-size:calc(12px * var(--text-scale,1));display:inline-flex;align-items:center;justify-content:center }
+.week-nav-buttons button:hover:not(:disabled) { color:#7b54bb;border-color:#c9b3e8;background:#f7f2fc }
+.week-nav-buttons button.active { color:#7b54bb;background:#eee7fb;border-color:#d9c6f0 }
+.week-nav-buttons button:disabled { opacity:.4;cursor:not-allowed }
+.week-grid-head { display:grid;grid-template-columns:46px repeat(7,minmax(0,1fr));border:1px solid #edf0f4;border-radius:8px 8px 0 0;overflow:hidden }
+.week-grid-head>i { background:#fafbfc;border-right:1px solid #edf0f4 }
+.week-grid-head>div { background:#fafbfc;border-right:1px solid #edf0f4;text-align:center;padding:4px 0 }
+.week-grid-head>div:last-child { border-right:0 }
+.week-grid-head small { display:block;font-size:calc(10px * var(--text-scale,1));color:#8c97a0;line-height:1.35 }
+.week-grid-head strong { font-size:calc(11px * var(--text-scale,1));color:#5f6b7a;font-weight:500;font-variant-numeric:tabular-nums }
+.week-grid-head .today { background:#f3edfb }
+.week-grid-head .today small,.week-grid-head .today strong { color:#7b54bb }
+.week-grid-head .today small { font-weight:600 }
+.week-grid-body { display:grid;grid-template-columns:46px repeat(7,minmax(0,1fr));border:1px solid #edf0f4;border-top:0;border-radius:0 0 8px 8px;overflow:hidden }
+.week-grid-body.empty { place-items:center }
+.day-lane { grid-row:1 / -1;border-right:1px solid #edf0f4 }
+.day-lane.today { background-color:#f7f2fc }
+.day-lane.last { border-right:0 }
+.period-cell { grid-column:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fafbfc;border-right:1px solid #edf0f4;border-bottom:1px solid #f0f2f6;padding:4px 2px;z-index:2 }
+.period-cell.last { border-bottom:0 }
+.period-cell b { font-size:calc(10px * min(var(--text-scale,1) * var(--course-text-scale,1),1.55));color:#5f6b7a;font-weight:600;line-height:1.35;font-variant-numeric:tabular-nums }
+.period-cell small { font-size:calc(8.5px * min(var(--text-scale,1) * var(--course-text-scale,1),1.55));color:#aab3bd;line-height:1.3;font-variant-numeric:tabular-nums }
+.grid-rule { grid-column:2 / -1;align-self:start;height:0;border-top:1px solid #f0f2f6;z-index:1 }
+.week-sep { grid-column:1 / -1;align-self:start;position:relative;height:0;border-top:1px solid currentColor;color:#dfe4ec;z-index:3 }
+.week-sep.noon::after { content:'';position:absolute;left:0;right:0;top:4px;border-top:1px solid currentColor }
+.course-block { position:relative;display:flex;flex-direction:column;gap:2px;margin:1px;min-width:0;border:0;border-left:2px solid var(--course-color,#9674cc);border-radius:6px;background:color-mix(in srgb,var(--course-color,#9674cc) 13%,#fff);color:color-mix(in srgb,var(--course-color,#9674cc) 72%,#1c1c1c);padding:4px 3px;text-align:left;overflow:hidden;z-index:4 }
+.course-block:hover { filter:brightness(.96) }
+.course-block strong { font-size:calc(10px * var(--text-scale,1) * var(--course-text-scale,1));font-weight:550;line-height:1.32;overflow-wrap:anywhere;word-break:break-word }
+.course-block .course-room { display:block;font-size:calc(9px * var(--text-scale,1) * var(--course-text-scale,1));line-height:1.4;opacity:.85;overflow-wrap:anywhere;word-break:break-word }
+.course-live { position:absolute;inset:0 0 auto 0;height:2px;border-radius:6px 6px 0 0;background:#d85a30 }
+.week-empty { grid-column:1 / -1;display:grid;place-items:center;padding:0 14px;text-align:center;color:var(--secondary,#8c97a0);font-size:calc(11px * var(--text-scale,1)) }
+.course-live.pending { background:#b8863b }
+.now-slot { position:relative;z-index:5;pointer-events:none }
+.now-line { position:absolute;left:0;right:0;height:2px;background:#e24b4a }
+.now-line i { position:absolute;left:2px;top:-15px;font-style:normal;font-size:calc(9px * var(--text-scale,1));color:#e24b4a;font-variant-numeric:tabular-nums }
+.course-foot { display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:calc(11px * var(--text-scale,1));color:#5f6b7a }
 .fitness-card { background:linear-gradient(120deg,#fff8ef,#fdf6ee);border-color:#f1e6d8 }
 .fitness-card h2 .el-icon { color:#d98849 }
 .workout-summary { display:flex;justify-content:space-between;gap:10px;align-items:center;margin:12px 0;color:#a96332 }
@@ -401,7 +422,6 @@ kbd { font-size:calc(11px * var(--text-scale, 1)); border: 1px solid #dfe5df; pa
 .shortcut-open,.shortcut-placeholder { height:76px }
 .shortcut-open>span:last-child { font-size:calc(12px * var(--text-scale, 1)) }
 .home-task strong { font-size:calc(17px * var(--text-scale, 1)) }.home-task small { font-size:calc(14px * var(--text-scale, 1)) }
-.course-row { font-size:calc(12px * var(--text-scale, 1)) }.course-row small { font-size:calc(11px * var(--text-scale, 1)) }
 .exercise-list { font-size:calc(12px * var(--text-scale, 1)) }.file-row strong { font-size:calc(12px * var(--text-scale, 1)) }.file-row small { font-size:calc(10px * var(--text-scale, 1)) }
 .home-tasks { min-height:430px }
 @media(min-width:1550px) { .shortcut-grid { height:270px;max-height:270px }.shortcut-open,.shortcut-placeholder { height:82px } }

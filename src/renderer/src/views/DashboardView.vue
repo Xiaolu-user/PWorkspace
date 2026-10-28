@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, watch, type CSSProperties } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { useWorkspace } from '../stores/workspace'
@@ -7,7 +7,7 @@ import { useEditor } from '../stores/editor'
 import { localDate } from '../../../shared/date'
 import { isReminderActive, compareReminderTasks, reminderLabel } from '../../../shared/reminders'
 import ReminderNotice from '../components/ReminderNotice.vue'
-import { coursesOn, semesterWeek, emptySemester, type PlannerData, type LocalEntry } from '../../../shared/planner'
+import { coursesOn, semesterWeek, emptySemester, courseTimeSlots, courseSlotSpan, type CourseOccurrence, type PlannerData, type LocalEntry } from '../../../shared/planner'
 import type { Task } from '../../../shared/types'
 import AppIcon from '../components/AppIcon.vue'
 import TaskDialog from '../components/TaskDialog.vue'
@@ -30,11 +30,41 @@ const apps = computed(() => data.value.entries.filter(e => e.kind === 'app'))
 const files = computed(() => data.value.entries.filter(e => e.kind === 'file'))
 const shortcuts = computed(() => [ ...(filter.value !== 'web' ? apps.value.map(a => ({ id: a.id, title: a.title.replace(/\.(exe|lnk)$/i, ''), icon: a.icon, url: '', kind: 'app' })) : []), ...(filter.value !== 'app' ? ws.bookmarks.map(b => ({ id: b.id, title: b.title, icon: '', url: b.url, kind: 'web' })) : []) ])
 const week = computed(() => semesterWeek(data.value.semester.startDate, today.value))
-const weekDays = computed(() => {
-  const monday = new Date(now.value); monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7)
-  return Array.from({ length: 7 }, (_, i) => { const d = new Date(monday); d.setDate(d.getDate() + i); const date = localDate(d); return { date, number: d.getDate(), label: ['一', '二', '三', '四', '五', '六', '日'][i], courses: coursesOn(data.value.semester, date) } })
+const viewOffset = ref(0)
+const viewMonday = computed(() => { const monday = new Date(now.value); monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7 + viewOffset.value * 7); return monday })
+const viewDays = computed(() => Array.from({ length: 7 }, (_, i) => { const day = new Date(viewMonday.value); day.setDate(day.getDate() + i); const date = localDate(day); return { date, label: ['一', '二', '三', '四', '五', '六', '日'][i], short: `${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`, courses: coursesOn(data.value.semester, date) } }))
+const viewWeek = computed(() => semesterWeek(data.value.semester.startDate, localDate(viewMonday.value)))
+const viewRange = computed(() => { const sunday = new Date(viewMonday.value); sunday.setDate(sunday.getDate() + 6); const fmt = (day: Date) => `${String(day.getMonth() + 1).padStart(2, '0')}.${String(day.getDate()).padStart(2, '0')}`; return `${fmt(viewMonday.value)} – ${fmt(sunday)}` })
+const viewCourseCount = computed(() => viewDays.value.reduce((total, day) => total + day.courses.length, 0))
+// Each time arranged in 学期课程 gets one grid row. Rows are minmax(rowMin, auto), so text size,
+// name length and room length all push the row taller instead of being clipped.
+const ROW_MIN = 46
+const courseFontScale = computed(() => Math.max(80, Math.min(160, ws.preferences.appearance.courseFontScale)) / 100)
+const courseTextScale = computed(() => ws.preferences.appearance.fontScale * ws.preferences.appearance.modules.courses.fontScale / 10000 * courseFontScale.value)
+const rowMin = computed(() => Math.round(ROW_MIN * courseTextScale.value))
+const weekSlots = computed(() => courseTimeSlots(viewDays.value.flatMap(day => day.courses)))
+const gridStyle = computed<CSSProperties>(() => weekSlots.value.length ? { gridTemplateRows: `repeat(${weekSlots.value.length}, minmax(${rowMin.value}px, auto))` } : { height: '132px' })
+const periodMinutes = (time: string): number => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5))
+function courseCell(start: string, end: string, dayIndex: number): CSSProperties {
+  const { first, last } = courseSlotSpan(weekSlots.value, start, end)
+  return { gridColumn: String(dayIndex + 2), gridRow: `${first + 1} / ${last + 2}` }
+}
+// Light rules divide the day into 上午 / 下午 / 晚上; they appear only where the week crosses a boundary.
+const dayPart = (start: string): number => periodMinutes(start) < 12 * 60 ? 0 : periodMinutes(start) < 18 * 60 ? 1 : 2
+const weekSeps = computed(() => weekSlots.value.flatMap((slot, index) => index && dayPart(slot.start) !== dayPart(weekSlots.value[index - 1].start) ? [{ row: index + 1, noon: dayPart(slot.start) === 1 }] : []))
+const weekRules = computed(() => weekSlots.value.slice(1).flatMap((slot, i) => weekSeps.value.some(sep => sep.row === i + 2) ? [] : [{ row: i + 2, start: slot.start }]))
+const todayIndex = computed(() => viewDays.value.findIndex(day => day.date === today.value))
+const nowLine = computed(() => {
+  if (viewOffset.value !== 0) return null
+  const minutes = now.value.getHours() * 60 + now.value.getMinutes()
+  const index = weekSlots.value.findIndex(slot => minutes >= periodMinutes(slot.start) && minutes <= periodMinutes(slot.end))
+  if (index < 0) return null
+  const slot = weekSlots.value[index]
+  const span = Math.max(1, periodMinutes(slot.end) - periodMinutes(slot.start))
+  return { row: index + 1, percent: Math.round((minutes - periodMinutes(slot.start)) / span * 1000) / 10, label: clock.value }
 })
-const selectedDay = ref(localDate()); const dayCourses = computed(() => coursesOn(data.value.semester, selectedDay.value))
+function courseState(date: string, start: string, end: string): string { if (date !== today.value) return ''; return clock.value >= end ? '已结束' : clock.value >= start ? '进行中' : '即将开始' }
+function blockTitle(date: string, course: CourseOccurrence): string { const state = courseState(date, course.start, course.end); return `${course.start}–${course.end} ${course.title}${course.room ? ' · ' + course.room : ''}${state && state !== '已结束' ? ' · ' + state : ''}${course.modified ? ' · 已调整' : ''}` }
 const workout = computed(() => data.value.workouts.find(w => w.day === (now.value.getDay() + 6) % 7 + 1))
 let timer: ReturnType<typeof setInterval>; let request = 0
 async function load(): Promise<void> { const n = ++request; try { const value = unwrap(await window.workbench.planner.get()); if (n === request) data.value = value } catch (e) { report(e) } }
@@ -42,7 +72,7 @@ watch(() => ws.revision, () => void load())
 watch(plan, value => { if (!value && ['courses', 'fitness'].includes(String(route.query.panel))) void router.replace('/') })
 watch(() => route.query.panel, panel => { if (panel === 'courses' || panel === 'fitness') plan.value = panel; else if (panel === 'files') document.getElementById('home-files')?.scrollIntoView({ behavior: 'smooth' }) }, { immediate: true })
 watch(() => editor.body, body => { editor.title = body.trim().split('\n')[0].slice(0, 80) || '' })
-function tick(): void { const before = today.value; now.value = new Date(); if (before !== today.value) { selectedDay.value = today.value; void ws.refresh() } }
+function tick(): void { const before = today.value; now.value = new Date(); if (before !== today.value) { viewOffset.value = 0; void ws.refresh() } }
 onMounted(() => { if (!editor.dirty) editor.select(null); timer = setInterval(tick, 1000); window.addEventListener('focus', tick); void load() })
 onBeforeUnmount(() => { clearInterval(timer); window.removeEventListener('focus', tick) })
 function addTask(): void { selected.value = null; taskDialog.value = true }
@@ -56,7 +86,6 @@ async function removeEntry(entry: Pick<LocalEntry, 'id' | 'title'>, kind = 'file
   try { await ElMessageBox.confirm(`移除“${entry.title}”的入口？原文件不会删除。`, '移除入口', { confirmButtonText: '移除', cancelButtonText: '取消' }); if (kind === 'web') await ws.mutate(() => window.workbench.bookmarks.remove(entry.id), '链接已删除'); else { unwrap(await window.workbench.planner.remove(entry.id)); await load() } } catch (e) { if (e !== 'cancel' && e !== 'close') report(e) }
 }
 async function saveLink(): Promise<void> { savingLink.value = true; const ok = await ws.mutate(() => window.workbench.bookmarks.create({ title: shortcutTitle.value, url: shortcutUrl.value, group: '快捷方式' }), '快捷方式已添加'); savingLink.value = false; if (ok) { addShortcut.value = false; shortcutTitle.value = ''; shortcutUrl.value = '' } }
-function courseStatus(start: string, end: string): string { if (selectedDay.value !== today.value) return ''; return clock.value >= end ? '已结束' : clock.value >= start ? '进行中' : '即将开始' }
 </script>
 <template>
   <h1 class="sr-only">今日概览</h1>
@@ -76,7 +105,24 @@ function courseStatus(start: string, end: string): string { if (selectedDay.valu
       </section>
     </div>
     <div class="home-column home-right">
-      <section class="home-card courses-card" :style="ws.moduleStyle('courses')"><header><h2><AppIcon name="notebook" />本周课程</h2><button class="text-link" @click="plan = 'courses'">＋ 学期课程</button></header><p class="home-caption">{{ data.semester.title || '还没有设置学期' }}<span v-if="data.semester.startDate"> · {{ week < 1 ? '尚未开学' : week > data.semester.weeks ? '学期已结束' : `第 ${week} 周` }}</span></p><div class="week-strip"><button v-for="d in weekDays" :key="d.date" :class="{ active: selectedDay === d.date, 'is-today': d.date === today }" @click="selectedDay = d.date"><span>{{ d.label }}</span><strong>{{ d.number }}</strong></button></div><div class="week-overview"><div v-for="d in weekDays" :key="d.date" :class="{ current: d.date === today }"><button v-for="c in d.courses" :key="c.id" :title="`${c.start} ${c.title} ${c.room}`" @click="selectedDay = d.date"><span>{{ c.start }}</span>{{ c.title }}</button></div></div><header class="course-subhead"><strong>{{ selectedDay === today ? '今天' : selectedDay.slice(5) }} · {{ dayCourses.length }} 节课</strong><button class="text-link" @click="plan = 'courses'">编辑课表 →</button></header><div class="course-agenda"><div v-for="c in dayCourses" :key="c.id" class="course-row" :style="{ '--course-color': c.color }"><span>{{ c.start }}—{{ c.end }}</span><div><strong>{{ c.title }}</strong><small>{{ c.room || '未设置教室' }}{{ c.teacher ? ' · ' + c.teacher : '' }}{{ c.modified ? ' · 已调整' : '' }}</small></div><small class="course-status">{{ courseStatus(c.start, c.end) }}</small></div><p v-if="!dayCourses.length" class="home-caption">{{ data.semester.startDate ? '这一天没有课程，自由安排时间。' : '创建一学期课程，自动显示每周日程。' }}</p></div></section>
+      <section class="home-card courses-card" :style="{ ...ws.moduleStyle('courses'), '--course-text-scale': courseFontScale }"><header><h2><AppIcon name="notebook" />本周课程</h2><button class="text-link" @click="plan = 'courses'">＋ 学期课程</button></header><p class="home-caption">{{ data.semester.title || '还没有设置学期' }}<span v-if="data.semester.startDate"> · {{ week < 1 ? '尚未开学' : week > data.semester.weeks ? '学期已结束' : `第 ${week} 周` }}</span></p>
+        <div class="week-nav"><strong>{{ viewWeek < 1 ? '未开学' : `第 ${viewWeek} 周` }}</strong><span class="week-range">{{ viewRange }}</span><div class="week-nav-buttons"><button :disabled="viewWeek <= 1" aria-label="查看上一周" title="上一周" @click="viewOffset--">‹</button><button :class="{ active: viewOffset === 0 }" :disabled="viewOffset === 0" @click="viewOffset = 0">本周</button><button :disabled="viewWeek >= data.semester.weeks" aria-label="查看下一周" title="下一周" @click="viewOffset++">›</button></div></div>
+        <div class="week-grid-head"><i aria-hidden="true"></i><div v-for="d in viewDays" :key="d.date" :class="{ today: d.date === today }"><small>{{ d.date === today ? '今天' : '周' + d.label }}</small><strong>{{ d.short }}</strong></div></div>
+        <div class="week-grid-body" :class="{ empty: !weekSlots.length }" :style="gridStyle">
+          <template v-if="weekSlots.length">
+            <i v-for="(d, i) in viewDays" :key="'lane-' + d.date" class="day-lane" :class="{ today: d.date === today, last: i === viewDays.length - 1 }" :style="{ gridColumn: String(i + 2) }" aria-hidden="true"></i>
+            <span v-for="(slot, i) in weekSlots" :key="'slot-' + slot.start" class="period-cell" :class="{ last: i === weekSlots.length - 1 }" :style="{ gridRow: String(i + 1) }"><b>{{ slot.start }}</b><small>{{ slot.end }}</small></span>
+            <span v-for="rule in weekRules" :key="'rule-' + rule.start" class="grid-rule" :style="{ gridRow: String(rule.row) }" aria-hidden="true"></span>
+            <span v-for="sep in weekSeps" :key="'sep-' + sep.row" class="week-sep" :class="{ noon: sep.noon }" :style="{ gridRow: String(sep.row) }" aria-hidden="true"></span>
+            <template v-for="(d, dayIndex) in viewDays" :key="'day-' + d.date">
+              <button v-for="c in d.courses" :key="c.id" class="course-block" :style="{ ...courseCell(c.start, c.end, dayIndex), '--course-color': c.color }" :title="blockTitle(d.date, c)" @click="plan = 'courses'"><strong>{{ c.title }}</strong><small class="course-room">{{ c.room || '未设置教室' }}</small><i v-if="courseState(d.date, c.start, c.end) && courseState(d.date, c.start, c.end) !== '已结束'" class="course-live" :class="{ pending: courseState(d.date, c.start, c.end) === '即将开始' }" aria-hidden="true"></i></button>
+            </template>
+            <div v-if="nowLine && todayIndex >= 0" class="now-slot" :style="{ gridColumn: String(todayIndex + 2), gridRow: String(nowLine.row) }" aria-hidden="true"><div class="now-line" :style="{ top: nowLine.percent + '%' }"><i>{{ nowLine.label }}</i></div></div>
+          </template>
+          <p v-else class="week-empty">该周还没有课程安排，点击“学期课程”添加。</p>
+        </div>
+        <div class="course-foot"><span>{{ viewOffset === 0 ? '本周' : '该周' }}共 {{ viewCourseCount }} 节课</span><button class="text-link" @click="plan = 'courses'">编辑课表 →</button></div>
+      </section>
       <section class="home-card fitness-card" :style="ws.moduleStyle('fitness')"><header><h2><AppIcon name="fitness" />今日健身</h2><button class="text-link" @click="plan = 'fitness'">制定计划 ↗</button></header><div class="workout-summary"><h3>{{ workout?.title || '休息与恢复' }}</h3><strong v-if="workout">{{ workout.minutes }} <small>分钟</small></strong></div><div v-if="workout" class="exercise-list"><span v-for="(line, i) in workout.exercises.split('\n').filter(Boolean)" :key="i">{{ line }}</span></div><p v-else class="home-caption">今天暂无训练计划，让身体充分休息。</p></section>
       <section id="home-files" class="home-card files-card" :style="ws.moduleStyle('files')"><header><h2><AppIcon name="folder" />常用资料</h2><el-dropdown trigger="click" @command="pick"><button class="icon-button" aria-label="添加资料"><AppIcon name="plus" /></button><template #dropdown><el-dropdown-menu><el-dropdown-item command="file">选择文件</el-dropdown-item><el-dropdown-item command="folder">选择文件夹</el-dropdown-item></el-dropdown-menu></template></el-dropdown></header><div class="file-list"><div v-for="f in files" :key="f.id" class="file-row"><button :title="f.path" @click="openLocal(f.id)"><img v-if="f.icon" :src="f.icon" alt="" /><AppIcon v-else name="document" /><span><strong>{{ f.title }}</strong><small>{{ f.path }}</small></span></button><button class="icon-button" :aria-label="'移除' + f.title" @click="removeEntry(f)">×</button></div></div><button class="file-add" @click="pick('file')"><AppIcon name="add" :size="17" />点击添加文件入口</button><small class="file-hint">文件保留在原位置，移除入口不会删除文件。</small></section>
     </div>
