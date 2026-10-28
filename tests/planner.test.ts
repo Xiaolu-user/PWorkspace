@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { Planner } from '../src/main/planner'
-import { coursesOn, semesterWeek, upgradeSemester, parseWeeks, formatWeeks, courseOccurrences, courseConflicts, courseTimeSlots, courseSlotSpan, type Semester, type LegacySemester } from '../src/shared/planner'
+import { coursesOn, semesterWeek, upgradeSemester, parseWeeks, formatWeeks, courseOccurrences, courseConflicts, courseTimeSlots, courseSlotSpan, encodeSemesterShare, decodeSemesterShare, type Semester, type LegacySemester } from '../src/shared/planner'
 import { normalizeAppearance } from '../src/shared/appearance'
 import { fixture } from './helpers'
 const semester: LegacySemester = { title: '2026秋季', startDate: '2026-09-02', weeks: 18, courses: [{ id: '', title: '高等数学', room: 'A302', day: 3, start: '08:00', end: '09:40', firstWeek: 1, lastWeek: 18, parity: 'even' }] }
@@ -129,6 +129,43 @@ describe('本周课程时间轴', () => {
     expect(normalizeAppearance({ courseFontScale: 400 }).courseFontScale).toBe(160)
     expect(normalizeAppearance({ courseFontScale: 10 }).courseFontScale).toBe(80)
     expect(normalizeAppearance({ courseFontScale: 'large' }).courseFontScale).toBe(100)
+  })
+})
+describe('课表分享码', () => {
+  it('编码解码往返一致，中文内容、颜色与单次调整完整保留', async () => {
+    const value = flexibleSemester()
+    value.courses[0].schedules[0].exceptions.push({ week: 5, day: 2, start: '10:00', end: '11:30', room: '临时教室', cancelled: false })
+    value.courses[0].schedules[1].exceptions.push({ week: 8, day: 4, start: '18:30', end: '20:05', room: '海洋楼301', cancelled: true })
+    const code = await encodeSemesterShare(value, { includeExceptions: true })
+    expect(code.startsWith('PWS1.')).toBe(true)
+    expect(await decodeSemesterShare(code)).toEqual(value)
+    expect(await decodeSemesterShare(` ${code.slice(0, 40)}\n${code.slice(40)} `)).toEqual(value)
+  })
+  it('默认不含单次调整，可选包含', async () => {
+    const value = flexibleSemester()
+    value.courses[0].schedules[0].exceptions.push({ week: 5, day: 2, start: '10:00', end: '11:30', room: '临时教室', cancelled: true })
+    const clean = await decodeSemesterShare(await encodeSemesterShare(value))
+    expect(clean.courses[0].schedules[0].exceptions).toEqual([])
+    expect(clean.courses[0].schedules[0].weeks).toEqual(value.courses[0].schedules[0].weeks)
+    const full = await decodeSemesterShare(await encodeSemesterShare(value, { includeExceptions: true }))
+    expect(full).toEqual(value)
+  })
+  it('截断、篡改与错误前缀都会被拒绝并给出可读提示', async () => {
+    const code = await encodeSemesterShare(flexibleSemester()), payload = code.slice('PWS1.'.length)
+    await expect(decodeSemesterShare('PWS1.' + payload.slice(0, -8))).rejects.toThrow('分享码不完整或已损坏')
+    const middle = Math.floor(payload.length / 2), flipped = payload[middle] === 'A' ? 'B' : 'A'
+    await expect(decodeSemesterShare('PWS1.' + payload.slice(0, middle) + flipped + payload.slice(middle + 1))).rejects.toThrow()
+    await expect(decodeSemesterShare('XXXX.' + payload)).rejects.toThrow('不是有效的课表分享码')
+  })
+  it('分享前校验课表结构，拒绝没有安排与无效时间的课表', async () => {
+    const empty: Semester = { ...flexibleSemester(), courses: [] }
+    await expect(encodeSemesterShare(empty)).rejects.toThrow('还没有课程')
+    const noSchedule = flexibleSemester(); noSchedule.courses[0].schedules = []
+    await expect(encodeSemesterShare(noSchedule)).rejects.toThrow('没有上课安排')
+    const badTime = flexibleSemester(); badTime.courses[0].schedules[0].start = '25:00'
+    await expect(encodeSemesterShare(badTime)).rejects.toThrow('无效的上课时间')
+    const badWeek = flexibleSemester(); badWeek.courses[0].schedules[0].weeks = [19]
+    await expect(encodeSemesterShare(badWeek)).rejects.toThrow('越界的周次')
   })
 })
 function flexibleSemester(): Semester {

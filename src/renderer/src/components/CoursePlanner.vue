@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { emptySemester, upgradeSemester, courseOccurrences, courseConflicts, parseWeeks, formatWeeks, type Semester, type Course, type CourseSchedule, type CourseOccurrence, type CourseTime } from '../../../shared/planner'
+import { emptySemester, upgradeSemester, courseOccurrences, courseConflicts, parseWeeks, formatWeeks, encodeSemesterShare, decodeSemesterShare, type Semester, type Course, type CourseSchedule, type CourseOccurrence, type CourseTime } from '../../../shared/planner'
+import { isValidDate } from '../../../shared/date'
 import { unwrap, report } from '../lib/api'
 import { useWorkspace } from '../stores/workspace'
 import AppIcon from './AppIcon.vue'
@@ -28,6 +29,79 @@ const occurrenceCount = computed(() => occurrences.value.filter(o => !o.cancelle
 const selectedConflicts = computed(() => conflicts.value.filter(c => c.first.courseId === selectedId.value || c.second.courseId === selectedId.value))
 const editing = ref<CourseOccurrence | null>(null), editScope = ref<'once' | 'schedule'>('once'), cancelled = ref(false)
 const editTime = ref<CourseTime>({ day: 1, start: '08:00', end: '09:40', room: '' })
+// 课表分享码：导入（替换草稿）与分享（基于当前草稿生成）。
+const importOpen = ref(false), importCode = ref(''), importParsed = ref<Semester | null>(null), importError = ref(''), importStartDate = ref('')
+const importScheduleCount = ref(0), importOccurrenceCount = ref(0), importConflicts = ref(0)
+const importFileInput = ref<HTMLInputElement | null>(null)
+const startDateChanged = computed(() => !!importParsed.value && importStartDate.value !== importParsed.value.startDate)
+const shareOpen = ref(false), shareInclude = ref(false), shareCode = ref(''), shareBusy = ref(false), shareCopied = ref(false)
+let copiedTimer: ReturnType<typeof setTimeout> | undefined
+function openImport(): void {
+  importCode.value = ''; importParsed.value = null; importError.value = ''; importStartDate.value = ''
+  importScheduleCount.value = 0; importOccurrenceCount.value = 0; importConflicts.value = 0
+  importOpen.value = true
+}
+async function parseImportCode(): Promise<void> {
+  if (!importCode.value.trim()) { importError.value = '请先粘贴分享码'; importParsed.value = null; return }
+  try {
+    const semester = await decodeSemesterShare(importCode.value)
+    importParsed.value = semester
+    importStartDate.value = semester.startDate
+    importScheduleCount.value = semester.courses.reduce((sum, c) => sum + c.schedules.length, 0)
+    importOccurrenceCount.value = courseOccurrences(semester).filter(o => !o.cancelled).length
+    importConflicts.value = courseConflicts(courseOccurrences(semester)).length
+    importError.value = ''
+  } catch (error) { importParsed.value = null; importError.value = error instanceof Error ? error.message : '分享码无法解析' }
+}
+function readImportFile(event: Event): void {
+  const input = event.target as HTMLInputElement, file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+  if (file.size > 1024 * 1024) { importError.value = '文件过大，请直接粘贴分享码文本'; importParsed.value = null; return }
+  void file.text().then(text => { importCode.value = text.trim(); return parseImportCode() })
+}
+async function applyImport(): Promise<void> {
+  const semester = importParsed.value
+  if (!semester) return
+  if (!isValidDate(importStartDate.value)) { ElMessage.warning('请选择有效的开学日期，周次将以此日期计算'); return }
+  if (startDateChanged.value) {
+    try { await ElMessageBox.confirm('开学日期已修改，所有周次将整体平移。请确认新日期下的周次与对方课表的周次一致。', '周次平移提醒', { confirmButtonText: '仍然替换', cancelButtonText: '返回修改', type: 'warning' }) }
+    catch { return }
+  }
+  const imported: Semester = JSON.parse(JSON.stringify({ ...semester, startDate: importStartDate.value }))
+  // 重新生成全部 ID，避免与本地数据编号冲突。
+  for (const course of imported.courses) { course.id = crypto.randomUUID(); for (const schedule of course.schedules) schedule.id = crypto.randomUUID() }
+  draft.value = imported
+  selectedId.value = imported.courses[0]?.id || ''; expanded.value = imported.courses[0]?.schedules[0]?.id || ''
+  query.value = ''; showAll.value = false; editing.value = null; weekInputs.value = {}
+  importOpen.value = false
+  ElMessage.success('课表已导入，点击“保存课程表”后生效')
+}
+async function generateShare(): Promise<void> {
+  shareBusy.value = true
+  try { shareCode.value = await encodeSemesterShare(draft.value, { includeExceptions: shareInclude.value }) }
+  catch (error) { shareCode.value = ''; report(error) } finally { shareBusy.value = false }
+}
+function openShare(): void { shareInclude.value = false; shareCode.value = ''; shareCopied.value = false; shareOpen.value = true; void generateShare() }
+watch(shareInclude, () => { if (shareOpen.value) void generateShare() })
+const shareSize = computed(() => shareCode.value ? `${(new Blob([shareCode.value]).size / 1024).toFixed(1)} KB` : '')
+async function copyShare(): Promise<void> {
+  if (!shareCode.value) return
+  try { await navigator.clipboard.writeText(shareCode.value) }
+  catch {
+    const fallback = document.createElement('textarea')
+    fallback.value = shareCode.value; document.body.appendChild(fallback); fallback.select()
+    document.execCommand('copy'); fallback.remove()
+  }
+  shareCopied.value = true
+  clearTimeout(copiedTimer); copiedTimer = setTimeout(() => { shareCopied.value = false }, 2000)
+}
+function saveShareFile(): void {
+  if (!shareCode.value) return
+  const blob = new Blob([shareCode.value], { type: 'text/plain;charset=utf-8' }), anchor = document.createElement('a')
+  anchor.href = URL.createObjectURL(blob); anchor.download = `课表分享码-${draft.value.title || '未命名学期'}.txt`
+  anchor.click(); URL.revokeObjectURL(anchor.href)
+}
 watch(() => props.modelValue, open => {
   if (!open) return
   draft.value = JSON.parse(JSON.stringify(upgradeSemester(props.semester)))
@@ -149,10 +223,42 @@ async function save(): Promise<void> {
         <div class="course-conflict-summary" :class="{warning:conflicts.length}"><strong>{{ conflicts.length ? '发现 '+conflicts.length+' 处时间冲突' : '没有时间冲突' }}</strong><p>{{ conflicts.length ? '核对后仍可保存，点击课程查看相关冲突。' : '与本学期所有课程对照，未发现时间重叠。' }}</p><p v-for="(conflict,index) in selectedConflicts.slice(0,20)" :key="index" class="course-conflict">第 {{ conflict.first.week }} 周 · 周{{ days[conflict.first.day-1] }}<br />{{ conflict.first.title || '未命名课程' }} {{ conflict.first.start }}–{{ conflict.first.end }}<br />{{ conflict.second.title || '未命名课程' }} {{ conflict.second.start }}–{{ conflict.second.end }}</p><p v-if="selectedConflicts.length>20">还有 {{ selectedConflicts.length-20 }} 处，请调整后继续查看。</p></div>
       </aside>
     </div>
-    <template #footer><div class="course-planner-footer"><span>已设置 {{ draft.courses.length }} 门课程 · {{ draft.courses.reduce((sum,c)=>sum+c.schedules.length,0) }} 条安排 · {{ occurrenceCount }} 次上课</span><el-button :disabled="saving" @click="emit('update:modelValue',false)">取消</el-button><el-button type="primary" :loading="saving" @click="save">保存课程表</el-button></div></template>
+    <template #footer><div class="course-planner-footer"><span>已设置 {{ draft.courses.length }} 门课程 · {{ draft.courses.reduce((sum,c)=>sum+c.schedules.length,0) }} 条安排 · {{ occurrenceCount }} 次上课</span><span class="course-planner-actions"><el-button :disabled="saving" @click="openImport"><AppIcon name="add" :size="14" />导入课表</el-button><el-button :disabled="saving" @click="openShare"><AppIcon name="share" :size="14" />分享课表</el-button><el-button :disabled="saving" @click="emit('update:modelValue',false)">取消</el-button><el-button type="primary" :loading="saving" @click="save">保存课程表</el-button></span></div></template>
   </el-dialog>
   <el-dialog :model-value="!!editing" title="调整上课安排" width="560px" append-to-body :close-on-click-modal="false" @update:model-value="editing=null">
     <template v-if="editing"><p class="course-planner-subtitle">{{ editing.title }} · 第 {{ editing.week }} 周</p><el-radio-group v-model="editScope" aria-label="调整范围"><el-radio-button value="once">仅修改这一次</el-radio-button><el-radio-button value="schedule">修改整条安排</el-radio-button></el-radio-group><p class="course-planner-subtitle">{{ editScope==='once'?'只调整本周这一次上课，其他周不变。':'修改该安排的常规时间与地点；已单独调整的周次继续保留。' }}</p><el-form label-position="top"><el-form-item label="星期"><el-select v-model="editTime.day" aria-label="调整上课星期"><el-option v-for="(d,i) in days" :key="d" :label="'星期'+d" :value="i+1" /></el-select></el-form-item><div class="form-columns"><el-form-item label="开始时间"><el-time-picker v-model="editTime.start" format="HH:mm" value-format="HH:mm" :clearable="false" aria-label="调整开始时间" /></el-form-item><el-form-item label="结束时间"><el-time-picker v-model="editTime.end" format="HH:mm" value-format="HH:mm" :clearable="false" aria-label="调整结束时间" /></el-form-item></div><el-form-item label="教室 / 地点"><el-input v-model="editTime.room" aria-label="调整教室" maxlength="100" /></el-form-item><el-checkbox v-if="editScope==='once'" v-model="cancelled">本次停课</el-checkbox></el-form><p class="course-planner-subtitle">应用后，请在主窗口保存课程表。</p></template>
     <template #footer><el-button v-if="editing?.modified && editScope==='once'" @click="restoreOccurrence">恢复原安排</el-button><el-button @click="editing=null">取消</el-button><el-button type="primary" @click="applyOccurrence">应用调整</el-button></template>
+  </el-dialog>
+  <el-dialog :model-value="importOpen" title="导入课表" width="680px" append-to-body :close-on-click-modal="false" @update:model-value="importOpen=$event">
+    <p class="course-planner-subtitle">粘贴同学发来的分享码，确认后替换当前正在编辑的课表（尚未保存的修改会被覆盖）；替换后点击主窗口的“保存课程表”才正式生效。</p>
+    <el-input v-model="importCode" type="textarea" :rows="5" placeholder="粘贴形如 PWS1. 开头的分享码" aria-label="课表分享码" />
+    <div class="share-actions">
+      <el-button type="primary" :disabled="!importCode.trim()" @click="parseImportCode">解析分享码</el-button>
+      <el-button @click="importFileInput?.click()">从文件导入</el-button>
+      <el-tooltip content="链接导入即将上线" placement="top"><span><el-button disabled>从链接导入（即将上线）</el-button></span></el-tooltip>
+      <input ref="importFileInput" type="file" accept=".txt,.pws,.json,application/json,text/plain" class="share-file-input" aria-hidden="true" tabindex="-1" @change="readImportFile" />
+    </div>
+    <p v-if="importError" class="share-error" role="alert">{{ importError }}</p>
+    <div v-if="importParsed" class="share-preview">
+      <header><strong>解析成功</strong><small>请确认以下信息后再替换</small></header>
+      <div class="share-field"><span>课表名称</span><b>{{ importParsed.title || '未命名学期' }}</b></div>
+      <div class="share-field"><span>开学日期</span><el-date-picker v-model="importStartDate" value-format="YYYY-MM-DD" placeholder="选择开学日期" aria-label="导入课表的开学日期" /></div>
+      <div class="share-field"><span>课表规模</span><b>{{ importParsed.courses.length }} 门课程 · {{ importScheduleCount }} 条安排 · {{ importOccurrenceCount }} 次上课</b></div>
+      <div class="share-field"><span>冲突检查</span><b :class="importConflicts ? 'share-conflict-warn' : 'share-conflict-ok'">{{ importConflicts ? `发现 ${importConflicts} 处时间冲突，替换后仍可调整` : '无时间冲突' }}</b></div>
+      <p v-if="startDateChanged" class="share-week-warning">开学日期已修改，所有周次将整体平移，请确认与对方课表的周次一致。</p>
+    </div>
+    <template #footer><el-button @click="importOpen=false">取消</el-button><el-button type="primary" :disabled="!importParsed" @click="applyImport">替换当前课表</el-button></template>
+  </el-dialog>
+  <el-dialog :model-value="shareOpen" title="分享课表" width="680px" append-to-body @update:model-value="shareOpen=$event">
+    <p class="course-planner-subtitle">分享当前编辑中的课表（包含尚未保存的修改）。对方在“学期课程 → 导入课表”粘贴分享码即可一键导入。</p>
+    <el-radio-group v-model="shareInclude" :disabled="shareBusy">
+      <el-radio :value="false">仅分享原始课表（推荐）</el-radio>
+      <el-radio :value="true">包含单次调整与停课记录</el-radio>
+    </el-radio-group>
+    <div class="share-code-box">
+      <el-input :model-value="shareCode" type="textarea" :rows="6" readonly aria-label="课表分享码" :placeholder="shareBusy ? '正在生成分享码…' : ''" />
+      <small v-if="shareCode" class="share-size">约 {{ shareSize }} · 请完整复制，缺字符会导致对方导入失败</small>
+    </div>
+    <template #footer><el-button :disabled="!shareCode" @click="saveShareFile">保存为文件</el-button><el-button type="primary" :disabled="!shareCode || shareBusy" @click="copyShare">{{ shareCopied ? '已复制 ✓' : '复制分享码' }}</el-button></template>
   </el-dialog>
 </template>

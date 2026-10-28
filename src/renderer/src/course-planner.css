@@ -77,6 +77,26 @@ html[data-theme='dark'] .course-week-grid button[aria-pressed=true] { color: #13
 .course-planner-footer { display: flex; align-items: center; gap: 10px; }
 .course-planner-footer > span { flex: 1; color: var(--secondary); font-size: calc(12px * var(--text-scale)); text-align: left; }
 .course-planner-footer .el-button + .el-button { margin: 0; }
+.course-planner-actions { display: inline-flex; gap: 0; flex: initial; }
+.course-planner-actions .el-button .el-icon { margin-right: 4px; }
+.share-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.share-actions .el-button { margin: 0; }
+.share-file-input { display: none; }
+.share-error { margin: 10px 0 0; color: var(--el-color-danger); font-size: calc(12px * var(--text-scale)); line-height: 1.6; }
+.share-preview { margin-top: 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.share-preview > header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.share-preview > header strong { color: var(--primary); font-size: calc(13px * var(--text-scale)); }
+.share-preview > header small { color: var(--secondary); font-size: calc(11px * var(--text-scale)); }
+.share-field { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px 0; font-size: calc(12px * var(--text-scale)); }
+.share-field:not(:last-of-type) { border-bottom: 1px dashed var(--line); }
+.share-field > span { color: var(--secondary); }
+.share-field b { font-weight: 550; overflow-wrap: anywhere; }
+.share-field .el-date-editor { width: 200px; }
+.share-conflict-ok { color: var(--primary); }
+.share-conflict-warn { color: var(--el-color-warning-dark-2); }
+.share-week-warning { margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--el-color-warning-light-9); color: var(--el-color-warning-dark-2); font-size: calc(11px * var(--text-scale)); line-height: 1.6; }
+.share-code-box { margin-top: 14px; }
+.share-size { display: block; margin-top: 6px; color: var(--secondary); font-size: calc(11px * var(--text-scale)); }
 @media (max-width: 1150px) {
   .course-planner-columns { grid-template-columns: 180px minmax(0, 1fr); }
   .course-preview { grid-column: 1 / -1; }
