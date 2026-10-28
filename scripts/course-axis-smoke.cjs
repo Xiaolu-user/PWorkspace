@@ -39,6 +39,19 @@ async function main() {
   assert.ok(Math.abs(sepTops[1] - rowTops[3]) <= 2, `下午/晚上分隔线应与 19:00 行对齐，实际 ${sepTops[1]} vs ${rowTops[3]}`)
   checks.push('上午/下午分界为两条平行浅线并与 13:30 行齐平，晚间分界与 19:00 行齐平')
 
+  const noonBox = await card.evaluate(() => {
+    const sep = document.querySelectorAll('.week-sep')[0].getBoundingClientRect()
+    return { top: sep.top, blocks: [...document.querySelectorAll('.course-block')].map(node => { const box = node.getBoundingClientRect(); return { top: box.top, bottom: box.bottom, row: node.style.gridRow } }) }
+  })
+  const afternoon = noonBox.blocks.filter(block => block.top >= rowTops[2] - 2 && block.top < rowTops[3])
+  assert.equal(afternoon.length, 2, `13:30 时段应有 2 个课程块，实际 ${afternoon.length}`)
+  for (const block of afternoon) {
+    assert.ok(block.top - noonBox.top >= 6, `下午课程块顶部应位于双线之下，实际偏移 ${Math.round(block.top - noonBox.top)}px`)
+    assert.ok(block.bottom <= rowTops[3] + 1, `下午课程块不应越过 13:30 行的下边界，实际底部 ${Math.round(block.bottom)} vs ${rowTops[3]}`)
+  }
+  const periodShift = await card.locator('.period-cell').nth(2).evaluate(node => Math.round(node.getBoundingClientRect().top + parseFloat(getComputedStyle(node).paddingTop)))
+  checks.push('下午课程着色严格落在 13:30 行内：顶部让出双线（偏移 ≥6px），底部不越过行下边界')
+
   const blocks = card.locator('.course-block')
   assert.equal(await blocks.count(), 5)
   const clipped = await blocks.evaluateAll(nodes => nodes.map(node => ({ text: node.innerText.replace(/\n/g, ' / '), over: node.scrollHeight - node.clientHeight, wide: node.scrollWidth - node.clientWidth })).filter(item => item.over > 1 || item.wide > 1))

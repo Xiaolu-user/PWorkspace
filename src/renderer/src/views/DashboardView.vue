@@ -47,11 +47,14 @@ const gridStyle = computed<CSSProperties>(() => weekSlots.value.length ? { gridT
 const periodMinutes = (time: string): number => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5))
 function courseCell(start: string, end: string, dayIndex: number): CSSProperties {
   const { first, last } = courseSlotSpan(weekSlots.value, start, end)
-  return { gridColumn: String(dayIndex + 2), gridRow: `${first + 1} / ${last + 2}` }
+  return { gridColumn: String(dayIndex + 2), gridRow: `${first + 1} / ${last + 2}`, '--sep-inset': noonRows.value.has(first + 1) ? '7px' : '0px' } as CSSProperties
 }
 // Light rules divide the day into 上午 / 下午 / 晚上; they appear only where the week crosses a boundary.
 const dayPart = (start: string): number => periodMinutes(start) < 12 * 60 ? 0 : periodMinutes(start) < 18 * 60 ? 1 : 2
 const weekSeps = computed(() => weekSlots.value.flatMap((slot, index) => index && dayPart(slot.start) !== dayPart(weekSlots.value[index - 1].start) ? [{ row: index + 1, noon: dayPart(slot.start) === 1 }] : []))
+// The noon divider is a pair of rules inside the first afternoon row, so blocks starting there are inset below it.
+const noonRows = computed(() => new Set(weekSeps.value.filter(sep => sep.noon).map(sep => sep.row)))
+const sepRow = (row: number): boolean => noonRows.value.has(row)
 const weekRules = computed(() => weekSlots.value.slice(1).flatMap((slot, i) => weekSeps.value.some(sep => sep.row === i + 2) ? [] : [{ row: i + 2, start: slot.start }]))
 const todayIndex = computed(() => viewDays.value.findIndex(day => day.date === today.value))
 const nowLine = computed(() => {
@@ -111,7 +114,7 @@ async function saveLink(): Promise<void> { savingLink.value = true; const ok = a
         <div class="week-grid-body" :class="{ empty: !weekSlots.length }" :style="gridStyle">
           <template v-if="weekSlots.length">
             <i v-for="(d, i) in viewDays" :key="'lane-' + d.date" class="day-lane" :class="{ today: d.date === today, last: i === viewDays.length - 1 }" :style="{ gridColumn: String(i + 2) }" aria-hidden="true"></i>
-            <span v-for="(slot, i) in weekSlots" :key="'slot-' + slot.start" class="period-cell" :class="{ last: i === weekSlots.length - 1 }" :style="{ gridRow: String(i + 1) }"><b>{{ slot.start }}</b><small>{{ slot.end }}</small></span>
+            <span v-for="(slot, i) in weekSlots" :key="'slot-' + slot.start" class="period-cell" :class="{ last: i === weekSlots.length - 1, 'after-sep': sepRow(i + 1) }" :style="{ gridRow: String(i + 1) }"><b>{{ slot.start }}</b><small>{{ slot.end }}</small></span>
             <span v-for="rule in weekRules" :key="'rule-' + rule.start" class="grid-rule" :style="{ gridRow: String(rule.row) }" aria-hidden="true"></span>
             <span v-for="sep in weekSeps" :key="'sep-' + sep.row" class="week-sep" :class="{ noon: sep.noon }" :style="{ gridRow: String(sep.row) }" aria-hidden="true"></span>
             <template v-for="(d, dayIndex) in viewDays" :key="'day-' + d.date">
