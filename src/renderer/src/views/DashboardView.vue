@@ -14,21 +14,19 @@ import TaskDialog from '../components/TaskDialog.vue'
 import PlannerDialogs from '../components/PlannerDialogs.vue'
 import TaskCalendar from '../components/TaskCalendar.vue'
 import WeatherWidget from '../components/WeatherWidget.vue'
+import ShortcutBoard from '../components/ShortcutBoard.vue'
 import { unwrap, report, openLink, formatTime } from '../lib/api'
 const ws = useWorkspace(); const editor = useEditor(); const router = useRouter(); const route = useRoute()
 const now = ref(new Date()); const today = computed(() => localDate(now.value))
 const clock = computed(() => now.value.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }))
 const dateLabel = computed(() => now.value.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }))
-const data = ref<PlannerData>({ semester: emptySemester(), workouts: [], entries: [] })
+const data = ref<PlannerData>({ semester: emptySemester(), workouts: [], entries: [], categories: [] })
 const plan = ref<'courses' | 'fitness' | null>(null); const taskDialog = ref(false); const selected = ref<Task | null>(null)
 const calendarOpen = ref(false)
-const filter = ref('all'); const addShortcut = ref(false); const shortcutTitle = ref(''); const shortcutUrl = ref(''); const savingLink = ref(false)
 const todayTasks = computed(() => ws.tasks.filter(t => t.dueDate === today.value || isReminderActive(t, ws.now)).sort((a, b) => compareReminderTasks(a, b, ws.now)))
 const done = computed(() => todayTasks.value.filter(t => t.status === 'done').length)
 const percent = computed(() => todayTasks.value.length ? Math.round(done.value / todayTasks.value.length * 100) : 0)
-const apps = computed(() => data.value.entries.filter(e => e.kind === 'app'))
 const files = computed(() => data.value.entries.filter(e => e.kind === 'file'))
-const shortcuts = computed(() => [ ...(filter.value !== 'web' ? apps.value.map(a => ({ id: a.id, title: a.title.replace(/\.(exe|lnk)$/i, ''), icon: a.icon, url: '', kind: 'app' })) : []), ...(filter.value !== 'app' ? ws.bookmarks.map(b => ({ id: b.id, title: b.title, icon: '', url: b.url, kind: 'web' })) : []) ])
 const week = computed(() => semesterWeek(data.value.semester.startDate, today.value))
 const viewOffset = ref(0)
 const viewMonday = computed(() => { const monday = new Date(now.value); monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7 + viewOffset.value * 7); return monday })
@@ -83,12 +81,12 @@ function editTask(task: Task): void { selected.value = task; taskDialog.value = 
 const toggling = ref(new Set<string>())
 async function toggle(task: Task): Promise<void> { if (toggling.value.has(task.id)) return; toggling.value.add(task.id); await ws.mutate(() => window.workbench.tasks.update(task.id, { ...task, status: task.status === 'done' ? 'todo' : 'done' }), task.status === 'done' ? '已取消完成' : '任务已完成'); toggling.value.delete(task.id) }
 async function saveIdea(): Promise<void> { if (editor.body.trim() && await editor.save()) editor.select(null) }
+async function reloadShortcuts(): Promise<void> { await Promise.all([load(), ws.refresh()]) }
 async function pick(kind: 'app' | 'file' | 'folder'): Promise<void> { try { unwrap(await window.workbench.planner.pick(kind)); await load() } catch (e) { report(e) } }
 async function openLocal(id: string): Promise<void> { try { unwrap(await window.workbench.planner.open(id)) } catch (e) { report(e) } }
 async function removeEntry(entry: Pick<LocalEntry, 'id' | 'title'>, kind = 'file'): Promise<void> {
   try { await ElMessageBox.confirm(`移除“${entry.title}”的入口？原文件不会删除。`, '移除入口', { confirmButtonText: '移除', cancelButtonText: '取消' }); if (kind === 'web') await ws.mutate(() => window.workbench.bookmarks.remove(entry.id), '链接已删除'); else { unwrap(await window.workbench.planner.remove(entry.id)); await load() } } catch (e) { if (e !== 'cancel' && e !== 'close') report(e) }
 }
-async function saveLink(): Promise<void> { savingLink.value = true; const ok = await ws.mutate(() => window.workbench.bookmarks.create({ title: shortcutTitle.value, url: shortcutUrl.value, group: '快捷方式' }), '快捷方式已添加'); savingLink.value = false; if (ok) { addShortcut.value = false; shortcutTitle.value = ''; shortcutUrl.value = '' } }
 </script>
 <template>
   <h1 class="sr-only">今日概览</h1>
@@ -101,9 +99,7 @@ async function saveLink(): Promise<void> { savingLink.value = true; const ok = a
       </section>
     </div>
     <div class="home-column home-center">
-      <section class="home-card shortcut-card" :style="ws.moduleStyle('shortcuts')"><header><span class="card-label"><AppIcon name="grid" />快捷方式</span><el-dropdown trigger="click" @command="(c: string) => c === 'web' ? addShortcut = true : pick('app')"><button class="outline-button">＋ 添加</button><template #dropdown><el-dropdown-menu><el-dropdown-item command="app">添加应用</el-dropdown-item><el-dropdown-item command="web">添加网页</el-dropdown-item></el-dropdown-menu></template></el-dropdown></header><div class="compact-tabs"><button v-for="f in [{ id: 'all', label: '全部' }, { id: 'app', label: '应用' }, { id: 'web', label: '网页' }]" :key="f.id" :class="{ active: filter === f.id }" @click="filter = f.id">{{ f.label }}</button></div>
-        <div class="shortcut-grid"><div v-for="(s, i) in shortcuts" :key="s.kind + s.id" class="shortcut-tile"><button class="shortcut-open" :title="s.title" @click="s.kind === 'web' ? openLink(s.url) : openLocal(s.id)"><img v-if="s.icon" :src="s.icon" alt="" /><span v-else class="shortcut-monogram" :class="'tint-' + i % 4">{{ s.title.slice(0, 1).toUpperCase() }}</span><span>{{ s.title }}</span></button><button class="tile-remove" :aria-label="'移除' + s.title" @click="removeEntry(s, s.kind)">×</button></div><button v-if="!shortcuts.length" class="shortcut-placeholder" aria-label="添加网页快捷方式" @click="addShortcut = true"><AppIcon name="plus" :size="25" /><span>添加网页</span></button></div><p v-if="!shortcuts.length" class="home-caption">把常用应用和网页放在这里。上方“添加”可选择本机应用。</p>
-      </section>
+      <ShortcutBoard :entries="data.entries" :categories="data.categories" @changed="reloadShortcuts" />
       <section class="home-card inspiration-card" :style="ws.moduleStyle('ideas')"><header><h2><AppIcon name="edit" />灵感速记</h2><small class="muted">{{ editor.dirty ? '未保存' : '随手记录' }}</small></header><p class="home-caption">随时捕捉，一闪而过的想法。</p><div class="idea-input" @click="($refs.idea as HTMLTextAreaElement)?.focus()"><textarea ref="idea" v-model="editor.body" :disabled="editor.saving" aria-label="灵感内容" placeholder="此刻，你在想什么？&#10;点击空白处，开始记录…" @keydown.ctrl.enter.prevent="saveIdea" /><div><small>Ctrl + Enter 保存</small><el-button type="primary" :disabled="!editor.body.trim()" :loading="editor.saving" @click.stop="saveIdea">记录</el-button></div></div><button v-for="note in ws.notes.slice(0, 2)" :key="note.id" class="idea-row" @click="router.push({ path: '/notes', query: { id: note.id } })"><AppIcon name="document" :size="17" /><span>{{ note.title }}</span><small>{{ formatTime(note.updatedAt) }}</small></button>
       </section>
     </div>
@@ -133,5 +129,4 @@ async function saveLink(): Promise<void> { savingLink.value = true; const ok = a
   <TaskDialog v-model="taskDialog" :task="selected" :default-date="today" />
   <TaskCalendar v-model="calendarOpen" :today="today" />
   <PlannerDialogs v-model="plan" :data="data" @saved="load" />
-  <el-dialog v-model="addShortcut" title="添加网页快捷方式" width="440px" :close-on-click-modal="false"><el-form label-position="top" :disabled="savingLink"><el-form-item label="名称"><el-input v-model="shortcutTitle" placeholder="例如：GitHub" /></el-form-item><el-form-item label="网址"><el-input v-model="shortcutUrl" placeholder="https://" @keydown.enter="saveLink" /></el-form-item></el-form><template #footer><el-button @click="addShortcut = false">取消</el-button><el-button type="primary" :loading="savingLink" @click="saveLink">添加</el-button></template></el-dialog>
 </template>

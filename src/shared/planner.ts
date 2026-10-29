@@ -8,8 +8,8 @@ export interface Semester { title: string; startDate: string; weeks: number; cou
 export interface LegacySemester extends Omit<Semester, 'courses'> { courses: LegacyCourse[] }
 export interface CourseOccurrence extends CourseTime { id: string; courseId: string; scheduleId: string; title: string; teacher: string; color: string; week: number; date: string; cancelled: boolean; modified: boolean }
 export interface Workout { day: number; title: string; minutes: number; exercises: string }
-export interface LocalEntry { id: string; title: string; path: string; kind: 'app' | 'file'; icon?: string }
-export interface PlannerData { semester: Semester; workouts: Workout[]; entries: LocalEntry[] }
+export interface LocalEntry { id: string; title: string; path: string; kind: 'app' | 'file'; icon?: string; iconVersion?: number; category?: string }
+export interface PlannerData { semester: Semester; workouts: Workout[]; entries: LocalEntry[]; categories: string[] }
 export const emptySemester = (): Semester => ({ title: '', startDate: '', weeks: 18, courses: [] })
 // UTC day numbers represent calendar dates, avoiding daylight-saving offsets.
 const dayNumber = (date: string): number => Date.parse(`${date}T00:00:00Z`) / 86400000

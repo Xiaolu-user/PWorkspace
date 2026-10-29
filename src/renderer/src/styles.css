@@ -324,23 +324,56 @@ kbd { font-size:calc(11px * var(--text-scale, 1)); border: 1px solid #dfe5df; pa
 .overdue-link { font-size:calc(11px * var(--text-scale, 1));color:#ab714d;margin-top:10px;text-align:center }
 .home-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#90a397;min-height:180px;gap:10px;font-size:calc(12px * var(--text-scale, 1)) }
 .home-empty small { font-size:calc(11px * var(--text-scale, 1));color:#a0aaa5 }
-.shortcut-card { flex:1.15;min-height:345px }
-.home-card .shortcut-title { font-size:calc(26px * var(--text-scale, 1));letter-spacing:1px;margin-top:6px }
+.shortcut-card { flex:1.05;min-height:332px;position:relative;display:flex;flex-direction:column }
 .outline-button { border:1px solid #e0e8e4;border-radius:8px;background:white;padding:5px 12px }
-.compact-tabs { display:flex;gap:7px;margin:15px 0 12px }
-.compact-tabs button { border:0;border-radius:6px;padding:5px 16px;background:#f2f5f5;color:#6c7875;font-size:calc(12px * var(--text-scale, 1)) }
-.compact-tabs button.active { color:#1c785e;background:#e5f4eb;font-weight:600 }
-.shortcut-grid { display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;max-height:320px;overflow:auto;padding:2px }
-.shortcut-tile { position:relative;min-width:0 }
-.shortcut-open,.shortcut-placeholder { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px solid #eef2ef;background:#fff;border-radius:10px;width:100%;height:82px;padding:8px 3px;transition:background .15s }
-.shortcut-open:hover { background:#eef7f2;border-color:#c8e3d5 }
-.shortcut-open>span:last-child { max-width:100%;font-size:calc(11px * var(--text-scale, 1));overflow:hidden;white-space:nowrap;text-overflow:ellipsis }
-.shortcut-open img { width:30px;height:30px;object-fit:contain }
-.shortcut-monogram { width:31px;height:31px;display:grid;place-items:center;font-size:calc(19px * var(--text-scale, 1));font-weight:650;border-radius:9px;background:#e6f3ee;color:#318270 }
+.shortcut-toolbar { display:flex;align-items:center;justify-content:space-between;gap:8px }
+/* Tag row: one horizontal line that scrolls instead of wrapping, so the grid keeps its height. */
+.shortcut-tags { display:flex;align-items:center;gap:2px;margin:14px 0 10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding-bottom:1px }
+.shortcut-tags::-webkit-scrollbar { height:0 }
+.shortcut-tag { flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;color:#6c7875;border-radius:7px;padding:5px 9px;font-size:calc(11.5px * var(--text-scale, 1));line-height:1.3;transition:background .15s,color .15s }
+.shortcut-tag:hover { background:#f1f5f3 }
+.shortcut-tag.active { background:#e5f4eb;color:#1c785e;font-weight:600 }
+.shortcut-tag.over { background:#d8efe4;box-shadow:inset 0 0 0 1px #8ecbb2 }
+.shortcut-tag i { font-style:normal;font-size:calc(9.5px * var(--text-scale, 1));color:#9aa9a1;font-variant-numeric:tabular-nums }
+.shortcut-tag.active i { color:#3d9a78 }
+.shortcut-tag-add { flex:0 0 auto;display:grid;place-items:center;width:22px;height:22px;border:1px dashed #d5ded8;border-radius:7px;background:transparent;color:#9aa9a1 }
+.shortcut-tag-add:hover { border-color:#8ecbb2;color:#1c785e }
+.shortcut-tag-input { flex:0 0 auto;width:86px;border:1px solid #8ecbb2;border-radius:7px;padding:4px 7px;font-size:calc(11.5px * var(--text-scale, 1));outline:none;background:#fff;color:#3d5b4c }
+/* Compact grid: no permanent white cell, so more icons fit in the same card height. */
+.shortcut-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));grid-auto-rows:minmax(58px,auto);gap:2px;align-content:start;max-height:264px;overflow-x:hidden;overflow-y:auto;padding:2px 1px;scrollbar-width:thin }
+.shortcut-tile { position:relative;min-width:0;overflow:hidden;border-radius:9px }
+.shortcut-tile.dragging { opacity:.45 }
+.shortcut-open,.shortcut-placeholder { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:0;background:transparent;border-radius:9px;width:100%;height:58px;padding:4px 2px;transition:background .15s,box-shadow .15s }
+.shortcut-open:hover,.shortcut-open:focus-visible { background:#f2f7f4;box-shadow:0 4px 12px #2f4a3d12 }
+.shortcut-open>span:last-child { max-width:100%;font-size:calc(10.5px * var(--text-scale, 1));line-height:1.25;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#5d6b64 }
+.shortcut-open img { width:29px;height:29px;object-fit:contain }
+.shortcut-monogram { width:29px;height:29px;display:grid;place-items:center;font-size:calc(15px * var(--text-scale, 1));font-weight:650;border-radius:8px;background:#e6f3ee;color:#318270;flex:0 0 auto }
+.shortcut-generic { width:29px;height:29px;display:grid;place-items:center;border-radius:8px;background:#eef1f5;color:#7d8a96;flex:0 0 auto }
 .tint-1 { background:#e9e9fb;color:#7b70be }.tint-2 { background:#fff1dc;color:#b27f35 }.tint-3 { background:#e4effb;color:#578abb }
-.tile-remove { position:absolute;right:0;top:0;border:0;border-radius:5px;background:#fff3ed;color:#a26c54;width:19px;height:19px;opacity:0 }
-.shortcut-tile:hover .tile-remove,.tile-remove:focus-visible { opacity:1 }
-.shortcut-placeholder { border-style:dashed;background:transparent;color:#9aa9a1;font-size:calc(11px * var(--text-scale, 1)) }
+.shortcut-tile > .el-dropdown { position:absolute;right:0;top:0;line-height:0 }
+.shortcut-more { width:16px;height:16px;display:grid;place-items:center;border:0;border-radius:6px;background:#fff;color:#8d9a93;box-shadow:0 1px 4px #2f4a3d1f;opacity:0;transition:opacity .15s }
+.shortcut-tile:hover .shortcut-more,.shortcut-more:focus-visible { opacity:1 }
+.shortcut-placeholder { border:1px dashed #dbe4de;color:#9aa9a1;font-size:calc(10.5px * var(--text-scale, 1)) }
+.shortcut-placeholder:hover { border-color:#a8d3c0;color:#1c785e;background:#f4faf7 }
+.menu-check { margin-left:6px;color:#1c785e }
+.shortcut-drop { position:absolute;inset:6px;z-index:12;display:grid;place-items:center;border:2px dashed #6fb9a2;border-radius:14px;background:#ffffffd6;text-align:center;pointer-events:none;backdrop-filter:blur(2px) }
+.shortcut-drop-inner { padding:0 18px }
+.shortcut-drop-icon { display:grid;place-items:center;width:38px;height:38px;margin:0 auto 8px;border-radius:11px;background:#e5f4eb;color:#1c785e }
+.shortcut-drop strong { display:block;font-size:calc(14px * var(--text-scale, 1));color:#2f4a3d }
+.shortcut-drop p { margin:4px 0 0;font-size:calc(12px * var(--text-scale, 1));color:#77857d }
+.shortcut-drop p em { font-style:normal;color:#1c785e;font-weight:600 }
+.shortcut-drop small { display:block;margin-top:7px;color:#9aa9a1;font-size:calc(10.5px * var(--text-scale, 1)) }
+.shortcut-manage-hint { margin:0 0 12px;color:#88958d;font-size:calc(11.5px * var(--text-scale, 1));line-height:1.7 }
+.shortcut-manage { max-height:300px;overflow:auto }
+.shortcut-manage-row { display:flex;align-items:center;gap:8px;padding:8px 6px;border-radius:8px }
+.shortcut-manage-row:hover { background:#f6f9f7 }
+.shortcut-manage-row.dragging { opacity:.5 }
+.shortcut-manage-row strong { font-size:calc(13px * var(--text-scale, 1));font-weight:500;color:#3f5049 }
+.shortcut-manage-row small { font-size:calc(10.5px * var(--text-scale, 1));color:#9aa9a1;margin-right:auto }
+.shortcut-manage-row .text-link { font-size:calc(11.5px * var(--text-scale, 1)) }
+.shortcut-manage-row .text-link.danger { color:#c2705a }
+.drag-handle { color:#c3cec7;font-size:11px;letter-spacing:-1px;cursor:grab }
+.shortcut-manage-empty { margin:0;padding:18px 6px;text-align:center;color:#9aa9a1;font-size:calc(11.5px * var(--text-scale, 1)) }
 .inspiration-card { flex:1;background:linear-gradient(130deg,#fffcf6,#fff);display:flex;flex-direction:column;min-height:285px }
 .idea-input { flex:1;display:flex;flex-direction:column;min-height:145px;margin:14px 0 8px;padding:14px;background:#fdf8f0a6;border:1px solid #f2e8d8;border-radius:10px;cursor:text }
 .idea-input textarea { resize:none;width:100%;flex:1;min-height:72px;border:0;outline:none;background:none;color:#344a40;font-size:calc(15px * var(--text-scale, 1));line-height:1.9 }
@@ -415,17 +448,17 @@ kbd { font-size:calc(11px * var(--text-scale, 1)); border: 1px solid #dfe5df; pa
 .planner-hint { color:#86958d;font-size:calc(12px * var(--text-scale, 1));margin-bottom:15px }
 .course-form { padding:15px;border:1px solid #e5ece6;border-radius:10px;margin-bottom:12px }.course-weeks { display:flex;align-items:center;gap:9px }.course-weeks .el-button { margin-left:auto }
 .workout-form { display:grid;grid-template-columns:70px 1fr 135px 35px;align-items:center;gap:10px;border-top:1px solid #eef1ee;padding:12px 0 }.workout-form>.el-textarea { grid-column:2 / -1 }
-@media(min-width:1550px) { .home-card { padding:24px }.time-card { min-height:230px }.shortcut-open,.shortcut-placeholder { height:94px }.shortcut-grid { gap:10px }.home-task { padding:16px 11px }.home-card h2 { font-size:calc(19px * var(--text-scale, 1)) }.home-caption { font-size:calc(13px * var(--text-scale, 1)) } }
+@media(min-width:1550px) { .home-card { padding:24px }.time-card { min-height:230px }.shortcut-open,.shortcut-placeholder { height:62px }.shortcut-grid { grid-template-columns:repeat(auto-fill,minmax(48px,1fr)) }.home-task { padding:16px 11px }.home-card h2 { font-size:calc(19px * var(--text-scale, 1)) }.home-caption { font-size:calc(13px * var(--text-scale, 1)) } }
 @media(max-width:1150px) { .compact-shell .page-scroll { padding:18px }.home-grid { grid-template-columns:minmax(240px,1fr) minmax(350px,1.4fr) }.home-right { grid-column:1 / -1;display:grid;grid-template-columns:1.3fr 1fr }.courses-card { grid-row:span 2 }.home-center,.home-left { min-height:650px }.home-grid { gap:14px }.home-column { gap:14px }.home-card { padding:17px } }
 /* Keep dense shortcut content inside its card, including short windows. */
 .shortcut-card { flex:0 0 auto;min-height:0 }
-.shortcut-grid { height:250px;max-height:250px;align-content:start }
-.shortcut-open,.shortcut-placeholder { height:76px }
-.shortcut-open>span:last-child { font-size:calc(12px * var(--text-scale, 1)) }
+.shortcut-grid { height:auto;max-height:244px;align-content:start }
+.shortcut-open,.shortcut-placeholder { height:58px }
+.shortcut-open>span:last-child { font-size:calc(10.5px * var(--text-scale, 1)) }
 .home-task strong { font-size:calc(17px * var(--text-scale, 1)) }.home-task small { font-size:calc(14px * var(--text-scale, 1)) }
 .exercise-list { font-size:calc(12px * var(--text-scale, 1)) }.file-row strong { font-size:calc(12px * var(--text-scale, 1)) }.file-row small { font-size:calc(10px * var(--text-scale, 1)) }
 .home-tasks { min-height:430px }
-@media(min-width:1550px) { .shortcut-grid { height:270px;max-height:270px }.shortcut-open,.shortcut-placeholder { height:82px } }
+@media(min-width:1550px) { .shortcut-grid { height:auto;max-height:264px;grid-auto-rows:minmax(62px,auto) }.shortcut-open,.shortcut-placeholder { height:62px } }
 
 /* Display preferences also apply to teleported dialogs and controls. */
 body { --el-font-size-base:calc(14px * var(--text-scale,1));--el-font-size-small:calc(13px * var(--text-scale,1));--el-font-size-extra-small:calc(12px * var(--text-scale,1));--el-font-size-large:calc(18px * var(--text-scale,1)) }

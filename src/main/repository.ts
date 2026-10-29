@@ -79,6 +79,10 @@ export class Repository {
     return row
   }
   removeBookmark(bookmarkId: unknown): void { this.remove('bookmarks', bookmarkId) }
+  // Categories are shared with bookmarks, so renaming or deleting one moves its links too.
+  renameBookmarkGroup(from: string, to: string): void {
+    this.store.connection.prepare('UPDATE bookmarks SET "group"=? WHERE "group"=?').run(to.slice(0, 80), from.slice(0, 80))
+  }
   private remove(table: 'tasks' | 'notes' | 'bookmarks', key: unknown): void {
     const result = this.store.connection.prepare(`DELETE FROM ${table} WHERE id=?`).run(validate.id(key))
     if (!result.changes) throw new AppError('NOT_FOUND', '这条内容已不存在')

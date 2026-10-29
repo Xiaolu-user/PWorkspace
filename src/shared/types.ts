@@ -11,17 +11,28 @@ export interface Dashboard { today: Task[]; overdue: Task[]; recentNotes: Note[]
 export interface SearchResults { tasks: Task[]; notes: Note[]; bookmarks: Bookmark[] }
 export interface AppInfo { version: string; dataPath: string; backupPath: string; startupWarning: string | null }
 export interface BackupResult { path: string; safetyBackup?: string }
+export interface ShortcutImport { added: number; links: number; duplicates: number; skipped: string[] }
 export type ErrorCode = 'VALIDATION' | 'NOT_FOUND' | 'BUSY' | 'DATABASE' | 'BACKUP' | 'INCOMPATIBLE' | 'IO' | 'UNAUTHORIZED' | 'INTERNAL'
 export type Result<T> = { ok: true; data: T } | { ok: false; error: { code: ErrorCode; message: string } }
 export interface WorkbenchAPI {
+  // Real filesystem path of a dropped file; empty for virtual or browser-provided files.
+  filePath(file: File): string
   weather: { search(query: string): Promise<Result<import('./appearance').WeatherLocation[]>>; current(): Promise<Result<import('./weather').Weather | null>> }
   planner: {
     get(): Promise<Result<import('./planner').PlannerData>>
     semester(value: import('./planner').Semester): Promise<Result<void>>
     workouts(value: import('./planner').Workout[]): Promise<Result<void>>
-    pick(kind: 'app' | 'file' | 'folder'): Promise<Result<void>>
+    pick(kind: 'app' | 'file' | 'folder', category?: string): Promise<Result<void>>
     open(id: string): Promise<Result<void>>
     remove(id: string): Promise<Result<void>>
+  }
+  shortcuts: {
+    import(paths: string[], category: string): Promise<Result<ShortcutImport>>
+    assign(id: string, category: string): Promise<Result<void>>
+    refreshIcon(id: string): Promise<Result<string>>
+    saveCategories(list: string[]): Promise<Result<string[]>>
+    renameCategory(from: string, to: string): Promise<Result<void>>
+    removeCategory(name: string): Promise<Result<void>>
   }
   tasks: {
     list(): Promise<Result<Task[]>>

@@ -1,6 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain, nativeImage, nativeTheme, screen, shell, Tray, Menu, Notification, powerMonitor, type IpcMainInvokeEvent } from 'electron'
 import { existsSync, mkdirSync } from 'node:fs'
-import { isAbsolute, join } from 'node:path'
+import { basename, isAbsolute, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { randomUUID } from 'node:crypto'
 import { channels } from '../shared/channels'
@@ -14,6 +14,8 @@ import { BackupService } from './backup'
 import { AppError } from './errors'
 import { Logger } from './logger'
 import { externalUrl } from './validation'
+import { entryIcon, readWebLink } from './shortcuts'
+import { normalizeCategory, shortcutKindOf, UNCATEGORIZED, ICON_VERSION } from '../shared/shortcuts'
 
 app.setName('PersonalWorkbench')
 if (process.platform === 'win32') app.setAppUserModelId('local.personal.workbench')
@@ -112,19 +114,54 @@ function registerHandlers(): void {
   handle(channels.weatherCurrent, () => weather.current(repository.preferences().appearance.weatherLocation))
   const planner = new Planner(repository)
   handle(channels.plannerGet, async () => {
-    const data = planner.get()
+    const data = planner.get(), icons: Record<string, string> = {}
     data.entries = await Promise.all(data.entries.map(async entry => {
-      try { return { ...entry, icon: (await app.getFileIcon(entry.path, { size: 'normal' })).toDataURL() } } catch { return entry }
+      // Extraction is versioned: only entries handled by the current rules are trusted as-is.
+      if (entry.iconVersion === ICON_VERSION) return entry
+      const icon = await entryIcon(entry.path)
+      icons[entry.id] = icon
+      return { ...entry, icon, iconVersion: ICON_VERSION }
     }))
+    planner.markIcons(icons)
     return data
   })
   handle(channels.semesterSave, value => planner.semester(value))
   handle(channels.workoutsSave, value => planner.workouts(value))
-  handle(channels.localPick, async kind => {
+  handle(channels.localPick, async (kind, category) => {
     if (!['app', 'file', 'folder'].includes(kind as string)) throw new AppError('VALIDATION', '选择类型不正确')
     const result = await dialog.showOpenDialog(window!, { title: kind === 'app' ? '选择应用程序或快捷方式' : '添加资料入口（保留原文件位置）', properties: kind === 'folder' ? ['openDirectory', 'multiSelections'] : ['openFile', 'multiSelections'], ...(kind === 'app' ? { filters: [{ name: '应用或快捷方式', extensions: ['exe', 'lnk'] }] } : {}) })
-    if (!result.canceled) planner.add(result.filePaths, kind === 'app' ? 'app' : 'file')
+    if (!result.canceled) planner.add(result.filePaths, kind === 'app' ? 'app' : 'file', category)
   })
+  // Desktop drops arrive as filesystem paths; links become bookmarks, programs become app entries.
+  handle(channels.localImport, async (paths, category) => {
+    if (!Array.isArray(paths) || paths.length > 40) throw new AppError('VALIDATION', '一次最多添加 40 个快捷方式')
+    const group = normalizeCategory(category), apps: string[] = [], skipped: string[] = []
+    let links = 0, duplicates = 0
+    for (const item of paths) {
+      if (typeof item !== 'string' || !item || item.length > 1000) { skipped.push('无效的文件'); continue }
+      if (!isAbsolute(item) || !existsSync(item)) { skipped.push(basename(item)); continue }
+      const kind = shortcutKindOf(item)
+      if (kind === 'url') {
+        const link = readWebLink(item)
+        if (!link) { skipped.push(basename(item)); continue }
+        if (repository.bookmarks().some(bookmark => bookmark.url === link.url)) { duplicates++; continue }
+        repository.createBookmark({ title: link.title, url: link.url, group: group || UNCATEGORIZED }); links++
+      } else if (kind === 'app') apps.push(item)
+      else skipped.push(basename(item))
+    }
+    const result = planner.addEntries(apps, group)
+    return { added: result.added, links, duplicates: duplicates + result.duplicates, skipped }
+  })
+  handle(channels.shortcutAssign, (id, category) => planner.setCategory(id, category))
+  handle(channels.shortcutIcon, async id => {
+    const entry = planner.entry(id)
+    const icon = await entryIcon(entry.path)
+    if (icon) planner.saveIcon(entry.id, icon)
+    return icon
+  })
+  handle(channels.shortcutCategories, value => planner.categories(value))
+  handle(channels.shortcutRename, (from, to) => { planner.renameCategory(from, to); repository.renameBookmarkGroup(normalizeCategory(from) || UNCATEGORIZED, normalizeCategory(to)) })
+  handle(channels.shortcutRemoveCategory, name => { planner.removeCategory(name); repository.renameBookmarkGroup(normalizeCategory(name), UNCATEGORIZED) })
   handle(channels.localOpen, async id => {
     const entry = planner.entry(id)
     if (!existsSync(entry.path)) throw new AppError('IO', '原文件已移动或删除，请重新添加入口')

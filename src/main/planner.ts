@@ -5,13 +5,25 @@ import { Repository } from './repository'
 import { AppError } from './errors'
 import { isValidDate } from '../shared/date'
 import { emptySemester, upgradeSemester, type Semester, type LegacySemester, type Course, type CourseTime, type LegacyCourse, type CourseSchedule, type Workout, type LocalEntry, type PlannerData } from '../shared/planner'
+import { cleanCategories, mergeCategories, normalizeCategory, validCategoryName, MAX_CATEGORIES, ICON_VERSION } from '../shared/shortcuts'
 const invalid = (message: string): never => { throw new AppError('VALIDATION', message) }
 function record(v: unknown): Record<string, unknown> { if (!v || typeof v !== 'object' || Array.isArray(v)) invalid('数据格式不正确'); return v as Record<string, unknown> }
 function text(v: unknown, max: number, required = true): string { if (typeof v !== 'string' || v.length > max || (required && !v.trim())) invalid('请填写有效内容，且不要超过长度限制'); return (v as string).trim() }
 function integer(v: unknown, min: number, max: number): number { if (!Number.isInteger(v) || Number(v) < min || Number(v) > max) invalid(`请输入 ${min}—${max} 之间的整数`); return v as number }
+function categoryName(v: unknown, others: string[] = []): string {
+  try { return validCategoryName(v, others) } catch (error) { return invalid(error instanceof Error ? error.message : '分类名称不正确') }
+}
 export class Planner {
   constructor(private repo: Repository) {}
-  get(): PlannerData { return { semester: upgradeSemester(this.repo.readSetting<Semester | LegacySemester>('semester', emptySemester())), workouts: this.repo.readSetting('workouts', []), entries: this.repo.readSetting('localEntries', []) } }
+  get(): PlannerData {
+    // Older entries have no category; reading through normalizeCategory keeps them in 未分类.
+    const entries = this.repo.readSetting<LocalEntry[]>('localEntries', []).map(entry => ({ ...entry, category: normalizeCategory(entry.category) }))
+    return {
+      semester: upgradeSemester(this.repo.readSetting<Semester | LegacySemester>('semester', emptySemester())),
+      workouts: this.repo.readSetting('workouts', []), entries,
+      categories: cleanCategories(this.repo.readSetting('shortcutCategories', []))
+    }
+  }
   semester(value: unknown): void {
     const v = record(value)
     const startDate = text(v.startDate, 10)
@@ -64,13 +76,81 @@ export class Planner {
     const data: Workout[] = (value as unknown[]).map(item => { const v = record(item); const day = integer(v.day, 1, 7); if (days.has(day)) invalid('同一天请合并为一个训练计划'); days.add(day); return { day, title: text(v.title, 100), minutes: integer(v.minutes, 0, 600), exercises: text(v.exercises, 5000, false) } })
     this.repo.writeSetting('workouts', data)
   }
-  add(paths: string[], kind: 'app' | 'file'): void {
-    const entries = this.get().entries
+  add(paths: string[], kind: 'app' | 'file', category: unknown = ''): void {
+    const entries = this.get().entries, group = kind === 'app' ? normalizeCategory(category) : ''
     for (const path of paths) {
       if (!isAbsolute(path) || !existsSync(path)) invalid('文件已移动或不存在，请重新选择')
-      if (!entries.some(e => e.path === path && e.kind === kind)) entries.push({ id: randomUUID(), title: basename(path), path, kind })
+      if (!entries.some(e => e.path === path && e.kind === kind)) entries.push({ id: randomUUID(), title: basename(path), path, kind, category: group })
     }
     this.repo.writeSetting('localEntries', entries)
+  }
+  // Batch import used by drag and drop: one read and one write, with per-file accounting.
+  addEntries(paths: string[], category: unknown = ''): { added: number; duplicates: number; missing: number } {
+    const entries = this.get().entries, group = normalizeCategory(category)
+    let added = 0, duplicates = 0, missing = 0
+    for (const path of paths) {
+      if (!isAbsolute(path) || !existsSync(path)) { missing++; continue }
+      if (entries.some(e => e.path === path && e.kind === 'app')) { duplicates++; continue }
+      entries.push({ id: randomUUID(), title: basename(path), path, kind: 'app', category: group }); added++
+    }
+    if (added) this.repo.writeSetting('localEntries', entries)
+    return { added, duplicates, missing }
+  }
+  setCategory(id: unknown, value: unknown): void {
+    const entries = this.get().entries, entry = entries.find(e => e.id === id)
+    if (!entry) throw new AppError('NOT_FOUND', '这个入口已不存在')
+    if (entry.kind !== 'app') invalid('只有应用快捷方式可以归入分类')
+    entry.category = normalizeCategory(value)
+    this.repo.writeSetting('localEntries', entries)
+  }
+  // Icons are cached so the home page does not re-read every executable on each load.
+  cacheIcons(icons: Record<string, string>): void {
+    const entries = this.get().entries; let changed = false
+    for (const entry of entries) {
+      const icon = icons[entry.id]
+      if (!icon || !icon.startsWith('data:image/') || icon.length >= 400000) continue
+      if (entry.icon === icon && entry.iconVersion === ICON_VERSION) continue
+      entry.icon = icon; entry.iconVersion = ICON_VERSION; changed = true
+    }
+    if (changed) this.repo.writeSetting('localEntries', entries)
+  }
+  // An empty value with the current version means "extraction already ran and found nothing", so a
+  // placeholder saved by an older build is dropped instead of being shown forever.
+  markIcons(results: Record<string, string>): void {
+    const entries = this.get().entries; let changed = false
+    for (const entry of entries) {
+      const icon = results[entry.id]
+      if (icon === undefined) continue
+      const value = icon.startsWith('data:image/') && icon.length < 400000 ? icon : ''
+      if (entry.icon === value && entry.iconVersion === ICON_VERSION) continue
+      entry.icon = value; entry.iconVersion = ICON_VERSION; changed = true
+    }
+    if (changed) this.repo.writeSetting('localEntries', entries)
+  }
+  saveIcon(id: unknown, icon: string): void { this.cacheIcons({ [String(id)]: icon }) }
+  categories(value: unknown): string[] {
+    if (!Array.isArray(value) || value.length > MAX_CATEGORIES) invalid(`分类最多 ${MAX_CATEGORIES} 个`)
+    const list = cleanCategories(value)
+    this.repo.writeSetting('shortcutCategories', list)
+    return list
+  }
+  renameCategory(from: unknown, to: unknown): void {
+    const old = normalizeCategory(from)
+    if (!old) invalid('请选择要改名的分类')
+    const list = cleanCategories(this.repo.readSetting('shortcutCategories', []))
+    const name = categoryName(to, list.filter(item => item !== old))
+    const entries = this.get().entries; let changed = false
+    for (const entry of entries) if (entry.category === old) { entry.category = name; changed = true }
+    if (changed) this.repo.writeSetting('localEntries', entries)
+    this.repo.writeSetting('shortcutCategories', mergeCategories(list.map(item => item === old ? name : item), changed ? [name] : []))
+  }
+  removeCategory(value: unknown): void {
+    const old = normalizeCategory(value)
+    if (!old) invalid('请选择要删除的分类')
+    const entries = this.get().entries; let changed = false
+    for (const entry of entries) if (entry.category === old) { entry.category = ''; changed = true }
+    if (changed) this.repo.writeSetting('localEntries', entries)
+    this.repo.writeSetting('shortcutCategories', cleanCategories(this.repo.readSetting('shortcutCategories', [])).filter(item => item !== old))
   }
   entry(id: unknown): LocalEntry { const entry = this.get().entries.find(e => e.id === id); if (!entry) throw new AppError('NOT_FOUND', '这个入口已不存在'); return entry }
   remove(id: unknown): void { this.entry(id); this.repo.writeSetting('localEntries', this.get().entries.filter(e => e.id !== id)) }
