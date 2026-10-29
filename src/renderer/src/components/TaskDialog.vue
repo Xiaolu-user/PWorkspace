@@ -5,7 +5,7 @@ import type { Task, TaskInput } from '../../../shared/types'
 import { isValidDate } from '../../../shared/date'
 import { reminderTimestamp, reminderLabel } from '../../../shared/reminders'
 import { useWorkspace } from '../stores/workspace'
-const props = defineProps<{ modelValue: boolean; task?: Task | null; defaultDate?: string }>()
+const props = defineProps<{ modelValue: boolean; task?: Task | null; defaultDate?: string; defaultTitle?: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 const workspace = useWorkspace(); const saving = ref(false)
 const form = reactive<TaskInput>({ title: '', description: '', status: 'todo', dueDate: null, priority: 'normal', dueTime: null, remindBefore: null })
@@ -15,7 +15,7 @@ const reminderPreview = computed(() => { const time = reminderTimestamp(form); r
 function setVisible(value: boolean): void { if (!saving.value) emit('update:modelValue', value) }
 watch(() => props.modelValue, value => {
   if (!value) return
-  Object.assign(form, props.task ? { title: props.task.title, description: props.task.description, status: props.task.status, dueDate: props.task.dueDate, priority: props.task.priority, dueTime: props.task.dueTime, remindBefore: props.task.remindBefore } : { title: '', description: '', status: 'todo', dueDate: props.defaultDate || null, priority: 'normal', dueTime: null, remindBefore: null })
+  Object.assign(form, props.task ? { title: props.task.title, description: props.task.description, status: props.task.status, dueDate: props.task.dueDate, priority: props.task.priority, dueTime: props.task.dueTime, remindBefore: props.task.remindBefore } : { title: props.defaultTitle || '', description: '', status: 'todo', dueDate: props.defaultDate || null, priority: 'normal', dueTime: null, remindBefore: null })
   reminderChoice.value = form.remindBefore == null ? 'off' : reminderOptions.includes(form.remindBefore) ? form.remindBefore : 'custom'
 })
 watch(() => form.dueDate, value => { if (!value) { form.dueTime = null; reminderChoice.value = 'off'; form.remindBefore = null } })

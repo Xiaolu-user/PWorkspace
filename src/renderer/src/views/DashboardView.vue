@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount, watch, type CSSProperties } from 'vue'
+import { computed, ref, nextTick, onMounted, onBeforeUnmount, watch, type CSSProperties } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { useWorkspace } from '../stores/workspace'
@@ -76,8 +76,20 @@ watch(() => editor.body, body => { editor.title = body.trim().split('\n')[0].sli
 function tick(): void { const before = today.value; now.value = new Date(); if (before !== today.value) { viewOffset.value = 0; void ws.refresh() } }
 onMounted(() => { if (!editor.dirty) editor.select(null); timer = setInterval(tick, 1000); window.addEventListener('focus', tick); void load() })
 onBeforeUnmount(() => { clearInterval(timer); window.removeEventListener('focus', tick) })
-function addTask(): void { selected.value = null; taskDialog.value = true }
-function editTask(task: Task): void { selected.value = task; taskDialog.value = true }
+const quickTitle = ref(''); const quickEditing = ref(false); const quickSaving = ref(false)
+const quickInput = ref<HTMLInputElement | null>(null); const taskDraft = ref('')
+function addTask(): void { selected.value = null; taskDraft.value = ''; taskDialog.value = true }
+function editTask(task: Task): void { selected.value = task; taskDraft.value = ''; taskDialog.value = true }
+function openQuick(): void { quickEditing.value = true; void nextTick(() => quickInput.value?.focus()) }
+function closeQuick(): void { quickEditing.value = false; quickTitle.value = '' }
+async function submitQuick(): Promise<void> {
+  const title = quickTitle.value.trim(); if (!title || quickSaving.value) return
+  quickSaving.value = true
+  const ok = await ws.mutate(() => window.workbench.tasks.create({ title, description: '', status: 'todo', dueDate: today.value, priority: 'normal', dueTime: null, remindBefore: null }), '已添加新任务')
+  quickSaving.value = false
+  if (ok) closeQuick()
+}
+function detailQuick(): void { taskDraft.value = quickTitle.value.trim(); selected.value = null; taskDialog.value = true; quickEditing.value = false }
 const toggling = ref(new Set<string>())
 async function toggle(task: Task): Promise<void> { if (toggling.value.has(task.id)) return; toggling.value.add(task.id); await ws.mutate(() => window.workbench.tasks.update(task.id, { ...task, status: task.status === 'done' ? 'todo' : 'done' }), task.status === 'done' ? '已取消完成' : '任务已完成'); toggling.value.delete(task.id) }
 async function saveIdea(): Promise<void> { if (editor.body.trim() && await editor.save()) editor.select(null) }
@@ -93,9 +105,19 @@ async function removeEntry(entry: Pick<LocalEntry, 'id' | 'title'>, kind = 'file
   <div class="home-grid">
     <div class="home-column home-left">
       <section class="home-card time-card" :style="ws.moduleStyle('time')"><div class="card-label"><AppIcon name="clock" />此刻</div><div class="time-weather"><div class="clock-content"><time>{{ clock }}</time><div class="time-date-row"><p>{{ dateLabel }}</p><button class="icon-button calendar-trigger" aria-label="打开日历" title="打开日历，安排待办" aria-haspopup="dialog" :aria-expanded="calendarOpen" @click="calendarOpen = true"><AppIcon name="calendar" :size="20" /></button></div></div><WeatherWidget /></div></section>
-      <section class="home-card home-tasks" :style="ws.moduleStyle('todos')"><header><h2><AppIcon name="done" />今日待办</h2><span class="muted">{{ done }} / {{ todayTasks.length }}</span><button class="icon-button" aria-label="添加任务" @click="addTask"><AppIcon name="plus" /></button></header><p class="home-caption">今天的重点，逐一完成。已触发的提醒会置顶显示。</p>
-        <div class="home-task-list"><div v-for="task in todayTasks" :key="task.id" class="home-task" :class="{ completed: task.status === 'done', 'reminder-active': isReminderActive(task, ws.now), 'reminder-flashing': isReminderActive(task, ws.now) && !task.reminderAcknowledgedAt }"><input type="checkbox" :checked="task.status === 'done'" :disabled="toggling.has(task.id)" :aria-label="'完成任务：' + task.title" @change="toggle(task)" /><button @click="editTask(task)"><strong>{{ task.title }}<i v-if="task.priority === 'high'" class="priority-dot"></i></strong><small>{{ task.description || '给今天留一点进步' }}</small><small v-if="task.dueTime">{{ task.dueDate !== today ? task.dueDate + ' ' : '' }}{{ task.dueTime }}<template v-if="task.remindBefore !== null"> · {{ reminderLabel(task.remindBefore) }}</template></small></button><button class="icon-button" :aria-label="'编辑' + task.title" @click="editTask(task)"><AppIcon name="more" :size="15" /></button><ReminderNotice :task="task" /></div><div v-if="!todayTasks.length" class="home-empty"><AppIcon name="done" :size="32" /><p>今天的日程，留白也很好</p><small>添加任务，开始安排今天。</small></div></div>
-        <div class="task-progress"><div><i :style="{ width: percent + '%' }"></i></div><span>{{ percent }}%</span></div><p class="home-caption">已完成 {{ done }} 项，还有 {{ todayTasks.length - done }} 项</p><button class="soft-button" @click="addTask">＋ 添加今日待办</button><router-link v-if="ws.dashboard.overdue.length" class="overdue-link" to="/tasks">还有 {{ ws.dashboard.overdue.length }} 项逾期任务，前往处理 →</router-link>
+      <section class="home-card home-tasks" :class="{ 'is-quick-adding': quickEditing }" :style="ws.moduleStyle('todos')"><header><h2><AppIcon name="done" />今日待办</h2><span class="muted">{{ done }} / {{ todayTasks.length }}</span><button class="icon-button" aria-label="添加任务" @click="addTask"><AppIcon name="plus" /></button></header><p class="home-caption">今天的重点，逐一完成。已触发的提醒会置顶显示。</p>
+        <div class="home-task-list"><div v-for="task in todayTasks" :key="task.id" class="home-task" :class="{ completed: task.status === 'done', 'reminder-active': isReminderActive(task, ws.now), 'reminder-flashing': isReminderActive(task, ws.now) && !task.reminderAcknowledgedAt }"><input type="checkbox" :checked="task.status === 'done'" :disabled="toggling.has(task.id)" :aria-label="'完成任务：' + task.title" @change="toggle(task)" /><button @click="editTask(task)"><strong>{{ task.title }}<i v-if="task.priority === 'high'" class="priority-dot"></i></strong><small>{{ task.description || '给今天留一点进步' }}</small><small v-if="task.dueTime">{{ task.dueDate !== today ? task.dueDate + ' ' : '' }}{{ task.dueTime }}<template v-if="task.remindBefore !== null"> · {{ reminderLabel(task.remindBefore) }}</template></small></button><button class="icon-button" :aria-label="'编辑' + task.title" @click="editTask(task)"><AppIcon name="more" :size="15" /></button><ReminderNotice :task="task" /></div></div>
+        <button v-if="!quickEditing" type="button" class="task-add-zone" @click="openQuick">
+          <span class="task-zone-ring"><AppIcon name="plus" :size="15" /></span>
+          <span class="task-zone-label">{{ todayTasks.length ? '添加今日待办' : '今天还没有待办' }}</span>
+          <span class="task-zone-hint">{{ todayTasks.length ? '点击此处任意位置' : '点击这里，记下第一件事' }}</span>
+        </button>
+        <div v-else class="task-add-zone editing">
+          <span class="task-zone-ring"><AppIcon name="plus" :size="13" /></span>
+          <input ref="quickInput" v-model="quickTitle" class="task-zone-input" placeholder="接下来要做什么？回车创建，Esc 取消" maxlength="200" :disabled="quickSaving" @keydown.enter.prevent="submitQuick" @keydown.esc.prevent="closeQuick" />
+          <button type="button" class="task-zone-detail" @click="detailQuick">详细设置</button>
+        </div>
+        <div class="task-progress"><div><i :style="{ width: percent + '%' }"></i></div><span>{{ percent }}%</span></div><p class="home-caption">已完成 {{ done }} 项，还有 {{ todayTasks.length - done }} 项</p><router-link v-if="ws.dashboard.overdue.length" class="overdue-link" to="/tasks">还有 {{ ws.dashboard.overdue.length }} 项逾期任务，前往处理 →</router-link>
       </section>
     </div>
     <div class="home-column home-center">
@@ -122,11 +144,11 @@ async function removeEntry(entry: Pick<LocalEntry, 'id' | 'title'>, kind = 'file
         </div>
         <div class="course-foot"><span>{{ viewOffset === 0 ? '本周' : '该周' }}共 {{ viewCourseCount }} 节课</span><button class="text-link" @click="plan = 'courses'">编辑课表 →</button></div>
       </section>
-      <section class="home-card fitness-card" :style="ws.moduleStyle('fitness')"><header><h2><AppIcon name="fitness" />今日健身</h2><button class="text-link" @click="plan = 'fitness'">制定计划 ↗</button></header><div class="workout-summary"><h3>{{ workout?.title || '休息与恢复' }}</h3><strong v-if="workout">{{ workout.minutes }} <small>分钟</small></strong></div><div v-if="workout" class="exercise-list"><span v-for="(line, i) in workout.exercises.split('\n').filter(Boolean)" :key="i">{{ line }}</span></div><p v-else class="home-caption">今天暂无训练计划，让身体充分休息。</p></section>
+      <section class="home-card fitness-card" :class="{ resting: !workout }" :style="ws.moduleStyle('fitness')"><header><h2><AppIcon name="fitness" />今日健身</h2><button class="text-link" @click="plan = 'fitness'">制定计划 ↗</button></header><div class="workout-summary"><h3>{{ workout?.title || '休息与恢复' }}</h3><strong v-if="workout">{{ workout.minutes }} <small>分钟</small></strong></div><div v-if="workout" class="exercise-list"><span v-for="(line, i) in workout.exercises.split('\n').filter(Boolean)" :key="i">{{ line }}</span></div><p v-else class="home-caption">今天暂无训练计划，让身体充分休息。</p></section>
       <section id="home-files" class="home-card files-card" :style="ws.moduleStyle('files')"><header><h2><AppIcon name="folder" />常用资料</h2><el-dropdown trigger="click" @command="pick"><button class="icon-button" aria-label="添加资料"><AppIcon name="plus" /></button><template #dropdown><el-dropdown-menu><el-dropdown-item command="file">选择文件</el-dropdown-item><el-dropdown-item command="folder">选择文件夹</el-dropdown-item></el-dropdown-menu></template></el-dropdown></header><div class="file-list"><div v-for="f in files" :key="f.id" class="file-row"><button :title="f.path" @click="openLocal(f.id)"><img v-if="f.icon" :src="f.icon" alt="" /><AppIcon v-else name="document" /><span><strong>{{ f.title }}</strong><small>{{ f.path }}</small></span></button><button class="icon-button" :aria-label="'移除' + f.title" @click="removeEntry(f)">×</button></div></div><button class="file-add" @click="pick('file')"><AppIcon name="add" :size="17" />点击添加文件入口</button><small class="file-hint">文件保留在原位置，移除入口不会删除文件。</small></section>
     </div>
   </div>
-  <TaskDialog v-model="taskDialog" :task="selected" :default-date="today" />
+  <TaskDialog v-model="taskDialog" :task="selected" :default-date="today" :default-title="taskDraft" />
   <TaskCalendar v-model="calendarOpen" :today="today" />
   <PlannerDialogs v-model="plan" :data="data" @saved="load" />
 </template>

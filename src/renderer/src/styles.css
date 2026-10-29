@@ -309,7 +309,10 @@ kbd { font-size:calc(11px * var(--text-scale, 1)); border: 1px solid #dfe5df; pa
 .task-calendar-dialog,.task-editor-dialog { margin-top:5vh;max-height:90vh;overflow-y:auto }
 .time-leaves { position:absolute;right:-18px;bottom:-10px;width:44%;height:95%;color:#83b395;opacity:.18 }
 .home-tasks { flex:1;display:flex;flex-direction:column }
-.home-task-list { flex:1;max-height:440px;overflow:auto;margin:18px -2px 8px;padding:2px }
+/* The list takes the height the card actually has: it grows on tall screens, scrolls once it would push the card past the viewport. */
+.home-task-list { flex:0 1 auto;min-height:0;max-height:calc(100vh - 600px);overflow:auto;margin:18px -2px 8px;padding:2px }
+/* While the inline input replaces the zone, the list takes the free space back so the input keeps its place at the bottom. */
+.home-tasks.is-quick-adding .home-task-list { flex:1 }
 .home-task { display:flex;align-items:center;gap:10px;padding:12px 9px;border:1px solid #edf0ee;border-radius:10px;margin-bottom:8px }
 .home-task input { accent-color:#218069;width:18px;height:18px;flex-shrink:0;cursor:pointer }
 .home-task>button:not(.icon-button) { flex:1;min-width:0;text-align:left;border:0;background:none;padding:0 }
@@ -320,10 +323,22 @@ kbd { font-size:calc(11px * var(--text-scale, 1)); border: 1px solid #dfe5df; pa
 .task-progress { display:flex;align-items:center;gap:12px;color:#89958e;font-size:calc(12px * var(--text-scale, 1));margin-top:12px }
 .task-progress>div { height:7px;background:#edf1ee;flex:1;border-radius:9px;overflow:hidden }
 .task-progress i { display:block;height:100%;background:linear-gradient(90deg,#259d7a,#74baa0);border-radius:9px;transition:width .2s }
-.soft-button { border:0;background:#e9f4ee;color:#227259;padding:12px;border-radius:9px;margin-top:16px;width:100%;font-weight:550 }
+/* The whole shallow block below the list is the add entry: it keeps absorbing the free space, so the empty room itself invites a click. */
+.task-add-zone { flex:1;min-height:72px;width:100%;margin-top:2px;padding:12px 8px;border:1px dashed transparent;border-radius:12px;background:#f7faf8;color:#8fa39a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;font-family:inherit;cursor:pointer;transition:background .18s,border-color .18s,color .18s,box-shadow .18s }
+.task-add-zone:is(:hover,:focus-visible) { background:#eff7f3;border-color:#b7ddcf;color:#17765c;box-shadow:inset 0 0 0 3px #dcefe84d;outline:none }
+.task-zone-ring { width:34px;height:34px;border-radius:50%;background:#eaf4ef;color:#63a48d;display:grid;place-items:center;transition:background .18s,color .18s,transform .18s }
+.task-add-zone:is(:hover,:focus-visible) .task-zone-ring { background:#dcefe8;color:#17765c;transform:scale(1.05) }
+.task-zone-label { font-size:calc(13px * var(--text-scale, 1));font-weight:550;line-height:1.4 }
+.task-zone-hint { font-size:calc(11px * var(--text-scale, 1));color:#a6b8b0;margin-top:-3px }
+.task-add-zone:is(:hover,:focus-visible) .task-zone-hint { color:#7fae9c }
+.task-add-zone.editing { flex:0 0 auto;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;min-height:48px;padding:8px 9px;background:#ffffff;border:1px solid #b7ddcf;box-shadow:0 0 0 3px #dcefe880;cursor:text }
+.task-add-zone.editing .task-zone-ring { width:22px;height:22px;background:transparent }
+.task-zone-input { flex:1;min-width:0;border:0;background:transparent;outline:none;font-family:inherit;font-size:calc(13px * var(--text-scale, 1));color:#202830 }
+.task-zone-input:focus-visible { outline:none }
+.task-zone-input::placeholder { color:#a9b8b1 }
+.task-zone-detail { flex:0 0 auto;border:0;background:transparent;color:#8b98a6;font-size:calc(11.5px * var(--text-scale, 1));padding:4px 6px;border-radius:6px }
+.task-zone-detail:hover { background:#f1f5f3;color:#17765c }
 .overdue-link { font-size:calc(11px * var(--text-scale, 1));color:#ab714d;margin-top:10px;text-align:center }
-.home-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#90a397;min-height:180px;gap:10px;font-size:calc(12px * var(--text-scale, 1)) }
-.home-empty small { font-size:calc(11px * var(--text-scale, 1));color:#a0aaa5 }
 .shortcut-card { flex:1.05;min-height:332px;position:relative;display:flex;flex-direction:column }
 .outline-button { border:1px solid #e0e8e4;border-radius:8px;background:white;padding:5px 12px }
 .shortcut-toolbar { display:flex;align-items:center;justify-content:space-between;gap:8px }
@@ -382,7 +397,8 @@ kbd { font-size:calc(11px * var(--text-scale, 1)); border: 1px solid #dfe5df; pa
 .idea-row { display:flex;gap:9px;align-items:center;text-align:left;border:1px solid #edf0e9;border-left:3px solid #edd49d;border-radius:8px;background:white;padding:9px;margin-top:7px;font-size:calc(12px * var(--text-scale, 1)) }
 .idea-row>span { flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis }
 .idea-row small { color:#97a09a;font-size:calc(10px * var(--text-scale, 1)) }
-.courses-card { flex:1.6 }
+/* The timetable hugs its own content; leftover column height is handed to the fitness card. */
+.courses-card { flex:0 0 auto }
 .courses-card h2 .el-icon { color:#9674cc }
 .courses-card .text-link,.fitness-card .text-link { font-size:calc(11px * var(--text-scale, 1));white-space:nowrap }
 .week-nav { display:flex;align-items:center;gap:8px;margin:12px 0 9px }
@@ -426,14 +442,17 @@ kbd { font-size:calc(11px * var(--text-scale, 1)); border: 1px solid #dfe5df; pa
 .now-line { position:absolute;left:0;right:0;height:2px;background:#e24b4a }
 .now-line i { position:absolute;left:2px;top:-15px;font-style:normal;font-size:calc(9px * var(--text-scale,1));color:#e24b4a;font-variant-numeric:tabular-nums }
 .course-foot { display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:calc(11px * var(--text-scale,1));color:#5f6b7a }
-.fitness-card { background:linear-gradient(120deg,#fff8ef,#fdf6ee);border-color:#f1e6d8 }
+.fitness-card { flex:1;display:flex;flex-direction:column;background:linear-gradient(120deg,#fff8ef,#fdf6ee);border-color:#f1e6d8 }
 .fitness-card h2 .el-icon { color:#d98849 }
+/* A rest day has little to say: centre the copy in the taller card instead of leaving a blank tail. */
+.fitness-card.resting .workout-summary { margin-top:auto }
+.fitness-card.resting > .home-caption { margin-bottom:auto }
 .workout-summary { display:flex;justify-content:space-between;gap:10px;align-items:center;margin:12px 0;color:#a96332 }
 .workout-summary h3 { font-size:calc(20px * var(--text-scale, 1));font-weight:600 }
 .workout-summary>strong { font-size:calc(21px * var(--text-scale, 1));white-space:nowrap }
 .workout-summary small { font-size:calc(12px * var(--text-scale, 1)) }
-.exercise-list { display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;font-size:calc(11px * var(--text-scale, 1));max-height:135px;overflow:auto;white-space:pre-wrap }
-.files-card { flex:.6;padding:16px 18px }
+.exercise-list { flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;align-content:start;gap:7px 12px;font-size:calc(11px * var(--text-scale, 1));min-height:0;overflow:auto;white-space:pre-wrap }
+.files-card { flex:0 0 auto;padding:16px 18px }
 .file-list { max-height:145px;overflow:auto;margin:7px 0 }
 .file-row { display:flex;gap:6px;border-bottom:1px solid #f0f3f0 }
 .file-row>button:first-child { display:flex;flex:1;min-width:0;align-items:center;gap:9px;border:0;background:none;text-align:left;padding:6px 0 }
@@ -448,7 +467,7 @@ kbd { font-size:calc(11px * var(--text-scale, 1)); border: 1px solid #dfe5df; pa
 .course-form { padding:15px;border:1px solid #e5ece6;border-radius:10px;margin-bottom:12px }.course-weeks { display:flex;align-items:center;gap:9px }.course-weeks .el-button { margin-left:auto }
 .workout-form { display:grid;grid-template-columns:70px 1fr 135px 35px;align-items:center;gap:10px;border-top:1px solid #eef1ee;padding:12px 0 }.workout-form>.el-textarea { grid-column:2 / -1 }
 @media(min-width:1550px) { .home-card { padding:24px }.time-card { min-height:230px }.shortcut-open,.shortcut-placeholder { height:62px }.shortcut-grid { grid-template-columns:repeat(auto-fill,minmax(48px,1fr)) }.home-task { padding:16px 11px }.home-card h2 { font-size:calc(19px * var(--text-scale, 1)) }.home-caption { font-size:calc(13px * var(--text-scale, 1)) } }
-@media(max-width:1150px) { .compact-shell .page-scroll { padding:18px }.home-grid { grid-template-columns:minmax(240px,1fr) minmax(350px,1.4fr) }.home-right { grid-column:1 / -1;display:grid;grid-template-columns:1.3fr 1fr }.courses-card { grid-row:span 2 }.home-center,.home-left { min-height:650px }.home-grid { gap:14px }.home-column { gap:14px }.home-card { padding:17px } }
+@media(max-width:1150px) { .compact-shell .page-scroll { padding:18px }.home-grid { grid-template-columns:minmax(240px,1fr) minmax(350px,1.4fr) }.home-right { grid-column:1 / -1;display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:1fr auto }.courses-card { grid-row:span 2 }.home-center,.home-left { min-height:650px }.home-grid { gap:14px }.home-column { gap:14px }.home-card { padding:17px } }
 /* Keep dense shortcut content inside its card, including short windows. */
 .shortcut-card { flex:0 0 auto;min-height:0 }
 .shortcut-grid { height:auto;max-height:244px;align-content:start }

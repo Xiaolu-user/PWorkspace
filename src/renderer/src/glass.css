@@ -74,8 +74,14 @@ html[data-theme='dark'] .app-shell::before { background: #090f19d9; }
 .home-task input { width: 19px; height: 19px; accent-color: #168463; }
 .icon-button { color: var(--secondary); }
 .icon-button:hover, .note-index-item:hover, .quick-link:hover { background: var(--surface-hover); color: var(--primary); border-color: var(--glass-edge); }
-.soft-button, .compact-tabs button.active, .week-nav-buttons button.active, .note-index-item.active { background: var(--accent-soft); color: var(--primary); border-color: var(--line); }
-.soft-button { border: 1px solid var(--glass-edge); }
+.compact-tabs button.active, .week-nav-buttons button.active, .note-index-item.active { background: var(--accent-soft); color: var(--primary); border-color: var(--line); }
+/* The add zone reads as a translucent well instead of a solid block, so the wallpaper still shows through. */
+.task-add-zone { background: var(--surface); color: var(--secondary); }
+.task-add-zone:is(:hover,:focus-visible) { background: var(--accent-soft); border-color: #ffffffb0; color: var(--primary); box-shadow: var(--shadow); }
+.task-add-zone .task-zone-ring { background: var(--accent-soft); color: var(--primary); }
+.task-add-zone.editing { background: var(--surface-hover); border-color: var(--primary); box-shadow: 0 0 0 3px var(--accent-soft); }
+.task-zone-hint, .task-zone-input::placeholder { color: var(--secondary); }
+.task-add-zone:is(:hover,:focus-visible) .task-zone-hint { color: var(--primary); }
 /* Shortcut tiles stay transparent until hovered, so the glass card shows through. */
 .shortcut-open:hover, .shortcut-open:focus-visible { background: var(--surface-hover); color: var(--primary); box-shadow: 0 6px 16px #0d152012; }
 .shortcut-open > span:last-child { color: var(--secondary); }
@@ -202,5 +208,5 @@ html[data-theme] .calendar-schedule-detail b { font-size:1.1em; }
 html[data-theme='dark'] .priority.high,html[data-theme='dark'] .error-banner { background:#493928;color:#efd0a3;border-color:#84623d; }
 html[data-theme='dark'] .el-button--primary { color:#102b22; }
 @media(min-width:1550px) { .home-card { padding:24px; }.time-card p { font-size:calc(12px * var(--text-scale)); } }
-@media(max-width:1150px) { .app-shell { padding:12px;gap:12px; }.compact-shell .topbar { margin-bottom:12px; }.home-grid { grid-template-columns:minmax(280px,1fr) minmax(300px,1.1fr);gap:14px; }.home-right { grid-column:1/-1;grid-template-columns:1.2fr 1fr; }.home-card { padding:18px; }.home-center,.home-left { min-height:650px; } }
+@media(max-width:1150px) { .app-shell { padding:12px;gap:12px; }.compact-shell .topbar { margin-bottom:12px; }.home-grid { grid-template-columns:minmax(280px,1fr) minmax(300px,1.1fr);gap:14px; }.home-right { grid-column:1/-1;grid-template-columns:1.2fr 1fr;grid-template-rows:1fr auto; }.home-card { padding:18px; }.home-center,.home-left { min-height:650px; } }
 @media(max-height:740px) { .compact-shell .sidebar { padding-top:10px; }.compact-shell .brand { margin-bottom:12px; }.compact-shell .primary-nav { gap:2px; }.compact-shell .primary-nav a,.compact-shell .settings-nav,.theme-toggle,.compact-shell .quick-create { padding:10px; }.compact-shell .sidebar-divider { margin-top:6px; } }
