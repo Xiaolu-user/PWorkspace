@@ -20,7 +20,9 @@ export interface WorkbenchAPI {
   weather: { search(query: string): Promise<Result<import('./appearance').WeatherLocation[]>>; current(): Promise<Result<import('./weather').Weather | null>> }
   planner: {
     get(): Promise<Result<import('./planner').PlannerData>>
-    semester(value: import('./planner').Semester): Promise<Result<void>>
+    semester(value: import('./planner').Semester): Promise<Result<import('./planner').PlannerData>>
+    setHomeSemester(id: string): Promise<Result<import('./planner').PlannerData>>
+    removeSemester(id: string): Promise<Result<import('./planner').PlannerData>>
     workouts(value: import('./planner').Workout[]): Promise<Result<void>>
     pick(kind: 'app' | 'file' | 'folder', category?: string): Promise<Result<void>>
     open(id: string): Promise<Result<void>>

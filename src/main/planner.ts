@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs'
 import { Repository } from './repository'
 import { AppError } from './errors'
 import { isValidDate } from '../shared/date'
-import { emptySemester, upgradeSemester, type Semester, type LegacySemester, type Course, type CourseTime, type LegacyCourse, type CourseSchedule, type Workout, type LocalEntry, type PlannerData } from '../shared/planner'
+import { emptySemester, defaultSlots, upgradeSemester, type Semester, type LegacySemester, type Course, type CourseTime, type LegacyCourse, type CourseSchedule, type SemesterSlot, type Workout, type LocalEntry, type PlannerData } from '../shared/planner'
 import { cleanCategories, mergeCategories, normalizeCategory, validCategoryName, MAX_CATEGORIES, ICON_VERSION } from '../shared/shortcuts'
 const invalid = (message: string): never => { throw new AppError('VALIDATION', message) }
 function record(v: unknown): Record<string, unknown> { if (!v || typeof v !== 'object' || Array.isArray(v)) invalid('数据格式不正确'); return v as Record<string, unknown> }
@@ -15,20 +15,41 @@ function categoryName(v: unknown, others: string[] = []): string {
 }
 export class Planner {
   constructor(private repo: Repository) {}
+  // Older builds stored a single semester under `semester`; it becomes the first entry, once.
+  private semesters(): Semester[] {
+    const stored = this.repo.readSetting<Semester[]>('semesters', [])
+    if (stored.length) return stored.map(value => upgradeSemester(value))
+    const semester = { ...upgradeSemester(this.repo.readSetting<Semester | LegacySemester>('semester', emptySemester())), id: randomUUID() }
+    this.repo.writeSetting('semesters', [semester])
+    this.repo.writeSetting('homeSemesterId', semester.id)
+    return [semester]
+  }
+  private writeSemesters(list: Semester[]): void { this.repo.writeSetting('semesters', list) }
   get(): PlannerData {
     // Older entries have no category; reading through normalizeCategory keeps them in 未分类.
     const entries = this.repo.readSetting<LocalEntry[]>('localEntries', []).map(entry => ({ ...entry, category: normalizeCategory(entry.category) }))
+    const semesters = this.semesters(), stored = this.repo.readSetting<string>('homeSemesterId', '')
+    const semester = semesters.find(item => item.id === stored) || semesters[0]
     return {
-      semester: upgradeSemester(this.repo.readSetting<Semester | LegacySemester>('semester', emptySemester())),
+      semester, semesters, homeSemesterId: semester.id,
       workouts: this.repo.readSetting('workouts', []), entries,
       categories: cleanCategories(this.repo.readSetting('shortcutCategories', []))
     }
   }
-  semester(value: unknown): void {
+  saveSemester(value: unknown): PlannerData {
     const v = record(value)
     const startDate = text(v.startDate, 10)
     if (!isValidDate(startDate)) invalid('请选择有效的学期开始日期')
     const weeks = integer(v.weeks, 1, 52)
+    // Values written before bell schedules existed fall back to the default 8 periods.
+    const rawSlots = Array.isArray(v.slots) && v.slots.length ? v.slots : defaultSlots()
+    if (rawSlots.length > 16) invalid('每个学期最多 16 节课')
+    const slots: SemesterSlot[] = (rawSlots as unknown[]).map(item => {
+      const s = record(item), start = text(s.start, 5), end = text(s.end, 5)
+      if (![start, end].every(t => /^([01]\d|2[0-3]):[0-5]\d$/.test(t)) || start >= end) invalid('每节课的结束时间必须晚于开始时间')
+      return { start, end }
+    })
+    for (let i = 1; i < slots.length; i++) if (slots[i].start < slots[i - 1].start) invalid('节次需要按开始时间从早到晚排列')
     if (!Array.isArray(v.courses) || v.courses.length > 200) invalid('课程数量最多为200条')
     const ids = new Set<string>(); let scheduleCount = 0
     const id = (value: unknown): string => {
@@ -67,8 +88,29 @@ export class Planner {
       if (!['all', 'odd', 'even'].includes(c.parity as string)) invalid('单双周设置不正确')
       return { id: id(c.id), title: text(c.title, 100), ...time(c), firstWeek, lastWeek, parity: c.parity as 'all' | 'odd' | 'even' }
     })
-    const semester = upgradeSemester({ title: text(v.title, 100), startDate, weeks, courses } as Semester | LegacySemester)
-    this.repo.writeSetting('semester', semester)
+    const list = this.semesters(), kept = typeof v.id === 'string' && /^[\w-]{1,100}$/.test(v.id) ? v.id : ''
+    const semester: Semester = { id: kept || randomUUID(), title: text(v.title, 100), startDate, weeks, slots, courses: upgradeSemester({ ...emptySemester(), weeks, courses } as Semester).courses }
+    const index = list.findIndex(item => item.id === semester.id)
+    if (index >= 0) list[index] = semester; else list.push(semester)
+    this.writeSemesters(list)
+    // The placeholder semester created on first launch steps aside for the first real one.
+    const home = list.find(item => item.id === this.repo.readSetting<string>('homeSemesterId', ''))
+    if (!home || (!home.title && !home.courses.length)) this.repo.writeSetting('homeSemesterId', semester.id)
+    return this.get()
+  }
+  setHomeSemester(id: unknown): PlannerData {
+    const list = this.semesters()
+    if (!list.some(item => item.id === id)) throw new AppError('NOT_FOUND', '这个学期已不存在')
+    this.repo.writeSetting('homeSemesterId', String(id))
+    return this.get()
+  }
+  removeSemester(id: unknown): PlannerData {
+    const list = this.semesters(), next = list.filter(item => item.id !== id)
+    if (next.length === list.length) throw new AppError('NOT_FOUND', '这个学期已不存在')
+    if (!next.length) invalid('至少要保留一个学期')
+    this.writeSemesters(next)
+    if (this.repo.readSetting<string>('homeSemesterId', '') === id) this.repo.writeSetting('homeSemesterId', next[0].id)
+    return this.get()
   }
   workouts(value: unknown): void {
     if (!Array.isArray(value) || value.length > 7) invalid('请按每周七天设置训练计划')

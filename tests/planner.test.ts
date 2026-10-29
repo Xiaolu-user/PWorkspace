@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { Planner } from '../src/main/planner'
-import { coursesOn, semesterWeek, upgradeSemester, parseWeeks, formatWeeks, courseOccurrences, courseConflicts, courseTimeSlots, courseSlotSpan, encodeSemesterShare, decodeSemesterShare, type Semester, type LegacySemester } from '../src/shared/planner'
+import { coursesOn, semesterWeek, upgradeSemester, parseWeeks, formatWeeks, courseOccurrences, courseConflicts, courseTimeSlots, courseSlotSpan, defaultSlots, encodeSemesterShare, decodeSemesterShare, type Semester, type LegacySemester } from '../src/shared/planner'
 import { normalizeAppearance } from '../src/shared/appearance'
 import { fixture } from './helpers'
 const semester: LegacySemester = { title: '2026秋季', startDate: '2026-09-02', weeks: 18, courses: [{ id: '', title: '高等数学', room: 'A302', day: 3, start: '08:00', end: '09:40', firstWeek: 1, lastWeek: 18, parity: 'even' }] }
@@ -20,7 +20,7 @@ describe('首页计划与本地入口', () => {
     expect(coursesOn(semester, '2027-03-10')).toHaveLength(0)
   })
   it('课程、健身及文件入口随数据库备份恢复，移除入口保留文件', async () => {
-    p.semester(semester)
+    p.saveSemester(semester)
     p.workouts([{ day: 3, title: '上肢', minutes: 45, exercises: '俯卧撑 3×12\n拉伸' }])
     const path = join(f.root, '资料.txt'); writeFileSync(path, '个人资料')
     p.add([path, path], 'file'); expect(p.get().entries).toHaveLength(1)
@@ -31,10 +31,10 @@ describe('首页计划与本地入口', () => {
     expect(p.get()).toEqual(original)
   })
   it('拒绝无效课程时段、越界周次和重复训练日期且保留原计划', () => {
-    p.semester(semester)
+    p.saveSemester(semester)
     const original = p.get().semester
-    expect(() => p.semester({ ...semester, courses: [{ ...semester.courses[0], end: '07:00' }] })).toThrow()
-    expect(() => p.semester({ ...semester, courses: [{ ...semester.courses[0], lastWeek: 19 }] })).toThrow()
+    expect(() => p.saveSemester({ ...semester, courses: [{ ...semester.courses[0], end: '07:00' }] })).toThrow()
+    expect(() => p.saveSemester({ ...semester, courses: [{ ...semester.courses[0], lastWeek: 19 }] })).toThrow()
     expect(() => p.workouts([{ day: 1, title: '一', minutes: 30, exercises: '' }, { day: 1, title: '二', minutes: 30, exercises: '' }])).toThrow()
     expect(p.get().semester).toEqual(original)
     expect(() => p.add(['relative.txt'], 'file')).toThrow()
@@ -44,12 +44,12 @@ describe('首页计划与本地入口', () => {
     const old: LegacySemester = { ...semester, courses: [{ ...semester.courses[0], id: 'old-a' }, { ...semester.courses[0], id: 'old-b', day: 5, room: 'B203', parity: 'odd' }] }
     f.repository.writeSetting('semester', old)
     const upgraded = p.get().semester
-    expect(upgraded).toEqual(upgradeSemester(old))
+    expect(upgraded).toEqual({ ...upgradeSemester(old), id: upgraded.id })
     expect(upgraded.courses).toHaveLength(1)
     expect(upgraded.courses[0].schedules.map(s => s.id)).toEqual(['old-a', 'old-b'])
     expect(coursesOn(upgraded, '2026-09-04')[0].room).toBe('B203')
     expect(coursesOn(upgraded, '2026-09-09')[0].room).toBe('A302')
-    p.semester(upgraded)
+    p.saveSemester(upgraded)
     expect(p.get().semester).toEqual(upgraded)
   })
   it('任意周次与同课不同教室按实际日期展开，单次调整和停课独立生效', async () => {
@@ -64,12 +64,12 @@ describe('首页计划与本地入口', () => {
     expect(coursesOn(value, '2026-10-06')[0]).toMatchObject({ room: '临时教室', modified: true })
     expect(coursesOn(value, '2026-10-29')).toHaveLength(0)
     expect(coursesOn(value, '2026-11-12')[0].room).toBe('海洋楼301')
-    p.semester(value)
+    p.saveSemester(value)
     const backup = join(f.root, 'flexible.db'); await f.backup.create(backup)
-    p.semester({ ...value, courses: [] }); await f.backup.restore(backup)
+    p.saveSemester({ ...value, courses: [] }); await f.backup.restore(backup)
     expect(new Planner(f.repository).get().semester).toEqual(value)
     value.courses[0].schedules[0].exceptions = []
-    p.semester(value)
+    p.saveSemester(value)
     expect(coursesOn(p.get().semester, '2026-10-05')[0].room).toBe('獐子岛226')
   })
   it('周次输入支持范围、中文分隔、去重，拒绝歧义与越界', () => {
@@ -92,7 +92,7 @@ describe('首页计划与本地入口', () => {
     expect(courseConflicts(courseOccurrences(value))).toHaveLength(1)
   })
   it('新安排校验失败不覆盖原数据', () => {
-    const value = flexibleSemester(); p.semester(value)
+    const value = flexibleSemester(); p.saveSemester(value)
     const invalidRules = [
       { weeks: [] }, { weeks: [19] }, { end: '12:00' }, { day: 8 },
       { exceptions: [{ week: 4, day: 1, start: '08:00', end: '09:00', room: '', cancelled: false }] },
@@ -100,11 +100,11 @@ describe('首页计划与本地入口', () => {
     ]
     for (const change of invalidRules) {
       const draft = structuredClone(value); Object.assign(draft.courses[0].schedules[0], change)
-      expect(() => p.semester(draft)).toThrow()
+      expect(() => p.saveSemester(draft)).toThrow()
       expect(p.get().semester).toEqual(value)
     }
     const draft = structuredClone(value); draft.courses[0].schedules[1].id = draft.courses[0].schedules[0].id
-    expect(() => p.semester(draft)).toThrow()
+    expect(() => p.saveSemester(draft)).toThrow()
   })
 })
 describe('本周课程时间轴', () => {
@@ -138,8 +138,8 @@ describe('课表分享码', () => {
     value.courses[0].schedules[1].exceptions.push({ week: 8, day: 4, start: '18:30', end: '20:05', room: '海洋楼301', cancelled: true })
     const code = await encodeSemesterShare(value, { includeExceptions: true })
     expect(code.startsWith('PWS1.')).toBe(true)
-    expect(await decodeSemesterShare(code)).toEqual(value)
-    expect(await decodeSemesterShare(` ${code.slice(0, 40)}\n${code.slice(40)} `)).toEqual(value)
+    expect(await decodeSemesterShare(code)).toEqual({ ...value, id: '' })
+    expect(await decodeSemesterShare(` ${code.slice(0, 40)}\n${code.slice(40)} `)).toEqual({ ...value, id: '' })
   })
   it('默认不含单次调整，可选包含', async () => {
     const value = flexibleSemester()
@@ -148,7 +148,7 @@ describe('课表分享码', () => {
     expect(clean.courses[0].schedules[0].exceptions).toEqual([])
     expect(clean.courses[0].schedules[0].weeks).toEqual(value.courses[0].schedules[0].weeks)
     const full = await decodeSemesterShare(await encodeSemesterShare(value, { includeExceptions: true }))
-    expect(full).toEqual(value)
+    expect(full).toEqual({ ...value, id: '' })
   })
   it('截断、篡改与错误前缀都会被拒绝并给出可读提示', async () => {
     const code = await encodeSemesterShare(flexibleSemester()), payload = code.slice('PWS1.'.length)
@@ -169,7 +169,7 @@ describe('课表分享码', () => {
   })
 })
 function flexibleSemester(): Semester {
-  return { title: '2026秋季', startDate: '2026-09-07', weeks: 18, courses: [{ id: 'machine-learning', title: '机器学习', teacher: '王老师', color: '#17765c', schedules: [
+  return { id: 'flex', title: '2026秋季', startDate: '2026-09-07', weeks: 18, slots: defaultSlots(), courses: [{ id: 'machine-learning', title: '机器学习', teacher: '王老师', color: '#17765c', schedules: [
     { id: 'monday', day: 1, start: '13:30', end: '15:05', room: '獐子岛226', weeks: [3,5,8,9,10], exceptions: [] },
     { id: 'thursday', day: 4, start: '18:30', end: '20:05', room: '海洋楼301', weeks: [5,8,10], exceptions: [] }
   ] }] }

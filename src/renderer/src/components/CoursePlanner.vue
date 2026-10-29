@@ -68,7 +68,7 @@ async function applyImport(): Promise<void> {
     try { await ElMessageBox.confirm('开学日期已修改，所有周次将整体平移。请确认新日期下的周次与对方课表的周次一致。', '周次平移提醒', { confirmButtonText: '仍然替换', cancelButtonText: '返回修改', type: 'warning' }) }
     catch { return }
   }
-  const imported: Semester = JSON.parse(JSON.stringify({ ...semester, startDate: importStartDate.value }))
+  const imported: Semester = JSON.parse(JSON.stringify({ ...semester, id: draft.value.id, slots: draft.value.slots, startDate: importStartDate.value }))
   // 重新生成全部 ID，避免与本地数据编号冲突。
   for (const course of imported.courses) { course.id = crypto.randomUUID(); for (const schedule of course.schedules) schedule.id = crypto.randomUUID() }
   draft.value = imported

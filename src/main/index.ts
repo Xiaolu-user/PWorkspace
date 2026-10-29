@@ -125,7 +125,9 @@ function registerHandlers(): void {
     planner.markIcons(icons)
     return data
   })
-  handle(channels.semesterSave, value => planner.semester(value))
+  handle(channels.semesterSave, value => planner.saveSemester(value))
+  handle(channels.semesterHome, id => planner.setHomeSemester(id))
+  handle(channels.semesterRemove, id => planner.removeSemester(id))
   handle(channels.workoutsSave, value => planner.workouts(value))
   handle(channels.localPick, async (kind, category) => {
     if (!['app', 'file', 'folder'].includes(kind as string)) throw new AppError('VALIDATION', '选择类型不正确')

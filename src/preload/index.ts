@@ -5,7 +5,7 @@ import type { Result, WorkbenchAPI } from '../shared/types'
 const invoke = <T>(channel: string, ...args: unknown[]): Promise<Result<T>> => ipcRenderer.invoke(channel, ...args)
 const api: WorkbenchAPI = {
   weather: { search: query => invoke(c.weatherSearch, query), current: () => invoke(c.weatherCurrent) },
-  planner: { get: () => invoke(c.plannerGet), semester: value => invoke(c.semesterSave, value), workouts: value => invoke(c.workoutsSave, value), pick: (kind, category) => invoke(c.localPick, kind, category ?? ''), open: id => invoke(c.localOpen, id), remove: id => invoke(c.localRemove, id) },
+  planner: { get: () => invoke(c.plannerGet), semester: value => invoke(c.semesterSave, value), setHomeSemester: id => invoke(c.semesterHome, id), removeSemester: id => invoke(c.semesterRemove, id), workouts: value => invoke(c.workoutsSave, value), pick: (kind, category) => invoke(c.localPick, kind, category ?? ''), open: id => invoke(c.localOpen, id), remove: id => invoke(c.localRemove, id) },
   shortcuts: {
     import: (paths, category) => invoke(c.localImport, paths, category),
     assign: (id, category) => invoke(c.shortcutAssign, id, category),

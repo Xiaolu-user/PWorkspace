@@ -20,7 +20,7 @@ const ws = useWorkspace(); const editor = useEditor(); const router = useRouter(
 const now = ref(new Date()); const today = computed(() => localDate(now.value))
 const clock = computed(() => now.value.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }))
 const dateLabel = computed(() => now.value.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }))
-const data = ref<PlannerData>({ semester: emptySemester(), workouts: [], entries: [], categories: [] })
+const data = ref<PlannerData>({ semester: emptySemester(), semesters: [], homeSemesterId: '', workouts: [], entries: [], categories: [] })
 const plan = ref<'courses' | 'fitness' | null>(null); const taskDialog = ref(false); const selected = ref<Task | null>(null)
 const calendarOpen = ref(false)
 const todayTasks = computed(() => ws.tasks.filter(t => t.dueDate === today.value || isReminderActive(t, ws.now)).sort((a, b) => compareReminderTasks(a, b, ws.now)))

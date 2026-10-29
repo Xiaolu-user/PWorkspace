@@ -4,13 +4,22 @@ export interface CourseException extends CourseTime { week: number; cancelled: b
 export interface CourseSchedule extends CourseTime { id: string; weeks: number[]; exceptions: CourseException[] }
 export interface Course { id: string; title: string; teacher: string; color: string; schedules: CourseSchedule[] }
 export interface LegacyCourse extends CourseTime { id: string; title: string; firstWeek: number; lastWeek: number; parity: 'all' | 'odd' | 'even' }
-export interface Semester { title: string; startDate: string; weeks: number; courses: Course[] }
-export interface LegacySemester extends Omit<Semester, 'courses'> { courses: LegacyCourse[] }
+// Each semester owns its bell schedule, so a 6-period spring term and an 8-period autumn term coexist.
+export interface SemesterSlot { start: string; end: string }
+export interface Semester { id: string; title: string; startDate: string; weeks: number; slots: SemesterSlot[]; courses: Course[] }
+export interface LegacySemester extends Omit<Semester, 'id' | 'slots' | 'courses'> { id?: string; slots?: SemesterSlot[]; courses: LegacyCourse[] }
 export interface CourseOccurrence extends CourseTime { id: string; courseId: string; scheduleId: string; title: string; teacher: string; color: string; week: number; date: string; cancelled: boolean; modified: boolean }
 export interface Workout { day: number; title: string; minutes: number; exercises: string }
 export interface LocalEntry { id: string; title: string; path: string; kind: 'app' | 'file'; icon?: string; iconVersion?: number; category?: string }
-export interface PlannerData { semester: Semester; workouts: Workout[]; entries: LocalEntry[]; categories: string[] }
-export const emptySemester = (): Semester => ({ title: '', startDate: '', weeks: 18, courses: [] })
+export interface PlannerData { semester: Semester; semesters: Semester[]; homeSemesterId: string; workouts: Workout[]; entries: LocalEntry[]; categories: string[] }
+// 45-minute periods with a 10-minute break, one hour for lunch and two hours at noon.
+export const defaultSlots = (): SemesterSlot[] => [
+  { start: '08:00', end: '08:45' }, { start: '08:55', end: '09:40' },
+  { start: '10:10', end: '10:55' }, { start: '11:05', end: '11:50' },
+  { start: '14:00', end: '14:45' }, { start: '14:55', end: '15:40' },
+  { start: '16:00', end: '16:45' }, { start: '16:55', end: '17:40' }
+]
+export const emptySemester = (): Semester => ({ id: '', title: '', startDate: '', weeks: 18, slots: defaultSlots(), courses: [] })
 // UTC day numbers represent calendar dates, avoiding daylight-saving offsets.
 const dayNumber = (date: string): number => Date.parse(`${date}T00:00:00Z`) / 86400000
 export function semesterWeek(start: string, date: string): number {
@@ -28,7 +37,7 @@ export function upgradeSemester(value: Semester | LegacySemester): Semester {
     const weeks = Array.from({ length: value.weeks }, (_, i) => i + 1).filter(w => w >= item.firstWeek && w <= item.lastWeek && (item.parity === 'all' || w % 2 === (item.parity === 'odd' ? 1 : 0)))
     course.schedules.push({ id: item.id || 'schedule-' + index, day: item.day, start: item.start, end: item.end, room: item.room, weeks, exceptions: [] })
   }
-  return { ...value, courses }
+  return { ...value, id: value.id || '', slots: value.slots?.length ? value.slots.map(slot => ({ start: slot.start, end: slot.end })) : defaultSlots(), courses }
 }
 export function parseWeeks(input: string, max: number): number[] | null {
   const parts = input.trim().replace(/[，、；;]/g, ',').replace(/[–—~～]/g, '-').split(',')
@@ -91,8 +100,13 @@ export function courseSlotSpan(slots: CourseTimeSlot[], start: string, end: stri
   for (let index = first; index < slots.length && slots[index].start < end; index++) last = index
   return { first, last }
 }
-export function courseConflicts(occurrences: CourseOccurrence[]): { first: CourseOccurrence; second: CourseOccurrence }[] {
-  const active = occurrences.filter(c => !c.cancelled && c.start && c.end && c.start < c.end).sort((a, b) => a.week - b.week || a.day - b.day || a.start.localeCompare(b.start))
+export const slotMinutes = (time: string): number => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5))
+// "第 3 节" for one period, "第 3–4 节" when a lesson spans several.
+export function slotSpanText(slots: SemesterSlot[], start: string, end: string): string {
+  const { first, last } = courseSlotSpan(slots, start, end)
+  return last > first ? `第 ${first + 1}–${last + 1} 节` : `第 ${first + 1} 节`
+}
+export function courseConflicts(occurrences: CourseOccurrence[]): { first: CourseOccurrence; second: CourseOccurrence }[] {  const active = occurrences.filter(c => !c.cancelled && c.start && c.end && c.start < c.end).sort((a, b) => a.week - b.week || a.day - b.day || a.start.localeCompare(b.start))
   const conflicts: { first: CourseOccurrence; second: CourseOccurrence }[] = []
   for (let i = 0; i < active.length; i++) for (let j = i + 1; j < active.length; j++) {
     const first = active[i], second = active[j]
@@ -154,7 +168,7 @@ function sanitizeShareSemester(value: unknown, options?: ShareOptions): Semester
     })
     return { id: readText(course.id, 100) || `course-${courses.length + 1}`, title: readText(course.title, 100) || '未命名课程', teacher: readText(course.teacher, 100), color: typeof course.color === 'string' && /^#[\da-f]{6}$/i.test(course.color) ? course.color : '#17765c', schedules }
   })
-  return { title: readText(raw.title, 100), startDate: isValidDate(readText(raw.startDate, 10)) ? readText(raw.startDate, 10) : '', weeks: weeks as number, courses }
+  return { id: '', title: readText(raw.title, 100), startDate: isValidDate(readText(raw.startDate, 10)) ? readText(raw.startDate, 10) : '', weeks: weeks as number, slots: defaultSlots(), courses }
 }
 export async function encodeSemesterShare(value: Semester, options?: ShareOptions): Promise<string> {
   const semester = sanitizeShareSemester(value, options)
