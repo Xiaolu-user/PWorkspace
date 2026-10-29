@@ -327,9 +327,8 @@ kbd { font-size:calc(11px * var(--text-scale, 1)); border: 1px solid #dfe5df; pa
 .shortcut-card { flex:1.05;min-height:332px;position:relative;display:flex;flex-direction:column }
 .outline-button { border:1px solid #e0e8e4;border-radius:8px;background:white;padding:5px 12px }
 .shortcut-toolbar { display:flex;align-items:center;justify-content:space-between;gap:8px }
-/* Tag row: one horizontal line that scrolls instead of wrapping, so the grid keeps its height. */
-.shortcut-tags { display:flex;align-items:center;gap:2px;margin:14px 0 10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding-bottom:1px }
-.shortcut-tags::-webkit-scrollbar { height:0 }
+/* Tag row wraps onto extra lines so every category stays visible, however many are created. */
+.shortcut-tags { display:flex;flex-wrap:wrap;align-items:center;gap:4px 2px;margin:14px 0 10px;padding-bottom:1px }
 .shortcut-tag { flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;color:#6c7875;border-radius:7px;padding:5px 9px;font-size:calc(11.5px * var(--text-scale, 1));line-height:1.3;transition:background .15s,color .15s }
 .shortcut-tag:hover { background:#f1f5f3 }
 .shortcut-tag.active { background:#e5f4eb;color:#1c785e;font-weight:600 }
