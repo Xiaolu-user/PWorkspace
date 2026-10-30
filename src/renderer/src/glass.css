@@ -58,8 +58,9 @@ html[data-theme='dark'] .app-shell::before { background: #090f19d9; }
 .time-weather { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); align-items: center; gap: 18px; flex: 1; margin-top: 10px; }
 .clock-content { min-width: 0; }
 .time-card time { display: block; font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: calc(clamp(42px, 22cqw, 116px) * var(--text-scale)); font-variant-numeric: lining-nums tabular-nums; letter-spacing: -.055em; line-height: 1.1; white-space: nowrap; color: var(--ink); margin: 5px 0 18px; }
-.time-card p { color: var(--ink); font-size: calc(11px * var(--text-scale)); }
-.time-date-row { gap: 4px; }
+.time-card .time-date-label { margin: 0; color: var(--ink); font-size: calc(17px * var(--text-scale)); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; letter-spacing: .025em; line-height: 1.5; white-space: nowrap; }
+.time-date-row { gap: 10px; row-gap: 8px; }
+.time-weekday { border-left: 1px solid var(--line); padding-left: 10px; color: var(--primary); font-size: calc(14px * var(--text-scale)); font-weight: 500; letter-spacing: .08em; line-height: 1.2; white-space: nowrap; }
 .calendar-trigger { color: var(--primary); background: var(--surface); border-color: var(--line); }
 .weather-widget { min-width: 0; border-left: 1px solid var(--line); padding-left: 16px; display: flex; align-items: center; flex-direction: column; text-align: center; gap: 4px; font-size: calc(clamp(12px, 3.5cqw, 15px) * var(--text-scale)); }
 .weather-symbol { display: block; width: clamp(52px, 19cqw, 84px); height: auto; flex-shrink: 0; margin: 0 0 2px; filter: drop-shadow(0 4px 5px #384c6512); }
@@ -207,6 +208,6 @@ html[data-theme] .calendar-schedule-detail b { font-size:1.1em; }
 .calendar-color-preview { margin:22px 24px 0;padding:16px;border:1px solid var(--line);background:var(--surface);border-radius:12px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center; }
 html[data-theme='dark'] .priority.high,html[data-theme='dark'] .error-banner { background:#493928;color:#efd0a3;border-color:#84623d; }
 html[data-theme='dark'] .el-button--primary { color:#102b22; }
-@media(min-width:1550px) { .home-card { padding:24px; }.time-card p { font-size:calc(12px * var(--text-scale)); } }
+@media(min-width:1550px) { .home-card { padding:24px; } }
 @media(max-width:1150px) { .app-shell { padding:12px;gap:12px; }.compact-shell .topbar { margin-bottom:12px; }.home-grid { grid-template-columns:minmax(280px,1fr) minmax(300px,1.1fr);gap:14px; }.home-right { grid-column:1/-1;grid-template-columns:1.2fr 1fr;grid-template-rows:1fr auto; }.home-card { padding:18px; }.home-center,.home-left { min-height:650px; } }
 @media(max-height:740px) { .compact-shell .sidebar { padding-top:10px; }.compact-shell .brand { margin-bottom:12px; }.compact-shell .primary-nav { gap:2px; }.compact-shell .primary-nav a,.compact-shell .settings-nav,.theme-toggle,.compact-shell .quick-create { padding:10px; }.compact-shell .sidebar-divider { margin-top:6px; } }
