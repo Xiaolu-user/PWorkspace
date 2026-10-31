@@ -1,32 +1,478 @@
 [
   {
+    "slug": "barbell-bench-press",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Barbell flat bench press. Man lying face up on a horizontal black padded bench, feet planted on floor, holding a barbell in both hands above middle chest with elbows bent at bottom of press. Barbell with equal plates at each end. Three-quarter side view clearly showing horizontal bench.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Barbell_Bench_Press_-_Medium_Grip",
+    "name": "杠铃平板卧推"
+  },
+  {
+    "slug": "dumbbell-bench-press",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Dumbbell flat bench press. Man lying face up on horizontal black padded bench, feet planted, a separate dark dumbbell in each hand above chest, elbows bent out to sides. Three-quarter side view, NOT barbell.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Dumbbell_Bench_Press",
+    "name": "哑铃平板卧推"
+  },
+  {
+    "slug": "incline-dumbbell-press",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Incline dumbbell chest press on bench backrest inclined 30 degrees. Back supported, feet planted, dumbbell in each hand alongside upper chest, elbows bent under wrists. Three-quarter side view showing incline clearly.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Incline_Dumbbell_Press",
+    "name": "上斜哑铃卧推"
+  },
+  {
+    "slug": "smith-incline-bench-press",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Smith machine incline bench chest press. Man lying on 30 degree inclined black bench inside a gray Smith rack with two vertical guide rails, both hands on guided barbell above upper chest, feet planted. Three-quarter side view, visible rail attachment of bar.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Smith_Machine_Incline_Bench_Press",
+    "name": "史密斯上斜卧推"
+  },
+  {
+    "slug": "machine-chest-press",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Seated chest press machine. Back upright against padded backrest, both hands pushing independent horizontal handles at chest height forward, elbows softly bent. Show seat, backrest and gray lever arms, three-quarter front view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Machine_Bench_Press",
+    "name": "器械推胸"
+  },
+  {
+    "slug": "cable-chest-fly",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Standing cable chest fly inside a cable crossover frame, split stance, arms wrapping inward with slightly bent elbows, handles approaching each other in front of sternum, cables leading diagonally to left and right shoulder-height pulleys. Full body and compact frame.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Cable_Crossover",
+    "name": "龙门架夹胸"
+  },
+  {
+    "slug": "pec-deck-fly",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Seated pec deck chest fly on gray machine, back against vertical pad, two padded machine arms closing together in front of chest. Upper arms at shoulder height, elbows bent. Front three-quarter view showing two symmetric pivot arms.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Butterfly",
+    "name": "蝴蝶机夹胸"
+  },
+  {
+    "slug": "pushup",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Standard floor push-up, palms on floor slightly wider than shoulders, elbows bent, straight line shoulders to heels, toes on ground, body held above pale lavender floor. Side three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Pushups",
+    "name": "俯卧撑"
+  },
+  {
     "slug": "lat-pulldown",
     "id": "Wide-Grip_Lat_Pulldown",
-    "prompt": "A seated wide-grip lat pulldown machine. Man seated facing machine, viewed from rear three-quarter, thighs secured, both hands holding overhead wide cable bar. Bar near upper chest, elbows down and to sides, torso upright. Weight stack and overhead cable clear."
+    "prompt": "A seated wide-grip lat pulldown machine. Man seated facing machine, viewed from rear three-quarter, thighs secured, both hands holding overhead wide cable bar. Bar near upper chest, elbows down and to sides, torso upright. Weight stack and overhead cable clear.",
+    "name": "高位下拉"
   },
   {
     "slug": "seated-row",
     "id": "Seated_Cable_Rows",
-    "prompt": "Seated cable row on low pulley bench. Man sitting on bench facing cable, both feet braced on platform, torso upright, knees slightly bent, elbows pulled back next to ribs and handle near lower ribs. Cable runs horizontally to weight stack in front. Side three-quarter view."
+    "prompt": "Seated cable row on low pulley bench. Man sitting on bench facing cable, both feet braced on platform, torso upright, knees slightly bent, elbows pulled back next to ribs and handle near lower ribs. Cable runs horizontally to weight stack in front. Side three-quarter view.",
+    "name": "坐姿划船"
   },
   {
     "slug": "dumbbell-row",
     "id": "One-Arm_Dumbbell_Row",
-    "prompt": "Single-arm dumbbell row. Man supported with left palm and left knee on a flat grey bench, right foot on floor, straight back almost horizontal. Right hand holding one dumbbell pulled towards right hip with elbow bent behind torso. Side three-quarter view. Only one dumbbell."
+    "prompt": "Single-arm dumbbell row. Man supported with left palm and left knee on a flat grey bench, right foot on floor, straight back almost horizontal. Right hand holding one dumbbell pulled towards right hip with elbow bent behind torso. Side three-quarter view. Only one dumbbell.",
+    "name": "单臂哑铃划船"
   },
   {
-    "slug": "pullup",
-    "id": "Pullups",
-    "prompt": "Strict pull-up on a simple tall grey pull-up frame. Man hanging with both hands in wide overhand grip, elbows bent pulling chest up toward bar, chin close to bar, feet off floor, legs together and slightly bent. Rear three-quarter view. No pulldown cables, no seat."
-  },
-  {
-    "slug": "straight-arm-pulldown",
-    "id": "Straight-Arm_Pulldown",
-    "prompt": "Standing straight-arm cable pulldown. Man facing high pulley machine, slight hip hinge, knees slightly bent, back neutral. Both hands on straight short bar at upper thighs, arms nearly straight, cable runs upward in front to high pulley. Side three-quarter view. Clearly a straight-arm pulldown not a triceps pressdown."
+    "slug": "barbell-row",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Bent-over barbell row. Standing hips hinged back, knees slightly bent, torso inclined forward around 35 degrees above horizontal, neutral back. Both hands pulling barbell with plates toward lower ribs, elbows behind torso. Side three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Bent_Over_Barbell_Row",
+    "name": "杠铃俯身划船"
   },
   {
     "slug": "chest-supported-row",
     "id": "Dumbbell_Incline_Row",
-    "prompt": "Chest-supported dumbbell row. Man lying chest-down on an incline bench angled about 35 degrees, feet on floor, chest supported on pad, holding one dumbbell in each hand, elbows bent back alongside torso as dumbbells reach ribs. Side three-quarter view, bench support clear."
+    "prompt": "Chest-supported dumbbell row. Man lying chest-down on an incline bench angled about 35 degrees, feet on floor, chest supported on pad, holding one dumbbell in each hand, elbows bent back alongside torso as dumbbells reach ribs. Side three-quarter view, bench support clear.",
+    "name": "胸托划船"
+  },
+  {
+    "slug": "machine-high-row",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Seated plate-loaded high row machine. Chest supported on upright angled pad, pulling two gray handles from diagonally above forward down toward ribs. Two raised pivoting lever arms with black weight plates, feet planted. View from rear three-quarter showing back and both handles.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Leverage_High_Row",
+    "name": "器械高位划船"
+  },
+  {
+    "slug": "pullup",
+    "id": "Pullups",
+    "prompt": "Strict pull-up on a simple tall grey pull-up frame. Man hanging with both hands in wide overhand grip, elbows bent pulling chest up toward bar, chin close to bar, feet off floor, legs together and slightly bent. Rear three-quarter view. No pulldown cables, no seat.",
+    "name": "引体向上"
+  },
+  {
+    "slug": "assisted-pullup",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Machine-assisted pull-up. Man gripping wide overhead pull-up handles, elbows bent pulling chest upward, BOTH knees resting on the raised rectangular support pad of counterweighted gray pull-up machine. Show full machine including vertical weight stack and knee pad. Three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Machine_Assisted_Pullup",
+    "name": "器械辅助引体向上"
+  },
+  {
+    "slug": "straight-arm-pulldown",
+    "id": "Straight-Arm_Pulldown",
+    "prompt": "Standing straight-arm cable pulldown. Man facing high pulley machine, slight hip hinge, knees slightly bent, back neutral. Both hands on straight short bar at upper thighs, arms nearly straight, cable runs upward in front to high pulley. Side three-quarter view. Clearly a straight-arm pulldown not a triceps pressdown.",
+    "name": "直臂下压"
+  },
+  {
+    "slug": "back-extension",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: 45-degree back extension on Roman chair. Hip crease supported by slanted black pad, ankles secured under rollers, arms crossed at chest, torso extended in straight line with legs, head neutral. SIDE view showing angled support, NOT lying on a flat bench.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Hyperextensions_Back_Extensions",
+    "name": "山羊挺身"
+  },
+  {
+    "slug": "seated-dumbbell-shoulder-press",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Seated dumbbell shoulder press. Man seated on near-upright 80 degree backrest bench, feet planted, each hand holds a dark dumbbell alongside ears with forearms vertical and elbows bent. Three-quarter front view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Dumbbell_Shoulder_Press",
+    "name": "坐姿哑铃推肩"
+  },
+  {
+    "slug": "smith-shoulder-press",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Seated Smith machine FRONT shoulder press. Strict SIDE PROFILE camera from man's LEFT so his face, nose and the bar in FRONT of his face are clearly visible, no rear view. Man sits against 80-degree upright backrest inside a Smith rack with vertical guide rails; feet planted. Barbell is at CHIN height, visibly in front of the nose and throat, never behind the head or across the shoulders. Both forearms vertical with elbows down and slightly forward, pushing the guided bar upward. Show black plates each end, full gray frame and entire bench.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Smith_Machine_Overhead_Shoulder_Press",
+    "name": "史密斯推肩"
+  },
+  {
+    "slug": "dumbbell-lateral-raise",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Standing dumbbell lateral raise. Man upright with dumbbell in each hand, both arms lifted out to sides to shoulder height, elbows softly bent, palms down. Front three-quarter view showing clear T silhouette.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Side_Lateral_Raise",
+    "name": "哑铃侧平举"
+  },
+  {
+    "slug": "cable-lateral-raise",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Single-arm cable lateral raise. Man standing next to a low cable pulley on his left, right hand holds handle with cable passing in front of hips, right arm raised out to his right at shoulder height with elbow softly bent. Left hand rests on machine column. Show full low pulley and cable route.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Standing_Low-Pulley_Deltoid_Raise",
+    "name": "绳索侧平举"
+  },
+  {
+    "slug": "reverse-pec-deck",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Reverse pec deck rear-delt fly. Man seated FACING the vertical chest pad of rear-delt machine, chest on pad, hands hold two handles with arms spread wide at shoulder height. Rear three-quarter view showing his back, two symmetrical gray machine levers, black seat.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Reverse_Machine_Flyes",
+    "name": "反向蝴蝶机飞鸟"
+  },
+  {
+    "slug": "face-pull",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Standing cable rope face pull. Face toward gray cable machine with pulley at eye height, both hands holding ends of black rope pulled to temples, elbows out at shoulder height, torso upright and feet planted. Side three-quarter view showing rope from pulley to face.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Face_Pull",
+    "name": "绳索面拉"
+  },
+  {
+    "slug": "dumbbell-curl",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Standing dumbbell biceps curl, both elbows close to ribs, dumbbell in each hand with palms facing up, forearms curled upward around 90 degrees. Front three-quarter view, full body.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Dumbbell_Bicep_Curl",
+    "name": "哑铃弯举"
+  },
+  {
+    "slug": "barbell-curl",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Standing barbell biceps curl. Both elbows near ribs, supinated grip on straight barbell, curled to upper waist, modest equal weight plates at both ends. Front three-quarter view, full body.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Barbell_Curl",
+    "name": "杠铃弯举"
+  },
+  {
+    "slug": "incline-dumbbell-curl",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Incline dumbbell biceps curl. Man seated leaning against 55 degree inclined bench, feet flat, upper arms hanging slightly behind torso, palms up dumbbells curled partway, elbows stationary below shoulders. Side three-quarter view, full bench.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Incline_Dumbbell_Curl",
+    "name": "上斜哑铃弯举"
+  },
+  {
+    "slug": "hammer-curl",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Standing dumbbell hammer curl. Dumbbell in each hand with NEUTRAL thumb-up grip, weights vertically oriented, elbows close to torso and forearms curled upward. Front three-quarter view making neutral grip clear.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Hammer_Curls",
+    "name": "锤式弯举"
+  },
+  {
+    "slug": "preacher-curl",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Preacher bench biceps curl. Man seated behind a slanted black preacher arm pad, upper arms resting fully on pad, both hands supinated gripping an EZ curl bar with small equal plates, elbows bent curling above pad. Side three-quarter view showing slanted pad.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Preacher_Curl",
+    "name": "牧师凳弯举"
+  },
+  {
+    "slug": "triceps-pushdown",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Standing cable triceps pushdown facing high pulley machine. Elbows pinned at sides, forearms nearly extended down, both hands pressing a short straight black cable bar to upper thighs. Cable goes vertically up to high pulley. Side three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Triceps_Pushdown",
+    "name": "绳索下压"
+  },
+  {
+    "slug": "overhead-cable-triceps-extension",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Standing overhead rope cable triceps extension. Man faces AWAY from cable column, split stance, upper arms next to ears, elbows bent holding rope ends behind head. Cable runs diagonally backward from hands to pulley behind him. Side view clearly showing overhead upper arms and bent elbows.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Cable_Rope_Overhead_Triceps_Extension",
+    "name": "绳索过顶臂屈伸"
+  },
+  {
+    "slug": "lying-ez-triceps-extension",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Lying EZ-bar triceps extension / skull crusher. Man face up on flat bench, feet planted, upper arms vertical above shoulders, elbows bent so EZ curl bar is lowered near forehead, both hands grip bar with small equal plates. Side three-quarter view, NOT a bench press.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Lying_Triceps_Press",
+    "name": "仰卧曲杆臂屈伸"
+  },
+  {
+    "slug": "parallel-bar-dip",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Parallel bar triceps dip. Man suspended between two gray parallel bars with hands gripping beside hips, elbows bent lowering torso, shoulders above hands, knees bent behind him and feet off floor. Upright torso. Full body three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Dips_-_Triceps_Version",
+    "name": "双杠臂屈伸"
+  },
+  {
+    "slug": "barbell-squat",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Barbell back squat. Man at bottom of controlled squat with loaded bar resting across upper back, both hands holding outside shoulder width, feet shoulder-width, hips lowered to around knee level, heels flat, back neutral. Three-quarter side view, show plates each end.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Barbell_Squat",
+    "name": "杠铃深蹲"
+  },
+  {
+    "slug": "smith-squat",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Smith machine squat. Man squatting under guided bar across upper back inside two gray vertical rails, both hands on bar, thighs around parallel, feet planted. Show rail attachment, full gray rack and black plates. Three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Smith_Machine_Squat",
+    "name": "史密斯深蹲"
+  },
+  {
+    "slug": "hack-squat",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Machine hack squat, NOT barbell hack squat. Man reclined against 45-degree angled sled backrest with padded shoulder rests, knees bent around 90 degrees, feet on wide lower angled platform, hands on shoulder handles. Show entire diagonal gray rail sled machine and black plates. Side three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Hack_Squat",
+    "name": "哈克深蹲"
+  },
+  {
+    "slug": "leg-press",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: 45-degree leg press machine. Man seated reclined in black padded seat, both feet flat on large elevated footplate, hips and knees bent around 90 degrees, hands on seat handles. Gray diagonal sled rails and weight plates visible, side three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Leg_Press",
+    "name": "腿举"
+  },
+  {
+    "slug": "leg-extension",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Seated leg extension machine. Back against upright pad, thighs on seat, both shins lifting horizontal against a cylindrical black roller above ankles, knees nearly extended, hands gripping seat sides. Side three-quarter view, clear knee extension.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Leg_Extensions",
+    "name": "坐姿腿屈伸"
+  },
+  {
+    "slug": "seated-leg-curl",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Seated leg curl machine. Man seated back against upright pad, thighs held under horizontal top restraint, both knees bent downward with heels pulling a roller beneath seat. Show distinct seated position and lower leg roller behind ankles. Side three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Seated_Leg_Curl",
+    "name": "坐姿腿弯举"
+  },
+  {
+    "slug": "lying-leg-curl",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Prone lying leg curl machine. Man lying FACE DOWN on black padded slightly angled bench, chest supported, hands holding front handles, knees bent bringing feet upward behind him against roller on back of ankles. Side three-quarter view, NOT seated.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Lying_Leg_Curls",
+    "name": "俯卧腿弯举"
+  },
+  {
+    "slug": "romanian-deadlift",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Barbell Romanian deadlift. Standing hips pushed back with only slight knee bend, torso hinged forward, straight neutral back, both hands holding barbell close to shins below knees. Feet hip-width, loaded plates. Side three-quarter view, clear hip hinge and nearly straight shins.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Romanian_Deadlift",
+    "name": "罗马尼亚硬拉"
+  },
+  {
+    "slug": "barbell-deadlift",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Conventional barbell deadlift starting pull. Feet hip-width on floor, barbell with equal large plates at mid-shin, both hands gripping outside legs, hips lower than shoulders, knees bent, straight neutral back. Three-quarter side view, distinguish from Romanian hinge with more knee flexion.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Barbell_Deadlift",
+    "name": "杠铃硬拉"
+  },
+  {
+    "slug": "bulgarian-split-squat",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Dumbbell Bulgarian split squat. Rear RIGHT foot resting shoelaces-down on black flat bench behind, front LEFT foot planted well forward, front knee bent around 90 degrees lowering hips. Dumbbell in each hand hanging at sides, upright torso. Side three-quarter view showing elevated rear foot.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Split_Squat_with_Dumbbells",
+    "name": "保加利亚分腿蹲"
+  },
+  {
+    "slug": "dumbbell-lunge",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Dumbbell forward lunge. One foot well forward with knee bent around 90 degrees, rear knee hovering near floor, rear heel raised, NO bench. Dumbbell in each hand hanging at sides, torso upright. Side three-quarter view, full body.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Dumbbell_Lunges",
+    "name": "哑铃弓步蹲"
+  },
+  {
+    "slug": "barbell-hip-thrust",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Barbell hip thrust. Upper back resting across horizontal black bench, knees bent around 90 degrees, feet flat on floor, hips lifted so torso and thighs horizontal. Padded barbell with plates across hip crease, hands steadying bar. Side view clearly showing shoulders on bench and feet on floor.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Barbell_Hip_Thrust",
+    "name": "杠铃臀推"
+  },
+  {
+    "slug": "seated-hip-abduction",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Seated hip abduction machine. Man upright in seat with backrest, knees bent, padded blocks pressing against OUTSIDE of knees, thighs spread outward opening legs against machine levers, hands on side handles. Front three-quarter view, two feet supported low on pegs.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Thigh_Abductor",
+    "name": "坐姿髋外展"
+  },
+  {
+    "slug": "standing-calf-raise",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Standing calf raise machine. Man upright on a raised foot block with heels elevated, shoulders under two padded shoulder rests of gray vertical machine, hands holding side handles. Knees straight, only balls of feet on block, heels clearly lifted. Side three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Standing_Calf_Raises",
+    "name": "站姿提踵"
+  },
+  {
+    "slug": "seated-calf-raise",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Seated calf raise machine. Man seated with padded lever resting across lower thighs above knees, knees bent 90 degrees, balls of feet on a small raised platform with heels elevated. Hands holding front lever handles. Side view showing heels lifted and black plate on lever.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Seated_Calf_Raise",
+    "name": "坐姿提踵"
+  },
+  {
+    "slug": "crunch",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Floor abdominal crunch. Man lying on his back on small lavender exercise mat, knees bent and feet flat, hands lightly beside temples, head and shoulder blades curled a short distance off floor, lower back on mat. Side view, NOT full sit-up.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Crunches",
+    "name": "卷腹"
+  },
+  {
+    "slug": "cable-crunch",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Kneeling cable abdominal crunch. Man kneeling on floor facing high cable pulley, both hands holding rope ends beside temples, elbows toward knees, spine curled gently forward to crunch torso. Hips remain above knees, cable runs up to high pulley. Side view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Cable_Crunch",
+    "name": "绳索卷腹"
+  },
+  {
+    "slug": "hanging-leg-raise",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Hanging leg raise. Man hanging from overhead pull-up bar with both arms extended, legs raised forward with knees nearly straight around hip height, torso stable. Full body side three-quarter view with simple gray pull-up station.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Hanging_Leg_Raise",
+    "name": "悬垂举腿"
+  },
+  {
+    "slug": "plank",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Forearm plank on lavender mat. Elbows directly under shoulders, forearms and toes on ground, straight body line from head to heels, hips level, facing downward. Full body side three-quarter view, NO weights.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Plank",
+    "name": "平板支撑"
+  },
+  {
+    "slug": "side-plank",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Side forearm plank. Man supported on RIGHT forearm and outer edge of right foot, elbow beneath shoulder, feet stacked, hips raised forming straight line shoulders to ankles, left hand on hip. Full body three-quarter front view, NO other support.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Side_Bridge",
+    "name": "侧平板支撑"
+  },
+  {
+    "slug": "ab-wheel",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Kneeling ab wheel rollout. Man on both knees on small lavender mat, both hands gripping handles of a single black ab wheel rolled forward, arms extended diagonally forward, hips extended, neutral back. Side view showing wheel on floor well ahead of knees.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Ab_Roller",
+    "name": "健腹轮"
+  },
+  {
+    "slug": "treadmill-run",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Man jogging on a modern gray treadmill. Running gait with one foot on belt and opposite leg bent behind, elbows bent in natural running swing, upright posture. Treadmill deck LEVEL, front console and belt visible, full body three-quarter side view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Running_Treadmill",
+    "name": "跑步机跑步"
+  },
+  {
+    "slug": "treadmill-incline-walk",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Man brisk WALKING on an INCLINED treadmill. Deck visibly tilted uphill around 12 degrees with front end raised, one foot forward on uphill belt, rear heel lifted, arms swinging naturally, no handrail holding. Show gray treadmill console and clearly sloped belt, full body side view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Walking_Treadmill",
+    "name": "跑步机坡度走"
+  },
+  {
+    "slug": "elliptical",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Man using gray elliptical cross trainer. Both feet on separate long pedal platforms, hands holding the moving upright handles, one pedal forward and other back, tall upright body. Show elliptical flywheel housing and long low pedal rails. Full body side three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Elliptical_Trainer",
+    "name": "椭圆机"
+  },
+  {
+    "slug": "stair-climber",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Man climbing a gray stairmill machine with a rotating staircase of three visible steps, one foot on higher step and other on lower step, hands lightly beside rails, upright torso. Show unmistakable staircase machine and console, NOT treadmill.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Stairmaster",
+    "name": "登阶机（爬楼机）"
+  },
+  {
+    "slug": "stationary-bike",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Man pedaling an upright stationary exercise bicycle. Seated on small saddle, hands on front handlebars, one knee bent up while opposite leg extended to pedal, gray frame with enclosed round flywheel. Full body side three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Bicycling_Stationary",
+    "name": "固定自行车"
+  },
+  {
+    "slug": "rowing-machine",
+    "prompt": "Use case: stylized-concept. Single square exercise-library illustration, 1024x1024. Reference image is STYLE AND CHARACTER REFERENCE ONLY. Same short black-haired adult male 3D cartoon character, royal blue T-shirt, navy shorts, white sneakers; same soft clay-like 3D render, charcoal/gray equipment, seamless pale lavender background, soft shadow. Full body and all essential equipment visible, centered, readable at thumbnail size, generous margin. Exactly one person, anatomically coherent limbs and hands, plausible gym posture. No text, no arrows, no panel layout, no logo or watermark. Show ONLY the requested exercise, not the reference exercise. Requested movement: Man using a stationary rowing ergometer. Sitting on sliding black seat along long horizontal rail, feet strapped to angled footrests, legs nearly extended, pulling handle to lower ribs with elbows behind torso, cable runs to large round gray flywheel in front. Full body side three-quarter view.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "Rowing_Stationary",
+    "name": "划船机"
+  },
+  {
+    "slug": "default-exercise",
+    "prompt": "Same blue-shirt, navy-shorts, white-sneakers 3D cartoon man as lat-pulldown reference, standing relaxed holding a small dumbbell in each hand at his sides. Full body, centered, pale lavender background, soft shadow. Generic neutral fitness image, no text, logo or watermark.",
+    "reference": "lat-pulldown.png",
+    "tool": "built-in imagegen",
+    "id": "__default__",
+    "name": "默认动作卡通图"
   }
 ]

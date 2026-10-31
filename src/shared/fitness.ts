@@ -6,7 +6,7 @@ export interface FitnessItem { exerciseId: string; sets: FitnessSet[]; rest: num
 export interface TrainingDay { title: string; type: string; templateId: string; items: FitnessItem[]; notes: string }
 export interface TrainingTemplate extends TrainingDay { id: string }
 export interface TrainingRecord { id: string; date: string; title: string; type: string; minutes: number | null; notes: string; tags: string; source: string; items: FitnessItem[]; updated: string; extra?: string }
-export interface FitnessData { name: string; startDate: string; mode: string; rhythm: TrainingDay[]; overrides: Record<string, TrainingDay[]>; templates: TrainingTemplate[]; exercises: Exercise[]; records: TrainingRecord[]; templateSeeded?: boolean }
+export interface FitnessData { name: string; startDate: string; mode: string; rhythm: TrainingDay[]; overrides: Record<string, TrainingDay[]>; templates: TrainingTemplate[]; exercises: Exercise[]; records: TrainingRecord[]; templateSeeded?: boolean; catalogVersion?: number }
 export const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value))
 export const newSet = (): FitnessSet => ({ weight: null, reps: null, duration: null, distance: null })
 export const newDay = (title = '自定义训练', type = '自定义'): TrainingDay => ({ title, type, templateId: '', items: [], notes: '' })
