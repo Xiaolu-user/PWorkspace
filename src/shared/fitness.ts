@@ -1,11 +1,11 @@
 import { localDate } from './date'
 export type Measure = 'weight' | 'time' | 'distance'
-export interface Exercise { id: string; name: string; alias: string; part: string; muscles: string[]; secondary: string[]; equipment: string; measure: Measure; description: string; notes: string; image: string; images: string[]; favorite: boolean; tags: string[] }
+export interface Exercise { id: string; name: string; alias: string; part: string; muscles: string[]; secondary: string[]; equipment: string; measure: Measure; description: string; notes: string; image: string; images: string[]; favorite: boolean; tags: string[]; artworkStatus?: 'ready' | 'pending'; sourceName?: string }
 export interface FitnessSet { weight: number | null; reps: number | null; duration: number | null; distance: number | null }
 export interface FitnessItem { exerciseId: string; sets: FitnessSet[]; rest: number; notes: string; group?: string }
 export interface TrainingDay { title: string; type: string; templateId: string; items: FitnessItem[]; notes: string }
 export interface TrainingTemplate extends TrainingDay { id: string }
-export interface TrainingRecord { id: string; date: string; title: string; type: string; minutes: number | null; notes: string; tags: string; source: string; items: FitnessItem[]; updated: string }
+export interface TrainingRecord { id: string; date: string; title: string; type: string; minutes: number | null; notes: string; tags: string; source: string; items: FitnessItem[]; updated: string; extra?: string }
 export interface FitnessData { name: string; startDate: string; mode: string; rhythm: TrainingDay[]; overrides: Record<string, TrainingDay[]>; templates: TrainingTemplate[]; exercises: Exercise[]; records: TrainingRecord[]; templateSeeded?: boolean }
 export const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value))
 export const newSet = (): FitnessSet => ({ weight: null, reps: null, duration: null, distance: null })

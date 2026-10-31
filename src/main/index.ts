@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, ipcMain, nativeImage, nativeTheme, screen, shell, Tray, Menu, Notification, powerMonitor, type IpcMainInvokeEvent } from 'electron'
-import { existsSync, mkdirSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { basename, isAbsolute, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { randomUUID } from 'node:crypto'
@@ -127,6 +127,12 @@ function registerHandlers(): void {
     return data
   })
   handle(channels.fitnessSave, value => repository.writeSetting('fitness', value))
+  handle(channels.fitnessExport, async (name, content) => {
+    const selection = await dialog.showSaveDialog(window!, { title: '导出健身数据', defaultPath: join(app.getPath('documents'), String(name)) })
+    if (selection.canceled || !selection.filePath) return false
+    writeFileSync(selection.filePath, String(content), 'utf8')
+    return true
+  })
   handle(channels.plannerGet, async () => {
     const data = planner.get(), icons: Record<string, string> = {}
     data.entries = await Promise.all(data.entries.map(async entry => {

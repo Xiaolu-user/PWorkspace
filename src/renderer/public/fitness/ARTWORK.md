@@ -1,11 +1,15 @@
-# 健身页素材
+# 健身页卡通素材
 
-- `hero.png`：使用内置 imagegen 生成的薄荷绿运动伙伴插画。
-- `kettlebell.png`：使用内置 imagegen 生成的杏色壶铃器械示意图，用于原资料缺少示范图的三个壶铃动作；不作为动作姿势演示。
-- `exercises/*.jpg`：Free Exercise DB 原始示范图，许可见 `EXERCISE-LICENSE.txt`，来源见 `SOURCES.md`。动作库内可上传自己的图片替换。
+原有的 1749 张真人动作照片已删除。当前只开放六个有专属卡通图的动作；其余 870 个动作数据保留，均为中文名称，待专属卡通图完成并核对后再开放。
 
-Hero prompt:
-Create a polished 3D clay illustration for a premium Chinese desktop fitness planner. Wide landscape 3:1 banner with a very pale mint white background, matching frosted glass UI. A small adorable rounded mint-green bean-shaped mascot with two tiny black eyes, soft peach cheeks, smiling and stretching one arm overhead. The character sits at the right-center alongside a lavender dumbbell and tiny apricot exercise ball on a pale ivory floor. Subtle blurred sage leaf in background, beautiful soft studio light, restrained pastel palette, mature designer-quality playful illustration. Large empty pale mint space on left 35%. No text, letters, UI, logos or watermarks. This is a standalone illustration asset, no application screen.
+## 动作插图
 
-Kettlebell prompt:
-One premium 3D clay kettlebell equipment illustration, centered on very pale lavender-white background, square composition. Soft pastel apricot kettlebell with rounded handle, softly shaded matte silicone material, subtle ground shadow, clean designer toy aesthetic, tiny mint exercise mat behind. No people, no text, no letters, no brand, no logo, no numbers. It is an equipment thumbnail for a fitness exercise library, not an instructional movement diagram.
+`cartoon/` 中的六张图片使用内置 imagegen 工具，以批准的动作库设计稿为角色风格参考，分别制作对应姿势。每张图只用于其对应动作，不复用于其他姿势。蓝色运动上衣、深色短裤、白鞋、短发和柔和立体材质保持一致；角色细节是重新生成的，无法保证与设计稿小图逐像素相同。
+
+逐图提示词和动作标识见 `cartoon/PROMPTS.json`。通用提示要求：参考设计稿中的成年男性卡通角色，蓝色运动上衣、深色短裤、白鞋、短发；柔和黏土三维质感，浅紫背景，完整人物和必要器械；准确对应所列动作；禁止真人、照片、文字和水印。
+
+## 原稿插画复用
+
+`design-artwork.png` 为本聊天中生成并批准的第一张设计稿。`DesignArt.vue` 通过 SVG 视窗只显示其中的吉祥物、哑铃、壶铃和月亮插画区域，界面的文字、按钮与布局均为真实组件，不是整张截图覆盖。
+
+既有 `hero.png`、`kettlebell.png` 为上一版生成的独立插画，当前主要界面已改为复用原稿对应区域。

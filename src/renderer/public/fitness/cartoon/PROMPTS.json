@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "lat-pulldown",
+    "id": "Wide-Grip_Lat_Pulldown",
+    "prompt": "A seated wide-grip lat pulldown machine. Man seated facing machine, viewed from rear three-quarter, thighs secured, both hands holding overhead wide cable bar. Bar near upper chest, elbows down and to sides, torso upright. Weight stack and overhead cable clear."
+  },
+  {
+    "slug": "seated-row",
+    "id": "Seated_Cable_Rows",
+    "prompt": "Seated cable row on low pulley bench. Man sitting on bench facing cable, both feet braced on platform, torso upright, knees slightly bent, elbows pulled back next to ribs and handle near lower ribs. Cable runs horizontally to weight stack in front. Side three-quarter view."
+  },
+  {
+    "slug": "dumbbell-row",
+    "id": "One-Arm_Dumbbell_Row",
+    "prompt": "Single-arm dumbbell row. Man supported with left palm and left knee on a flat grey bench, right foot on floor, straight back almost horizontal. Right hand holding one dumbbell pulled towards right hip with elbow bent behind torso. Side three-quarter view. Only one dumbbell."
+  },
+  {
+    "slug": "pullup",
+    "id": "Pullups",
+    "prompt": "Strict pull-up on a simple tall grey pull-up frame. Man hanging with both hands in wide overhand grip, elbows bent pulling chest up toward bar, chin close to bar, feet off floor, legs together and slightly bent. Rear three-quarter view. No pulldown cables, no seat."
+  },
+  {
+    "slug": "straight-arm-pulldown",
+    "id": "Straight-Arm_Pulldown",
+    "prompt": "Standing straight-arm cable pulldown. Man facing high pulley machine, slight hip hinge, knees slightly bent, back neutral. Both hands on straight short bar at upper thighs, arms nearly straight, cable runs upward in front to high pulley. Side three-quarter view. Clearly a straight-arm pulldown not a triceps pressdown."
+  },
+  {
+    "slug": "chest-supported-row",
+    "id": "Dumbbell_Incline_Row",
+    "prompt": "Chest-supported dumbbell row. Man lying chest-down on an incline bench angled about 35 degrees, feet on floor, chest supported on pad, holding one dumbbell in each hand, elbows bent back alongside torso as dumbbells reach ribs. Side three-quarter view, bench support clear."
+  }
+]

@@ -18,7 +18,7 @@ export interface WorkbenchAPI {
   // Real filesystem path of a dropped file; empty for virtual or browser-provided files.
   filePath(file: File): string
   weather: { search(query: string): Promise<Result<import('./appearance').WeatherLocation[]>>; current(): Promise<Result<import('./weather').Weather | null>> }
-  fitness: { get(): Promise<Result<import('./fitness').FitnessData>>; save(value: import('./fitness').FitnessData): Promise<Result<void>> }
+  fitness: { get(): Promise<Result<import('./fitness').FitnessData>>; save(value: import('./fitness').FitnessData): Promise<Result<void>>; exportFile(name: string, content: string): Promise<Result<boolean>> }
   planner: {
     get(): Promise<Result<import('./planner').PlannerData>>
     semester(value: import('./planner').Semester): Promise<Result<import('./planner').PlannerData>>

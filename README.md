@@ -157,9 +157,9 @@ git push
 左侧「健身计划」进入独立页面，首页健身卡片使用同一套周期安排。原有星期计划自动带入新工作区，已有备注保留。
 
 - 计划：概览、任意天数的周期编排、每轮覆盖、模板复制与应用。调整可仅作用于本轮，或本轮及后续；不改写历史实录。
-- 动作库：876 个预置动作，包含中文目标肌肉简介、主要/辅助肌肉、器械、计量方式和离线图片。常用动作有中文名称，其余保留原始英文名；可编辑、收藏、新建和上传个人图片。
+- 动作库：876 个动作元数据，其中当前仅开放六个配有已核对专属卡通图的动作；包含中文目标肌肉简介、主要/辅助肌肉、器械、计量方式和离线图片。全部预置动作均为中文名称，原英文名仅作为可选检索别名；可编辑、收藏、新建和上传个人图片。
 - 记录：日历、统计、动作对比、明细四种视图；手动补录快速摘要或逐组明细，支持从计划/模板带入。
 - 导入导出：CSV（可下载导入模板）和 JSON；导入需预览确认。时长可留空，统计只使用填写的数据。记录、计划、个人动作均保存在现有 SQLite settings 中，并随原有整库备份保存。
-- 插画与动作资料来源见 `src/renderer/public/fitness/ARTWORK.md` 和 `SOURCES.md`。原始动作数据处理脚本为 `scripts/fitness-catalog.py`，输入是 `.cache/fitness-source/free-exercise-db-main` 下的源库。
+- 插画与动作资料来源见 `src/renderer/public/fitness/ARTWORK.md` 和 `SOURCES.md`。原始动作数据处理脚本为 `scripts/fitness-catalog.py`，输入为 `names.zh-CN.json` 中文名表和 `cartoon/PROMPTS.json` 已核对插图清单。
 
-动作图片来自公开的 [Free Exercise DB](https://github.com/yuhonas/free-exercise-db)（Unlicense）：873 个动作的 1749 张示范图，另外三个缺图壶铃动作用器械示意图标识。应用运行时无需联网获取这些素材。
+动作元数据来自公开的 [Free Exercise DB](https://github.com/yuhonas/free-exercise-db)（Unlicense）。真人动作图片已全部删除；当前六张专属卡通图以批准设计稿的人物形象生成，其余870个动作待配图完成再开放。应用运行时无需联网获取素材。
