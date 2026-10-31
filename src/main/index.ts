@@ -10,6 +10,7 @@ import { WeatherService } from './weather'
 import { DatabaseStore } from './database'
 import { Repository } from './repository'
 import { Planner } from './planner'
+import { emptyFitness, newDay, type FitnessData } from '../shared/fitness'
 import { BackupService } from './backup'
 import { AppError } from './errors'
 import { Logger } from './logger'
@@ -113,6 +114,19 @@ function registerHandlers(): void {
   handle(channels.weatherSearch, query => weather.search(query))
   handle(channels.weatherCurrent, () => weather.current(repository.preferences().appearance.weatherLocation))
   const planner = new Planner(repository)
+  handle(channels.fitnessGet, () => {
+    const existing = repository.readSetting<FitnessData | null>('fitness', null)
+    if (existing) return existing
+    const data = emptyFitness(), old = planner.get().workouts
+    if (old.length) {
+      const monday = new Date(); monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7)
+      data.startDate = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`
+      data.rhythm = Array.from({ length: 7 }, (_, i) => { const w = old.find(v => v.day === i + 1); return w ? { ...newDay(w.title), notes: w.exercises } : newDay('休息与恢复', '休息') })
+    }
+    repository.writeSetting('fitness', data)
+    return data
+  })
+  handle(channels.fitnessSave, value => repository.writeSetting('fitness', value))
   handle(channels.plannerGet, async () => {
     const data = planner.get(), icons: Record<string, string> = {}
     data.entries = await Promise.all(data.entries.map(async entry => {

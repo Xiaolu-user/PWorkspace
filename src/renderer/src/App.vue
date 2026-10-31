@@ -34,7 +34,7 @@ const navigation = computed(() => [
   { path: '/', icon: 'grid', label: '今日概览', hint: '待办、课程与入口' },
   { path: '/tasks', icon: 'list', label: '我的待办', hint: workspace.dashboard.totalTodo ? `${workspace.dashboard.totalTodo} 项未完成` : '还没有待办' },
   { path: '/courses', icon: 'calendar', label: '课程表', hint: '整周与整学期课程' },
-  { path: '/?panel=fitness', icon: 'fitness', label: '健身计划', hint: '每周训练与打卡' },
+  { path: '/fitness', icon: 'fitness', label: '健身计划', hint: '周期安排与训练回顾' },
   { path: '/?panel=files', icon: 'folder', label: '常用资料', hint: '文件一键打开' },
   { path: '/notes', icon: 'document', label: '随手笔记', hint: '灵感与记录' },
   { path: '/bookmarks', icon: 'link', label: '常用链接', hint: '常去的地方' }
@@ -71,7 +71,7 @@ onMounted(async () => {
 onBeforeUnmount(() => { clearInterval(clock); unsubscribe?.(); window.removeEventListener('keydown', onKeyboard) })
 </script>
 <template>
-  <div class="app-shell compact-shell" :class="{ 'is-dashboard': route.path === '/' }">
+  <div class="app-shell compact-shell" :class="{ 'is-dashboard': route.path === '/', 'is-fitness': route.path === '/fitness' }">
     <aside class="sidebar">
       <router-link to="/" class="brand" aria-label="拾光工作台首页" :class="waveOf(0)" @mouseenter="hoverIndex = 0" @mouseleave="hoverIndex = -1"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span class="nav-label"><strong>拾光工作台</strong><em>本地个人空间</em></span></router-link>
       <nav class="primary-nav" aria-label="主要导航"><router-link v-for="(item, index) in navigation" :key="item.path" :to="item.path" :aria-label="item.label" :class="[waveOf(index + 1), { active: route.path === item.path }]" @mouseenter="hoverIndex = index + 1" @mouseleave="hoverIndex = -1"><AppIcon :name="item.icon" :size="20" /><span class="nav-label"><strong>{{ item.label }}</strong><em>{{ item.hint }}</em></span><small v-if="item.path === '/tasks' && workspace.dashboard.totalTodo">{{ workspace.dashboard.totalTodo }}</small></router-link></nav>
@@ -87,7 +87,7 @@ onBeforeUnmount(() => { clearInterval(clock); unsubscribe?.(); window.removeEven
     <div class="main-shell">
       <header class="topbar"><div class="breadcrumb"><strong class="toolbar-brand">拾光工作台</strong><template v-if="route.path !== '/'"><span>/</span><span>{{ route.meta.title }}</span></template></div><div class="topbar-right"><el-input v-model="search" class="global-search" placeholder="搜索任务、笔记、链接" aria-label="全局搜索" clearable @keydown.enter="doSearch"><template #prefix><AppIcon name="search" :size="17" /></template><template #suffix><kbd>↵</kbd></template></el-input><span class="topbar-divider"></span><span class="online-status"><span class="status-dot"></span>本地模式</span></div></header>
       <main class="page-scroll">
-        <div v-if="route.path !== '/' && route.path !== '/courses'" class="page-header"><div><div class="eyebrow">MY PERSONAL SPACE</div><h1>{{ route.meta.title }}</h1><p>{{ route.meta.subtitle }}</p></div><el-button v-if="route.path === '/tasks'" type="primary" class="primary-add" @click="addTask = true"><AppIcon name="plus" :size="17" />添加任务</el-button></div>
+        <div v-if="route.path !== '/' && route.path !== '/courses' && route.path !== '/fitness'" class="page-header"><div><div class="eyebrow">MY PERSONAL SPACE</div><h1>{{ route.meta.title }}</h1><p>{{ route.meta.subtitle }}</p></div><el-button v-if="route.path === '/tasks'" type="primary" class="primary-add" @click="addTask = true"><AppIcon name="plus" :size="17" />添加任务</el-button></div>
         <div v-if="workspace.error" class="error-banner" role="alert"><AppIcon name="warning" /><span>{{ workspace.error }}</span><el-button text :loading="workspace.loading" @click="workspace.refresh">重新加载</el-button></div>
         <router-view />
         <footer class="page-footer"><span>拾光 · 把日常，慢慢整理好。</span><span><span class="status-dot"></span>本地保存 · {{ workspace.info ? `v${workspace.info.version}` : '正在连接' }}</span></footer>

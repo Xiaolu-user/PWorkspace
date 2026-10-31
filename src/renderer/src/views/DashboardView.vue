@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { useWorkspace } from '../stores/workspace'
 import { useEditor } from '../stores/editor'
+import { useFitness } from '../fitness/store'
+import { dayOn } from '../../../shared/fitness'
 import { localDate } from '../../../shared/date'
 import { isReminderActive, compareReminderTasks, reminderLabel } from '../../../shared/reminders'
 import ReminderNotice from '../components/ReminderNotice.vue'
@@ -17,6 +19,7 @@ import WeatherWidget from '../components/WeatherWidget.vue'
 import ShortcutBoard from '../components/ShortcutBoard.vue'
 import { unwrap, report, openLink, formatTime } from '../lib/api'
 const ws = useWorkspace(); const editor = useEditor(); const router = useRouter(); const route = useRoute()
+const fitness = useFitness()
 const now = ref(new Date()); const today = computed(() => localDate(now.value))
 const clock = computed(() => now.value.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }))
 const dateLabel = computed(() => now.value.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }))
@@ -67,15 +70,15 @@ const nowLine = computed(() => {
 })
 function courseState(date: string, start: string, end: string): string { if (date !== today.value) return ''; return clock.value >= end ? '已结束' : clock.value >= start ? '进行中' : '即将开始' }
 function blockTitle(date: string, course: CourseOccurrence): string { const state = courseState(date, course.start, course.end); return `${course.start}–${course.end} ${course.title}${course.room ? ' · ' + course.room : ''}${state && state !== '已结束' ? ' · ' + state : ''}${course.modified ? ' · 已调整' : ''}` }
-const workout = computed(() => data.value.workouts.find(w => w.day === (now.value.getDay() + 6) % 7 + 1))
+const workout = computed(() => { if (!fitness.loaded) return undefined; const d = dayOn(fitness.data, today.value); return d && d.type !== '休息' ? { title: d.title, minutes: 0, exercises: d.items.map(i => fitness.exercise(i.exerciseId)?.name || i.exerciseId).join('\n') || d.notes } : undefined })
 let timer: ReturnType<typeof setInterval>; let request = 0
 async function load(): Promise<void> { const n = ++request; try { const value = unwrap(await window.workbench.planner.get()); if (n === request) data.value = value } catch (e) { report(e) } }
 watch(() => ws.revision, () => void load())
 watch(plan, value => { if (!value && ['courses', 'fitness'].includes(String(route.query.panel))) void router.replace('/') })
-watch(() => route.query.panel, panel => { if (panel === 'courses' || panel === 'fitness') plan.value = panel; else if (panel === 'files') document.getElementById('home-files')?.scrollIntoView({ behavior: 'smooth' }) }, { immediate: true })
+watch(() => route.query.panel, panel => { if (panel === 'fitness') void router.replace('/fitness'); else if (panel === 'courses') plan.value = panel; else if (panel === 'files') document.getElementById('home-files')?.scrollIntoView({ behavior: 'smooth' }) }, { immediate: true })
 watch(() => editor.body, body => { editor.title = body.trim().split('\n')[0].slice(0, 80) || '' })
 function tick(): void { const before = today.value; now.value = new Date(); if (before !== today.value) { viewOffset.value = 0; void ws.refresh() } }
-onMounted(() => { if (!editor.dirty) editor.select(null); timer = setInterval(tick, 1000); window.addEventListener('focus', tick); void load() })
+onMounted(() => { void fitness.load(); if (!editor.dirty) editor.select(null); timer = setInterval(tick, 1000); window.addEventListener('focus', tick); void load() })
 onBeforeUnmount(() => { clearInterval(timer); window.removeEventListener('focus', tick) })
 const quickTitle = ref(''); const quickEditing = ref(false); const quickSaving = ref(false)
 const quickInput = ref<HTMLInputElement | null>(null); const taskDraft = ref('')
@@ -145,7 +148,7 @@ async function removeEntry(entry: Pick<LocalEntry, 'id' | 'title'>, kind = 'file
         </div>
         <div class="course-foot"><span>{{ viewOffset === 0 ? '本周' : '该周' }}共 {{ viewCourseCount }} 节课</span><button class="text-link" @click="plan = 'courses'">编辑课表 →</button></div>
       </section>
-      <section class="home-card fitness-card" :class="{ resting: !workout }" :style="ws.moduleStyle('fitness')"><header><h2><AppIcon name="fitness" />今日健身</h2><button class="text-link" @click="plan = 'fitness'">制定计划 ↗</button></header><div class="workout-summary"><h3>{{ workout?.title || '休息与恢复' }}</h3><strong v-if="workout">{{ workout.minutes }} <small>分钟</small></strong></div><div v-if="workout" class="exercise-list"><span v-for="(line, i) in workout.exercises.split('\n').filter(Boolean)" :key="i">{{ line }}</span></div><p v-else class="home-caption">今天暂无训练计划，让身体充分休息。</p></section>
+      <section class="home-card fitness-card" :class="{ resting: !workout }" :style="ws.moduleStyle('fitness')"><header><h2><AppIcon name="fitness" />今日健身</h2><button class="text-link" @click="router.push('/fitness')">制定计划 ↗</button></header><div class="workout-summary"><h3>{{ workout?.title || '休息与恢复' }}</h3><strong v-if="workout && workout.minutes">{{ workout.minutes }} <small>分钟</small></strong></div><div v-if="workout" class="exercise-list"><span v-for="(line, i) in workout.exercises.split('\n').filter(Boolean)" :key="i">{{ line }}</span></div><p v-else class="home-caption">今天暂无训练计划，让身体充分休息。</p></section>
       <section id="home-files" class="home-card files-card" :style="ws.moduleStyle('files')"><header><h2><AppIcon name="folder" />常用资料</h2><el-dropdown trigger="click" @command="pick"><button class="icon-button" aria-label="添加资料"><AppIcon name="plus" /></button><template #dropdown><el-dropdown-menu><el-dropdown-item command="file">选择文件</el-dropdown-item><el-dropdown-item command="folder">选择文件夹</el-dropdown-item></el-dropdown-menu></template></el-dropdown></header><div class="file-list"><div v-for="f in files" :key="f.id" class="file-row"><button :title="f.path" @click="openLocal(f.id)"><img v-if="f.icon" :src="f.icon" alt="" /><AppIcon v-else name="document" /><span><strong>{{ f.title }}</strong><small>{{ f.path }}</small></span></button><button class="icon-button" :aria-label="'移除' + f.title" @click="removeEntry(f)">×</button></div></div><button class="file-add" @click="pick('file')"><AppIcon name="add" :size="17" />点击添加文件入口</button><small class="file-hint">文件保留在原位置，移除入口不会删除文件。</small></section>
     </div>
   </div>

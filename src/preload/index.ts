@@ -4,6 +4,7 @@ import type { Result, WorkbenchAPI } from '../shared/types'
 
 const invoke = <T>(channel: string, ...args: unknown[]): Promise<Result<T>> => ipcRenderer.invoke(channel, ...args)
 const api: WorkbenchAPI = {
+  fitness: { get: () => invoke(c.fitnessGet), save: value => invoke(c.fitnessSave, value) },
   weather: { search: query => invoke(c.weatherSearch, query), current: () => invoke(c.weatherCurrent) },
   planner: { get: () => invoke(c.plannerGet), semester: value => invoke(c.semesterSave, value), setHomeSemester: id => invoke(c.semesterHome, id), removeSemester: id => invoke(c.semesterRemove, id), workouts: value => invoke(c.workoutsSave, value), pick: (kind, category) => invoke(c.localPick, kind, category ?? ''), open: id => invoke(c.localOpen, id), remove: id => invoke(c.localRemove, id) },
   shortcuts: {
