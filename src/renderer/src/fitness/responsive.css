@@ -2,6 +2,12 @@
 .is-fitness .page-scroll { display:flex; flex-direction:column; }
 .fitness-page { flex:1 0 auto; height:100%; min-height:100%; display:flex; flex-direction:column; min-width:0; }
 .fitness-page > .fit-page-header,.fitness-page > .fit-navigation-row,.fitness-page > .fit-sub-tabs,.fit-library-tools { flex-shrink:0; }
+.fitness-page .fit-page-header { height:auto; min-height:88px; margin-bottom:18px; padding-bottom:10px; gap:20px; }
+.fitness-page .fit-page-header p { line-height:1.65; margin-top:8px; }
+.fitness-page .fit-navigation-row { height:auto; min-height:50px; margin-top:0; margin-bottom:14px; padding:8px 0; border-bottom:1px solid #dce7f1; }
+.fitness-page .fit-main-tabs,.fitness-page .fit-plan-tabs { height:auto; min-height:34px; }
+.fitness-page[data-view=entry] .fit-navigation-row,.fitness-page[data-view=cycles] .fit-navigation-row { height:auto; min-height:50px; margin-bottom:14px; }
+.fitness-page[data-view=entry] .fit-main-tabs { height:auto; min-height:34px; }
 .fitness-page .fit-plan-pane,.fitness-page .fit-records-pane { flex:1; display:flex; flex-direction:column; min-width:0; }
 .fitness-page .fit-columns,.fitness-page .fit-calendar-columns,.fitness-page .fit-template-workspace { flex:1; align-items:stretch; }
 .fitness-page .fit-main-column > .fit-card { flex:1; display:flex; flex-direction:column; }
@@ -73,9 +79,39 @@
 .fitness-page .fit-rhythm { flex-wrap:wrap; }
 .fitness-page .fit-rhythm > div:not(.fit-rhythm-caption) { height:auto; min-height:52px; }
 .fitness-page .fit-card header,.fitness-page .fit-compare-toolbar,.fitness-page .fit-list-filters { flex-wrap:wrap; height:auto; }
+/* Controls grow with text instead of retaining the design sheet's fixed heights. */
+.fitness-page input:not([type=checkbox]):not([type=radio]):not([type=file]):not(.el-input__inner),.fitness-page select { height:auto; min-height:42px; line-height:1.5; padding-top:9px; padding-bottom:9px; }
+.fitness-page input[type=number] { appearance:textfield; font-variant-numeric:tabular-nums; }
+.fitness-page input[type=number]::-webkit-inner-spin-button,.fitness-page input[type=number]::-webkit-outer-spin-button { appearance:none; margin:0; }
+.fitness-page label,.fitness-page .fit-form-grid > *,.fitness-page .fit-identity-pair > * { min-width:0; }
+.fitness-page .fit-form-grid input,.fitness-page .fit-form-grid select,.fitness-page .fit-identity-pair input,.fitness-page .fit-identity-pair select { width:100%; }
+.fitness-page .fit-unit-input { min-width:0; overflow:hidden; }
+.fitness-page .fit-unit-input > input { flex:1 1 0; min-width:0; width:0; padding:9px 10px!important; min-height:42px!important; }
+.fitness-page .fit-unit-input > span { flex:0 0 auto; padding:0 10px; white-space:nowrap; }
+.fitness-page .fit-unit-input > select { flex:0 0 80px; width:80px; min-width:80px; border:0; border-left:1px solid #dce6f3; border-radius:0; padding-left:8px; }
+.fitness-page .fit-editor-scroll { overflow-x:auto; padding-bottom:4px; }
+.fitness-page .fit-editor-scroll .fit-table-head,.fitness-page .fit-editor-scroll .fit-item-summary { grid-template-columns:24px minmax(180px,1fr) 76px 96px 130px 176px 100px; gap:10px; min-width:878px; }
+.fitness-page .fit-editor-scroll .fit-table-head { display:grid; }
+.fitness-page .fit-set-editor { min-width:650px; }
+.fitness-page .fit-item-summary > input { min-height:42px!important; }
+.fitness-page .fit-template-bottom { grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr); }
+.fitness-page .fit-template-bottom .fit-apply-panel .fit-form-grid { grid-template-columns:76px minmax(160px,1fr) minmax(180px,1fr); }
+.fitness-page .fit-template-identity > input { min-width:220px; }
+.fitness-page .fit-template-bottom .fit-form-grid select { min-height:44px; }
+.fitness-page .fit-list-filters > select { width:auto; min-width:130px; }
+.fitness-page .fit-entry-source { flex-wrap:wrap; }
+.fitness-page .fit-entry-source-note { height:auto; min-height:34px; }
+.fitness-page .fit-calendar-record,.fitness-page .fit-planned,.fitness-page .fit-badge,.fitness-page .fit-tags span { white-space:normal; overflow-wrap:anywhere; }
+.fitness-page .fit-actual-summary { height:auto; min-height:50px; flex-wrap:wrap; }
+.fitness-page .fit-detail-identity label,.fitness-page .fit-label { line-height:1.6; }
+.fitness-page .fit-detail-identity input,.fitness-page .fit-detail-identity select { margin-top:6px; }
+.fitness-page .el-date-editor.el-input { height:auto; min-height:42px; }
+.fitness-page .el-date-editor .el-input__inner { height:auto; min-height:24px!important; line-height:1.5; }
+.fitness-page .el-date-editor .el-input__wrapper { min-height:42px; }
+.fitness-page .fit-month-chart .el-date-editor.el-input { width:180px; flex-shrink:0; }
 @media(max-width:1100px) {
  .fitness-page .fit-hero-rhythm { margin-right:28%; }
- .fitness-page .fit-table-head,.fitness-page .fit-item-summary { grid-template-columns:20px minmax(100px,1fr) 45px 55px 75px 75px 70px; gap:6px; }
+ .fitness-page .fit-template-bottom { grid-template-columns:minmax(0,1fr); }
  .fitness-page[data-view=stats] .fit-record-toolbar { position:static; margin:8px 0; }
 }
 @media(max-width:1000px) {
