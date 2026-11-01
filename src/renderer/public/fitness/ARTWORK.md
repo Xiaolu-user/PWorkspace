@@ -10,6 +10,6 @@
 
 ## 原稿插画复用
 
-`design-artwork.png` 为本聊天中生成并批准的第一张设计稿。`DesignArt.vue` 通过 SVG 视窗只显示其中的吉祥物、哑铃、壶铃和月亮插画区域，界面的文字、按钮与布局均为真实组件，不是整张截图覆盖。
+`design-artwork.png` 为本聊天中生成并批准的第一张设计稿。装饰图现已使用内置 imagegen 工具参考原稿重新生成透明 PNG，位于 `decor/`。`DesignArt.vue` 直接展示这些透明素材，不再裁切整张设计稿，避免带入矩形底色。提示词见 `decor/PROMPTS.json`。
 
 既有 `hero.png`、`kettlebell.png` 为上一版生成的独立插画，当前主要界面已改为复用原稿对应区域。

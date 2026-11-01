@@ -1,0 +1,44 @@
+[
+  {
+    "kind": "mint",
+    "prompt": "Use case: stylized-concept. Create ONE isolated transparent PNG UI decoration, NOT a UI screenshot. Reference only for toy-like soft 3D clay style and object identity. A single mint green dumbbell, angled three-quarter view, centered. Soft studio lighting and clean silhouette, generous transparent margins, NO backdrop, NO ground plane, NO rectangular patch, NO text, no watermark. Truly transparent background outside object; preserve opaque colors on object.",
+    "tool": "built-in imagegen",
+    "transparent_background": true
+  },
+  {
+    "kind": "lavender",
+    "prompt": "Use case: stylized-concept. Create ONE isolated transparent PNG UI decoration, NOT a UI screenshot. Reference only for toy-like soft 3D clay style and object identity. A single lavender purple dumbbell, angled three-quarter view, centered. Soft studio lighting and clean silhouette, generous transparent margins, NO backdrop, NO ground plane, NO rectangular patch, NO text, no watermark. Truly transparent background outside object; preserve opaque colors on object.",
+    "tool": "built-in imagegen",
+    "transparent_background": true
+  },
+  {
+    "kind": "violet",
+    "prompt": "Use case: stylized-concept. Create ONE isolated transparent PNG UI decoration, NOT a UI screenshot. Reference only for toy-like soft 3D clay style and object identity. A single violet purple kettlebell, front three-quarter view, centered. Soft studio lighting and clean silhouette, generous transparent margins, NO backdrop, NO ground plane, NO rectangular patch, NO text, no watermark. Truly transparent background outside object; preserve opaque colors on object.",
+    "tool": "built-in imagegen",
+    "transparent_background": true
+  },
+  {
+    "kind": "pink",
+    "prompt": "Use case: stylized-concept. Create ONE isolated transparent PNG UI decoration, NOT a UI screenshot. Reference only for toy-like soft 3D clay style and object identity. A single pastel pink kettlebell, front three-quarter view, centered. Soft studio lighting and clean silhouette, generous transparent margins, NO backdrop, NO ground plane, NO rectangular patch, NO text, no watermark. Truly transparent background outside object; preserve opaque colors on object.",
+    "tool": "built-in imagegen",
+    "transparent_background": true
+  },
+  {
+    "kind": "peach",
+    "prompt": "Use case: stylized-concept. Create ONE isolated transparent PNG UI decoration, NOT a UI screenshot. Reference only for toy-like soft 3D clay style and object identity. A peach orange crescent moon with two tiny matching sparkles. Soft studio lighting and clean silhouette, generous transparent margins, NO backdrop, NO ground plane, NO rectangular patch, NO text, no watermark. Truly transparent background outside object; preserve opaque colors on object.",
+    "tool": "built-in imagegen",
+    "transparent_background": true
+  },
+  {
+    "kind": "hero",
+    "prompt": "Use case: stylized-concept. Create ONE isolated transparent PNG UI decoration, NOT a UI screenshot. Reference only for toy-like soft 3D clay style and object identity. The same cute mint green round mascot from the reference, stretching sideways with one arm curving over its head and the other on the ground, short legs, smiling face and rosy cheeks. A small purple dumbbell and peach ball beside it. Full character. Soft studio lighting and clean silhouette, generous transparent margins, NO backdrop, NO ground plane, NO rectangular patch, NO text, no watermark. Truly transparent background outside object; preserve opaque colors on object.",
+    "tool": "built-in imagegen",
+    "transparent_background": true
+  },
+  {
+    "kind": "note-character",
+    "prompt": "Use case: stylized-concept. Create ONE isolated transparent PNG UI decoration, NOT a UI screenshot. Reference only for toy-like soft 3D clay style and object identity. The same cute mint green round mascot from the reference holding a small cream notepad and yellow pencil, smiling, full body. Soft studio lighting and clean silhouette, generous transparent margins, NO backdrop, NO ground plane, NO rectangular patch, NO text, no watermark. Truly transparent background outside object; preserve opaque colors on object.",
+    "tool": "built-in imagegen",
+    "transparent_background": true
+  }
+]

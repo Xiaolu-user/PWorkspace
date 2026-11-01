@@ -8,6 +8,7 @@ import RecordsPane from '../fitness/RecordsPane.vue'
 import AppIcon from '../components/AppIcon.vue'
 import '../fitness/fitness.css'
 import '../fitness/design-match.css'
+import '../fitness/responsive.css'
 const route=useRoute(),router=useRouter(),fs=useFitness(),plan=ref<InstanceType<typeof PlanPane>>(),library=ref<InstanceType<typeof LibraryPane>>(),records=ref<InstanceType<typeof RecordsPane>>()
 const pages:Record<string,{title:string;subtitle:string}>={overview:{title:'健身计划',subtitle:'按周期安排，按自己的节奏调整。'},cycles:{title:'周期编排',subtitle:'按基础节奏生成训练日程，并支持按轮灵活调整。'},templates:{title:'训练模板',subtitle:'把常用训练存成模板，按需复用到每一轮。'},library:{title:'动作库',subtitle:'收好常用动作，按自己的训练方式分类。'},calendar:{title:'训练记录',subtitle:'用不同视角，回顾每一次训练。'},stats:{title:'训练统计',subtitle:'看见长期变化，不只是一串数字。'},compare:{title:'动作对比',subtitle:'把同一个动作的历次表现放在一起看。'},list:{title:'记录明细',subtitle:'方便查找、补充和整理过去的训练。'},entry:{title:'补录训练',subtitle:'记下实际完成的内容，已知多少就填多少。'}}
 const page=computed(()=>pages[String(route.query.view)]?String(route.query.view):'overview'),isPlan=computed(()=>['overview','cycles','templates'].includes(page.value)),isRecord=computed(()=>['calendar','stats','compare','list','entry'].includes(page.value))
