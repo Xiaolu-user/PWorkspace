@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useFitness, tone } from './store'
 import { addDays, clone, dayOn, newDay, volume, setCount, type TrainingRecord, type FitnessItem } from '../../../shared/fitness'
@@ -11,15 +12,15 @@ import FitnessChart from './FitnessChart.vue'
 import AppIcon from '../components/AppIcon.vue'
 import DesignArt from './DesignArt.vue'
 import ExerciseImage from './ExerciseImage.vue'
-const props=defineProps<{page:string}>(),emit=defineEmits<{navigate:[page:string]}>(),fs=useFitness(),today=localDate()
-const month=ref(today.slice(0,7)),selectedDate=ref(today),dateFrom=ref(month.value+'-01'),dateTo=ref(today),query=ref(''),type=ref('全部'),source=ref('全部'),pageNumber=ref(1),selectedId=ref(''),checked=ref<string[]>([]),group=ref('按周'),metric=ref('容量'),comparePrevious=ref(false),previewRecord=ref(false),summaryOnly=ref(false),recordForm=ref<HTMLFormElement>(),imported=ref<TrainingRecord[]>([]),importError=ref(''),showDifference=ref(false),showPlan=ref(false),exportFormat=ref('csv')
+const props=defineProps<{page:string}>(),emit=defineEmits<{navigate:[page:string]}>(),fs=useFitness(),today=localDate(),route=useRoute()
+const month=ref(today.slice(0,7)),selectedDate=ref(today),dateFrom=ref(month.value+'-01'),dateTo=ref(today),query=ref(''),type=ref('全部'),source=ref('全部'),pageNumber=ref(1),selectedId=ref(String(route.query.record||'')),checked=ref<string[]>([]),group=ref('按周'),metric=ref('容量'),comparePrevious=ref(false),previewRecord=ref(false),summaryOnly=ref(false),recordForm=ref<HTMLFormElement>(),imported=ref<TrainingRecord[]>([]),importError=ref(''),showDifference=ref(false),showPlan=ref(false),exportFormat=ref('csv')
 const blankRecord=():TrainingRecord=>({id:crypto.randomUUID(),date:today,title:'',type:'自定义',minutes:null,notes:'',tags:'',source:'手动补录',items:[],updated:new Date().toISOString()})
 const draft=ref<TrainingRecord>(blankRecord()),recordTemplate=ref(''),sourceMode=ref('空白补录'),originalItems=ref<FitnessItem[]>([])
 const allRecords=computed(()=>[...fs.data.records].sort((a,b)=>b.date.localeCompare(a.date))),filtered=computed(()=>allRecords.value.filter(r=>r.date>=dateFrom.value&&r.date<=dateTo.value&&(type.value==='全部'||r.type===type.value)&&(source.value==='全部'||r.source===source.value)&&(r.title+r.notes+r.items.map(i=>fs.exercise(i.exerciseId)?.name).join(' ')).toLowerCase().includes(query.value.toLowerCase()))),monthRecords=computed(()=>allRecords.value.filter(r=>r.date.startsWith(month.value)&&(type.value==='全部'||r.type===type.value))),calendarRecords=computed(()=>monthRecords.value.filter(r=>r.date===selectedDate.value)),detail=computed(()=>allRecords.value.find(r=>r.id===selectedId.value)||(props.page==='list'?allRecords.value[0]:calendarRecords.value[0]))
 watch([dateFrom,dateTo,query,type,source],()=>pageNumber.value=1)
 watch(()=>props.page,p=>{if(p==='entry'&&!editingId.value){draft.value=blankRecord();summaryOnly.value=false;sourceMode.value='空白补录'}if(p!=='entry')editingId.value=''} )
 const editingId=ref('')
-onMounted(()=>{if(allRecords.value.length){selectedDate.value=allRecords.value[0].date;selectedId.value=allRecords.value[0].id}})
+onMounted(()=>{if(allRecords.value.length){const chosen=allRecords.value.find(r=>r.id===route.query.record)||allRecords.value[0];selectedDate.value=chosen.date;selectedId.value=chosen.id}})
 watch(()=>props.page,p=>{if(p==='list'&&!selectedId.value)selectedId.value=allRecords.value[0]?.id||''})
 const calendar=computed(()=>{const first=month.value+'-01',weekday=(new Date(first+'T12:00:00').getDay()+6)%7;return Array.from({length:Math.ceil((weekday+new Date(Number(month.value.slice(0,4)),Number(month.value.slice(5)),0).getDate())/7)*7},(_,i)=>addDays(first,i-weekday))})
 function shiftMonth(n:number):void{const d=new Date(month.value+'-01T12:00:00');d.setMonth(d.getMonth()+n);month.value=localDate(d).slice(0,7)}
