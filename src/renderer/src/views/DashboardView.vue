@@ -9,7 +9,7 @@ import TodayFitnessCard from '../fitness/TodayFitnessCard.vue'
 import { localDate } from '../../../shared/date'
 import { isReminderActive, compareReminderTasks, reminderLabel } from '../../../shared/reminders'
 import ReminderNotice from '../components/ReminderNotice.vue'
-import { coursesOn, semesterWeek, emptySemester, courseTimeSlots, courseSlotSpan, type CourseOccurrence, type PlannerData, type LocalEntry } from '../../../shared/planner'
+import { coursesOn, semesterWeek, emptySemester, defaultSlots, courseSlotSpan, type CourseOccurrence, type PlannerData, type LocalEntry } from '../../../shared/planner'
 import type { Task } from '../../../shared/types'
 import AppIcon from '../components/AppIcon.vue'
 import TaskDialog from '../components/TaskDialog.vue'
@@ -38,13 +38,12 @@ const viewDays = computed(() => Array.from({ length: 7 }, (_, i) => { const day 
 const viewWeek = computed(() => semesterWeek(data.value.semester.startDate, localDate(viewMonday.value)))
 const viewRange = computed(() => { const sunday = new Date(viewMonday.value); sunday.setDate(sunday.getDate() + 6); const fmt = (day: Date) => `${String(day.getMonth() + 1).padStart(2, '0')}.${String(day.getDate()).padStart(2, '0')}`; return `${fmt(viewMonday.value)} – ${fmt(sunday)}` })
 const viewCourseCount = computed(() => viewDays.value.reduce((total, day) => total + day.courses.length, 0))
-// Each time arranged in 学期课程 gets one grid row. Rows are minmax(rowMin, auto), so text size,
-// name length and room length all push the row taller instead of being clipped.
+// Use the home semester bell schedule for both the time axis and course spans.
 const ROW_MIN = 46
 const courseFontScale = computed(() => Math.max(80, Math.min(160, ws.preferences.appearance.courseFontScale)) / 100)
 const courseTextScale = computed(() => ws.preferences.appearance.fontScale * ws.preferences.appearance.modules.courses.fontScale / 10000 * courseFontScale.value)
 const rowMin = computed(() => Math.round(ROW_MIN * courseTextScale.value))
-const weekSlots = computed(() => courseTimeSlots(viewDays.value.flatMap(day => day.courses)))
+const weekSlots = computed(() => data.value.semester.startDate ? (data.value.semester.slots.length ? data.value.semester.slots : defaultSlots()) : [])
 const gridStyle = computed<CSSProperties>(() => weekSlots.value.length ? { gridTemplateRows: `repeat(${weekSlots.value.length}, minmax(${rowMin.value}px, auto))` } : { height: '132px' })
 const periodMinutes = (time: string): number => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5))
 function courseCell(start: string, end: string, dayIndex: number): CSSProperties {

@@ -49,7 +49,7 @@ const courseOf = (id: string) => active.value.courses.find(course => course.id =
 const courseLessons = (id: string): number => occurrences.value.filter(item => item.courseId === id && !item.cancelled).length
 const courseWeeks = (id: string): number[] => [...new Set(active.value.courses.find(course => course.id === id)?.schedules.flatMap(schedule => schedule.weeks) || [])].sort((a, b) => a - b)
 function scheduleText(schedule: { day: number; start: string; end: string; room: string }): string { return `周${DAY_NAMES[schedule.day - 1]} ${schedule.start}–${schedule.end}${schedule.room ? ' · ' + schedule.room : ''}` }
-function slotText(occurrence: CourseOccurrence): string { return `${slotSpanText(slots.value, occurrence.start, occurrence.end)} · ${occurrence.start}` }
+function slotText(occurrence: CourseOccurrence): string { return `${slotSpanText(slots.value, occurrence.start, occurrence.end)} · ${occurrence.start}–${occurrence.end}` }
 
 async function load(): Promise<void> {
   try {
@@ -200,7 +200,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
         </div>
         <div class="week-body" :style="{ minHeight: slots.length * ROW + 'px' }">
           <div class="time-col" :style="{ height: slots.length * ROW + 'px' }">
-            <div v-for="(slot, index) in slots" :key="index" class="slot-label" :style="{ top: index * ROW + 'px' }"><b>第 {{ index + 1 }} 节</b><span>{{ slot.start }}</span></div>
+            <div v-for="(slot, index) in slots" :key="index" class="slot-label" :style="{ top: index * ROW + 'px' }"><b>第 {{ index + 1 }} 节</b><span>{{ slot.start }}</span><span class="slot-end">{{ slot.end }}</span></div>
             <span v-for="line in breaks" :key="'b' + line.row" class="noon-label" :style="{ top: line.row * ROW + 'px' }">{{ line.label }}</span>
           </div>
           <div v-for="day in days" :key="day.day" class="day-col" :class="{ today: day.date === today }" :style="{ height: slots.length * ROW + 'px' }">
