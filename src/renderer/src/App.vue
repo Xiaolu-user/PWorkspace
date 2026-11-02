@@ -11,7 +11,7 @@ import { unwrap, report } from './lib/api'
 const route = useRoute(); const router = useRouter(); const workspace = useWorkspace(); const editor = useEditor()
 const fitnessCrumbs = computed(() => {
   const view=String(route.query.view||'overview')
-  return ({overview:['健身计划','训练计划','概览'],cycles:['健身计划','训练计划','周期编排'],templates:['健身计划','训练计划','训练模板'],library:['健身计划','动作库'],calendar:['健身计划','训练记录'],stats:['健身计划','训练记录','训练统计'],compare:['训练记录','动作对比'],list:['健身计划','训练记录','记录明细'],entry:['训练记录','补录训练']} as Record<string,string[]>)[view]||['健身计划']
+  return ({overview:['健身计划','训练计划','概览'],cycles:['健身计划','训练计划','循环设置'],templates:['健身计划','训练计划','常用训练内容'],library:['健身计划','动作库'],calendar:['健身计划','训练记录'],stats:['健身计划','训练记录','训练统计'],compare:['训练记录','动作对比'],list:['健身计划','训练记录','记录明细'],entry:['训练记录','补录训练']} as Record<string,string[]>)[view]||['健身计划']
 })
 const changingTheme = ref(false)
 async function toggleTheme(): Promise<void> {
