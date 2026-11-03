@@ -8,15 +8,16 @@ export const DEFAULT_EXERCISE_IMAGE = 'fitness/cartoon/default-exercise.png'
 const presetIds = new Set(catalog.map(e => e.id))
 const isCustom = (e: Exercise): boolean => !e.sourceName && /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(e.id)
 export function withExerciseImage(e: Exercise): Exercise {
-  const image = e.image || DEFAULT_EXERCISE_IMAGE
-  return { ...e, image, images: e.image && e.images.length ? e.images : [image], artworkStatus: 'ready' }
+  const matched = (catalog as Exercise[]).find(base => base.name === e.name || !!base.alias && base.alias === e.name)
+  const image = (!e.image || e.image === DEFAULT_EXERCISE_IMAGE) && matched ? matched.image : e.image || DEFAULT_EXERCISE_IMAGE
+  return { ...e, image, images: image !== e.image ? [image] : e.image && e.images.length ? e.images : [image], artworkStatus: 'ready' }
 }
 export const useFitness = defineStore('fitness', () => {
   const data = ref<FitnessData>(emptyFitness()), loaded = ref(false)
   const exercises = computed(() => {
     const edits = new Map(data.value.exercises.map(e => [e.id, e]))
     return [
-      ...(catalog as Exercise[]).map(base => {
+      ...(catalog as Exercise[]).filter(base => !data.value.exercises.some(e => isCustom(e) && (e.name === base.name || !!base.alias && e.name === base.alias))).map(base => {
         const edit = edits.get(base.id)
         if (!edit) return withExerciseImage(base)
         const image = edit.image.startsWith('data:') ? edit.image : base.image
@@ -26,7 +27,7 @@ export const useFitness = defineStore('fitness', () => {
     ]
   })
   const availableExercises = exercises
-  const exercise = (id: string): Exercise | undefined => exercises.value.find(e => e.id === id)
+  const exercise = (id: string): Exercise | undefined => exercises.value.find(e => e.id === id) || (catalog as Exercise[]).filter(e => e.id === id).map(withExerciseImage)[0]
   function item(id: string): FitnessItem { return { exerciseId: id, sets: Array.from({ length: 3 }, () => newSet()), rest: 60, notes: '' } }
   async function save(message = ''): Promise<boolean> { try { unwrap(await window.workbench.fitness.save(clone(data.value))); if (message) ElMessage.success(message); return true } catch (e) { report(e); return false } }
   async function load(): Promise<void> {
