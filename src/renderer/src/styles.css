@@ -396,7 +396,7 @@ kbd { font-size:calc(11px * var(--text-scale, 1)); border: 1px solid #dfe5df; pa
 .idea-row>span { flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis }
 .idea-row small { color:#97a09a;font-size:calc(10px * var(--text-scale, 1)) }
 /* The timetable hugs its own content; leftover column height is handed to the fitness card. */
-.courses-card { flex:0 0 auto }
+.courses-card { flex:0 0 auto; align-self:start; width:100% }
 .courses-card h2 .el-icon { color:#9674cc }
 .courses-card .text-link,.fitness-card .text-link { font-size:calc(11px * var(--text-scale, 1));white-space:nowrap }
 .week-nav { display:flex;align-items:center;gap:8px;margin:12px 0 9px }
