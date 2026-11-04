@@ -10,7 +10,7 @@ import '../fitness/fitness.css'
 import '../fitness/responsive.css'
 import '../fitness/embedded.css'
 const route=useRoute(),router=useRouter(),fs=useFitness(),plan=ref<InstanceType<typeof PlanPane>>(),library=ref<InstanceType<typeof LibraryPane>>(),records=ref<InstanceType<typeof RecordsPane>>()
-const pages:Record<string,{title:string;subtitle:string}>={overview:{title:'健身计划',subtitle:'安排接下来怎么练，把实际完成的训练留在记录里。'},cycles:{title:'循环设置',subtitle:'用三步设置训练与休息的循环节奏。'},templates:{title:'常用训练内容',subtitle:'保存常练的动作组合，在计划里按天选用。'},library:{title:'动作库',subtitle:'收好常用动作，按自己的训练方式分类。'},calendar:{title:'训练记录',subtitle:'回看每一次真实的训练，让努力留下清晰的足迹。'},stats:{title:'训练记录',subtitle:'看见长期变化，不只是一串数字。'},compare:{title:'动作对比',subtitle:'把同一个动作的历次表现放在一起看。'},list:{title:'训练记录',subtitle:'方便查找、补充和整理过去的训练。'},entry:{title:'补录训练',subtitle:'记下实际完成的内容，已知多少就填多少。'}}
+const pages:Record<string,{title:string;subtitle:string}>={overview:{title:'健身计划',subtitle:'安排接下来怎么练，把实际完成的训练留在记录里。'},cycles:{title:'循环设置',subtitle:'用三步设置训练与休息的循环节奏。'},templates:{title:'常用训练内容',subtitle:'保存常练的动作组合，在计划里按天选用。'},library:{title:'动作库',subtitle:'收好常用动作，按自己的训练方式分类。'},calendar:{title:'训练记录',subtitle:'回看每一次真实的训练，让努力留下清晰的足迹。'},stats:{title:'训练记录',subtitle:'回看每一次训练，也看见自己的变化。'},compare:{title:'动作对比',subtitle:'把同一个动作的历次表现放在一起看。'},list:{title:'训练记录',subtitle:'方便查找、补充和整理过去的训练。'},entry:{title:'补录训练',subtitle:'记下实际完成的内容，已知多少就填多少。'}}
 const page=computed(()=>pages[String(route.query.view)]?String(route.query.view):'overview'),isPlan=computed(()=>['overview','cycles','templates'].includes(page.value)),isRecord=computed(()=>['calendar','stats','compare','list','entry'].includes(page.value))
 const navigate=(view:string)=>void router.push({path:'/fitness',query:view==='overview'?{}:{view}})
 onMounted(()=>fs.load())

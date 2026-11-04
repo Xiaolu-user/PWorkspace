@@ -12,6 +12,12 @@ describe('训练频率的统计范围', () => {
     expect(trainingFrequency([],'2026-01-31','2026-03-02','month','2026-01-01',4).map(b=>[b.start,b.end])).toEqual([['2026-01-31','2026-01-31'],['2026-02-01','2026-02-28'],['2026-03-01','2026-03-02']])
     expect(trainingFrequency([],'2026-12-31','2027-01-02','month','2026-01-01',4).map(b=>b.label)).toEqual(['2026年12月','2027年1月'])
   })
+  it('全年按月生成十二根柱子，空月份保留且不计入范围外记录', () => {
+    const buckets=trainingFrequency(records('2025-12-31','2026-01-01','2026-01-31','2026-06-15','2026-12-31','2027-01-01'),'2026-01-01','2026-12-31','month','2026-01-01',4)
+    expect(buckets).toHaveLength(12)
+    expect(buckets.map(b=>b.records.length)).toEqual([2,0,0,0,0,1,0,0,0,0,0,1])
+    expect(buckets[11].end).toBe('2026-12-31')
+  })
   it('训练周期跟随计划起始日，而不是筛选起始日', () => {
     const buckets=trainingFrequency([],'2026-10-30','2026-11-08','cycle','2026-11-01',4)
     expect(buckets.map(b=>[b.start,b.end,b.label])).toEqual([['2026-10-30','2026-10-31','计划开始前'],['2026-11-01','2026-11-04','第 1 周期'],['2026-11-05','2026-11-08','第 2 周期']])
