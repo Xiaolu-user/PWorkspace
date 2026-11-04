@@ -47,3 +47,5 @@
 .embedded-fitness .fit-list-detail .fit-record-metrics>span{padding:9px 10px;border-radius:8px;background:#f1f7fc;font-size:13px;overflow-wrap:anywhere}
 .embedded-fitness .fit-list-detail .fit-record-metrics small{display:block;margin-top:5px;font-size:10px;color:#91a6b5}
 .embedded-fitness .fit-list-detail-heading>h2{display:block;white-space:normal;min-width:0}.embedded-fitness .fit-list-detail-heading>h2 .app-icon{display:inline-block;vertical-align:middle}
+
+.embedded-fitness .fit-type-legend{display:flex;align-items:center;gap:0;border:0;border-radius:7px;padding:7px 10px;margin:8px 0;background:transparent;color:var(--secondary);font-size:12px;text-align:left}.embedded-fitness .fit-type-legend.active{background:var(--accent-soft);color:var(--primary)}
