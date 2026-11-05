@@ -23,6 +23,7 @@ const api: WorkbenchAPI = {
   dashboard: { getSummary: () => invoke(c.dashboard) }, search: { query: term => invoke(c.search, term) },
   backup: { create: () => invoke(c.backupCreate), restore: () => invoke(c.backupRestore) },
   app: {
+    loginStartup: () => invoke(c.loginStartup), setLoginStartup: enabled => invoke(c.setLoginStartup, enabled),
     setAppearance: value => invoke(c.setAppearance, value),
     info: () => invoke(c.info), preferences: () => invoke(c.preferences), setCloseBehavior: value => invoke(c.setCloseBehavior, value),
     openExternal: url => invoke(c.openExternal, url), openDataDirectory: () => invoke(c.openDataDirectory), ready: () => invoke(c.ready), respondClose: (token, allow) => invoke(c.respondClose, token, allow),

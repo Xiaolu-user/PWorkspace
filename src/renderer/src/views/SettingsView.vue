@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { defaultAppearance, defaultCalendarColors, calendarColorLabels, moduleLabels, type Appearance, type WeatherLocation } from '../../../shared/appearance'
 import { ElMessage } from 'element-plus'
 import { useWorkspace } from '../stores/workspace'
 import { useEditor } from '../stores/editor'
 import { unwrap, report, openLink } from '../lib/api'
+import type { LoginStartup } from '../../../shared/types'
 import AppIcon from '../components/AppIcon.vue'
 const workspace = useWorkspace(); const editor = useEditor()
 const operation = ref<'backup' | 'restore' | null>(null); const savingPreference = ref(false)
@@ -12,6 +13,22 @@ const latestBackup = ref(''); const recoveryBackup = ref('')
 const appearance = ref<Appearance>(defaultAppearance()); const savingAppearance = ref(false)
 const uploading = ref(false), cityQuery = ref(''), searchingCities = ref(false), cityResults = ref<WeatherLocation[]>([])
 const backgroundInput = ref<HTMLInputElement>()
+const loginStartup = ref<LoginStartup>({ supported: false, enabled: false })
+const loadingStartup = ref(true), savingStartup = ref(false), startupError = ref('')
+async function loadStartup(): Promise<void> {
+  loadingStartup.value = true; startupError.value = ''
+  try { loginStartup.value = unwrap(await window.workbench.app.loginStartup()) }
+  catch (error) { startupError.value = '无法读取开机启动设置'; report(error) }
+  finally { loadingStartup.value = false }
+}
+onMounted(loadStartup)
+async function setStartup(value: unknown): Promise<void> {
+  if (savingStartup.value || typeof value !== 'boolean') return
+  savingStartup.value = true
+  try { loginStartup.value = unwrap(await window.workbench.app.setLoginStartup(value)); ElMessage.success(value ? '已开启开机自动启动' : '已关闭开机自动启动') }
+  catch (error) { report(error); await loadStartup() }
+  finally { savingStartup.value = false }
+}
 async function uploadBackground(event: Event): Promise<void> {
   const input = event.target as HTMLInputElement, file = input.files?.[0]
   if (!file) return
@@ -91,7 +108,7 @@ async function restoreBackup(): Promise<void> {
       <el-form label-position="top" :disabled="savingAppearance || !!operation" class="appearance-form"><div class="appearance-global"><el-form-item label="全局文字大小（%）"><el-input-number v-model="appearance.fontScale" aria-label="全局文字大小" :min="90" :max="160" :step="5" /></el-form-item><el-form-item label="弹窗大小（%）"><el-input-number v-model="appearance.dialogScale" aria-label="弹窗大小" :min="100" :max="150" :step="5" /></el-form-item><el-form-item label="弹窗文字大小（%）"><el-input-number v-model="appearance.dialogFontScale" aria-label="弹窗文字大小" :min="100" :max="150" :step="5" /></el-form-item></div>
       <div class="appearance-module-row appearance-module-header"><span>首页模块</span><span>模块缩放（%）</span><span>文字缩放（%）</span></div><div v-for="(label, key) in moduleLabels" :key="key" class="appearance-module-row"><strong>{{ label }}</strong><el-input-number v-model="appearance.modules[key].scale" :aria-label="label + '模块大小'" :min="80" :max="140" :step="5" /><el-input-number v-model="appearance.modules[key].fontScale" :aria-label="label + '文字大小'" :min="80" :max="160" :step="5" /></div><div class="appearance-actions"><el-button type="primary" :loading="savingAppearance" @click="saveAppearance">保存显示设置</el-button></div></el-form>
     </section>
-    <section class="panel settings-section"><div class="panel-heading"><h2><AppIcon name="monitor" :size="20" />桌面体验</h2></div><div class="setting-row"><div><strong>关闭窗口时</strong><p>你可以让工作台在托盘等待，也可以直接退出。</p></div><el-radio-group :model-value="workspace.preferences.closeBehavior" :disabled="savingPreference || !!operation" @update:model-value="setBehavior"><el-radio-button value="tray">留在托盘</el-radio-button><el-radio-button value="quit">退出软件</el-radio-button></el-radio-group></div><div class="setting-note"><AppIcon name="done" :size="16" /> 真正退出前，会提醒你保存尚未保存的笔记。</div></section>
+    <section class="panel settings-section"><div class="panel-heading"><h2><AppIcon name="monitor" :size="20" />桌面体验</h2></div><div class="setting-row startup-setting"><div><strong id="login-startup-label">开机自动启动</strong><p>{{ startupError || (loadingStartup ? '正在读取系统设置…' : loginStartup.supported ? '开启后，登录 Windows 时自动打开拾光工作台。' : '安装后的 Windows 版本可启用此功能。') }}</p><button v-if="startupError" class="text-link" @click="loadStartup">重新读取</button></div><el-switch :model-value="loginStartup.enabled" aria-labelledby="login-startup-label" aria-label="开机自动启动" :loading="loadingStartup || savingStartup" :disabled="loadingStartup || savingStartup || !loginStartup.supported || !!startupError || !!operation" @change="setStartup" /></div><div class="setting-row"><div><strong>关闭窗口时</strong><p>你可以让工作台在托盘等待，也可以直接退出。</p></div><el-radio-group :model-value="workspace.preferences.closeBehavior" :disabled="savingPreference || !!operation" @update:model-value="setBehavior"><el-radio-button value="tray">留在托盘</el-radio-button><el-radio-button value="quit">退出软件</el-radio-button></el-radio-group></div><div class="setting-note"><AppIcon name="done" :size="16" /> 真正退出前，会提醒你保存尚未保存的笔记。</div></section>
     <section class="panel settings-section"><div class="panel-heading"><h2><AppIcon name="folder" :size="20" />数据与备份</h2><span class="local-badge"><span class="status-dot"></span>仅保存在本机</span></div>
       <div class="data-path"><span>数据文件夹</span><code>{{ workspace.info?.dataPath || '正在读取…' }}</code><el-button :disabled="!!operation" @click="openDirectory"><AppIcon name="folder" :size="16" />打开文件夹</el-button></div>
       <div class="backup-cards"><article><span class="setting-feature-icon green"><AppIcon name="download" :size="24" /></span><h3>保存一份备份</h3><p>把所有任务、笔记、链接和设置保存为一个文件。你也可以将它放到移动硬盘中。</p><el-button type="primary" :loading="operation === 'backup'" :disabled="!!operation" @click="createBackup">创建备份</el-button></article><article><span class="setting-feature-icon amber"><AppIcon name="upload" :size="24" /></span><h3>从备份中恢复</h3><p>恢复会替换当前内容。工作台会先校验文件，并保留恢复前的数据，以便找回。</p><el-button :loading="operation === 'restore'" :disabled="!!operation" @click="restoreBackup">选择备份并恢复</el-button></article></div>

@@ -1,4 +1,5 @@
 export const channels = {
+  loginStartup: 'wb:app:loginStartup', setLoginStartup: 'wb:app:setLoginStartup',
   fitnessGet: 'wb:fitness:get', fitnessSave: 'wb:fitness:save', fitnessExport: 'wb:fitness:export',
   weatherSearch: 'wb:weather:search', weatherCurrent: 'wb:weather:current',
   taskAcknowledge: 'wb:task:acknowledge', setAppearance: 'wb:app:setAppearance',

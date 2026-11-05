@@ -9,6 +9,7 @@ export interface Bookmark extends BookmarkInput { id: string; createdAt: string;
 export interface Preferences { closeBehavior: 'tray' | 'quit'; trayExplained: boolean; appearance: import('./appearance').Appearance }
 export interface Dashboard { today: Task[]; overdue: Task[]; recentNotes: Note[]; bookmarks: Bookmark[]; totalTodo: number; totalDone: number; noteCount: number; bookmarkCount: number }
 export interface SearchResults { tasks: Task[]; notes: Note[]; bookmarks: Bookmark[] }
+export interface LoginStartup { supported: boolean; enabled: boolean }
 export interface AppInfo { version: string; dataPath: string; backupPath: string; startupWarning: string | null }
 export interface BackupResult { path: string; safetyBackup?: string }
 export interface ShortcutImport { added: number; links: number; duplicates: number; skipped: string[] }
@@ -61,6 +62,8 @@ export interface WorkbenchAPI {
   search: { query(term: string): Promise<Result<SearchResults>> }
   backup: { create(): Promise<Result<BackupResult | null>>; restore(): Promise<Result<BackupResult | null>> }
   app: {
+    loginStartup(): Promise<Result<LoginStartup>>
+    setLoginStartup(enabled: boolean): Promise<Result<LoginStartup>>
     info(): Promise<Result<AppInfo>>
     preferences(): Promise<Result<Preferences>>
     setCloseBehavior(value: 'tray' | 'quit'): Promise<Result<Preferences>>

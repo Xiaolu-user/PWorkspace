@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url'
 import { randomUUID } from 'node:crypto'
 import { channels } from '../shared/channels'
 import type { ErrorCode, Result, Task } from '../shared/types'
+import { LoginStartupService } from './loginStartup'
 import { ReminderService } from './reminders'
 import { WeatherService } from './weather'
 import { DatabaseStore } from './database'
@@ -110,6 +111,9 @@ function persistBounds(): void {
   catch (error) { logger.error('windowBounds', error) }
 }
 function registerHandlers(): void {
+  const loginStartup = new LoginStartupService(app)
+  handle(channels.loginStartup, () => loginStartup.get())
+  handle(channels.setLoginStartup, enabled => loginStartup.set(enabled))
   const weather = new WeatherService()
   handle(channels.weatherSearch, query => weather.search(query))
   handle(channels.weatherCurrent, () => weather.current(repository.preferences().appearance.weatherLocation))
