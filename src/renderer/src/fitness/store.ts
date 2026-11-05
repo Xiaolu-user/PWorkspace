@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { ElMessage } from 'element-plus'
-import { emptyFitness, clone, newDay, newSet, type Exercise, type FitnessData, type FitnessItem } from '../../../shared/fitness'
+import { emptyFitness, clone, newSet, type Exercise, type FitnessData, type FitnessItem } from '../../../shared/fitness'
 import { artworkPath } from './artwork'
 import catalog from './catalog.json'
 import { unwrap, report } from '../lib/api'
@@ -44,13 +44,6 @@ export const useFitness = defineStore('fitness', () => {
       })
       data.value.catalogVersion = 1
       if (updateCatalog || before !== JSON.stringify(data.value.exercises)) await save()
-      if (!data.value.templateSeeded) {
-        data.value.templateSeeded = true
-        const defs = [ ['推 · 胸肩三头', '推', ['Barbell_Bench_Press_-_Medium_Grip', 'Incline_Dumbbell_Press', 'Dumbbell_Shoulder_Press', 'Side_Lateral_Raise', 'Triceps_Pushdown']], ['拉 · 背部二头', '拉', ['Wide-Grip_Lat_Pulldown', 'Seated_Cable_Rows', 'One-Arm_Dumbbell_Row', 'Dumbbell_Bicep_Curl']], ['腿 · 下肢核心', '腿', ['Barbell_Squat', 'Romanian_Deadlift', 'Leg_Press', 'Lying_Leg_Curls', 'Standing_Calf_Raises']] ]
-        data.value.templates = defs.map(([title, type, ids]) => ({ ...newDay(title as string, type as string), id: crypto.randomUUID(), items: (ids as string[]).filter(id => exercise(id)).map(id => item(id)) }))
-        for (const day of data.value.rhythm) { const t = data.value.templates.find(t => t.type === day.type); if (t && !day.items.length) { day.items = clone(t.items); day.templateId = t.id } }
-        await save()
-      }
       loaded.value = true
     } catch (e) { report(e) }
   }

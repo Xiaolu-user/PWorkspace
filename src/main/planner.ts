@@ -19,7 +19,9 @@ export class Planner {
   private semesters(): Semester[] {
     const stored = this.repo.readSetting<Semester[]>('semesters', [])
     if (stored.length) return stored.map(value => upgradeSemester(value))
-    const semester = { ...upgradeSemester(this.repo.readSetting<Semester | LegacySemester>('semester', emptySemester())), id: randomUUID() }
+    const legacy = this.repo.readSetting<Semester | LegacySemester | null>('semester', null)
+    if (!legacy || (!legacy.startDate && !legacy.title && !legacy.courses.length)) return []
+    const semester = { ...upgradeSemester(legacy), id: randomUUID() }
     this.repo.writeSetting('semesters', [semester])
     this.repo.writeSetting('homeSemesterId', semester.id)
     return [semester]
@@ -29,7 +31,7 @@ export class Planner {
     // Older entries have no category; reading through normalizeCategory keeps them in 未分类.
     const entries = this.repo.readSetting<LocalEntry[]>('localEntries', []).map(entry => ({ ...entry, category: normalizeCategory(entry.category) }))
     const semesters = this.semesters(), stored = this.repo.readSetting<string>('homeSemesterId', '')
-    const semester = semesters.find(item => item.id === stored) || semesters[0]
+    const semester = semesters.find(item => item.id === stored) || semesters[0] || emptySemester()
     return {
       semester, semesters, homeSemesterId: semester.id,
       workouts: this.repo.readSetting('workouts', []), entries,
@@ -93,7 +95,7 @@ export class Planner {
     const index = list.findIndex(item => item.id === semester.id)
     if (index >= 0) list[index] = semester; else list.push(semester)
     this.writeSemesters(list)
-    // The placeholder semester created on first launch steps aside for the first real one.
+    // A placeholder semester from older versions steps aside for the first real one.
     const home = list.find(item => item.id === this.repo.readSetting<string>('homeSemesterId', ''))
     if (!home || (!home.title && !home.courses.length)) this.repo.writeSetting('homeSemesterId', semester.id)
     return this.get()

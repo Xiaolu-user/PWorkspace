@@ -18,7 +18,7 @@ const checks = []
 const started = Date.now()
 const screenshot = async name => {
   await page.waitForFunction(() => !document.querySelector('.el-message'), { timeout: 6000 })
-  return page.screenshot({ path: join(output, `${name}.png`), fullPage: true })
+  return page.screenshot({ path: join(output, `${name}.png`), fullPage: true, animations: 'disabled' })
 }
 async function check(name, operation) {
   await operation()
@@ -35,7 +35,7 @@ async function launch() {
   page.on('pageerror', error => errors.push(error.message))
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
   await page.waitForFunction(() => !!window.workbench)
-  await page.locator('.daily-content').waitFor()
+  await page.locator('.home-grid').waitFor()
   await page.waitForFunction(() => document.querySelector('.page-footer')?.textContent.includes('v0.1.0'))
   assert.equal(await page.locator('.error-banner').count(), 0)
 }
@@ -94,7 +94,7 @@ async function main() {
     await page.getByRole('textbox', { name: '笔记正文', exact: true }).fill(note.body + '\n继续，慢慢做好每一步。')
     await page.getByRole('link', { name: '今日概览', exact: true }).click()
     await unsaved.getByRole('button', { name: '保存并继续', exact: true }).click()
-    await page.locator('.daily-content').waitFor()
+    await page.locator('.home-grid').waitFor()
     assert((await queryAPI('notes', 'get', [note.id])).body.includes('继续'))
     await page.getByRole('link', { name: '随手笔记', exact: true }).click()
     await page.locator('.note-index-item', { hasText: note.title }).click()

@@ -10,6 +10,7 @@ const props = defineProps<{ modelValue: boolean; semester: Semester }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean]; saved: [] }>()
 const ws = useWorkspace()
 const draft = ref<Semester>(emptySemester()), saving = ref(false), query = ref(''), selectedId = ref(''), expanded = ref('')
+const courseGuide = ref(false)
 const courseFont = ref(ws.preferences.appearance.courseFontScale)
 const weekInputs = ref<Record<string, string>>({}), showAll = ref(false)
 const days = ['一', '二', '三', '四', '五', '六', '日']
@@ -104,6 +105,7 @@ function saveShareFile(): void {
 }
 watch(() => props.modelValue, open => {
   if (!open) return
+  courseGuide.value = !props.semester.startDate && !props.semester.courses.length
   draft.value = JSON.parse(JSON.stringify(upgradeSemester(props.semester)))
   selectedId.value = draft.value.courses[0]?.id || ''; expanded.value = draft.value.courses[0]?.schedules[0]?.id || ''
   query.value = ''; showAll.value = false; editing.value = null; weekInputs.value = {}
@@ -181,7 +183,8 @@ async function save(): Promise<void> {
 }
 </script>
 <template>
-  <el-dialog :model-value="modelValue" title="学期课程" width="1200px" class="course-planner-dialog" :close-on-click-modal="false" :show-close="!saving" :close-on-press-escape="!saving && !editing" @update:model-value="emit('update:modelValue', $event)">
+  <el-dialog :model-value="modelValue" :title="courseGuide?'创建第一份课表':'学期课程'" :width="courseGuide?'640px':'1200px'" class="course-planner-dialog" :class="{'is-onboarding':courseGuide}" :close-on-click-modal="false" :show-close="!saving" :close-on-press-escape="!saving && !editing" @update:model-value="emit('update:modelValue', $event)">
+    <section v-if="courseGuide" class="course-first-guide"><h3>从空白开始，安排自己的学期</h3><p>先设置学期，再添加你的课程。只有点击保存后才会创建课表。</p><ol><li><b>设置学期</b><span>填写学期名称、开学日期和周数。</span></li><li><b>添加课程</b><span>为课程选择上课时间、教室和周次。</span></li><li><b>保存课表</b><span>回到首页，即可查看本周的真实安排。</span></li></ol><el-button type="primary" @click="courseGuide=false">开始设置课表</el-button></section><template v-else>
     <p class="course-planner-subtitle">一门课程，多条上课安排。周一作为每周起点。</p>
     <div class="course-font-setting">
       <AppIcon name="notebook" :size="16" />
@@ -223,7 +226,7 @@ async function save(): Promise<void> {
         <div class="course-conflict-summary" :class="{warning:conflicts.length}"><strong>{{ conflicts.length ? '发现 '+conflicts.length+' 处时间冲突' : '没有时间冲突' }}</strong><p>{{ conflicts.length ? '核对后仍可保存，点击课程查看相关冲突。' : '与本学期所有课程对照，未发现时间重叠。' }}</p><p v-for="(conflict,index) in selectedConflicts.slice(0,20)" :key="index" class="course-conflict">第 {{ conflict.first.week }} 周 · 周{{ days[conflict.first.day-1] }}<br />{{ conflict.first.title || '未命名课程' }} {{ conflict.first.start }}–{{ conflict.first.end }}<br />{{ conflict.second.title || '未命名课程' }} {{ conflict.second.start }}–{{ conflict.second.end }}</p><p v-if="selectedConflicts.length>20">还有 {{ selectedConflicts.length-20 }} 处，请调整后继续查看。</p></div>
       </aside>
     </div>
-    <template #footer><div class="course-planner-footer"><span>已设置 {{ draft.courses.length }} 门课程 · {{ draft.courses.reduce((sum,c)=>sum+c.schedules.length,0) }} 条安排 · {{ occurrenceCount }} 次上课</span><span class="course-planner-actions"><el-button :disabled="saving" @click="openImport"><AppIcon name="add" :size="14" />导入课表</el-button><el-button :disabled="saving" @click="openShare"><AppIcon name="share" :size="14" />分享课表</el-button><el-button :disabled="saving" @click="emit('update:modelValue',false)">取消</el-button><el-button type="primary" :loading="saving" @click="save">保存课程表</el-button></span></div></template>
+    </template><template #footer><template v-if="!courseGuide"><div class="course-planner-footer"><span>已设置 {{ draft.courses.length }} 门课程 · {{ draft.courses.reduce((sum,c)=>sum+c.schedules.length,0) }} 条安排 · {{ occurrenceCount }} 次上课</span><span class="course-planner-actions"><el-button :disabled="saving" @click="openImport"><AppIcon name="add" :size="14" />导入课表</el-button><el-button :disabled="saving" @click="openShare"><AppIcon name="share" :size="14" />分享课表</el-button><el-button :disabled="saving" @click="emit('update:modelValue',false)">取消</el-button><el-button type="primary" :loading="saving" @click="save">保存课程表</el-button></span></div></template></template>
   </el-dialog>
   <el-dialog :model-value="!!editing" title="调整上课安排" width="560px" append-to-body :close-on-click-modal="false" @update:model-value="editing=null">
     <template v-if="editing"><p class="course-planner-subtitle">{{ editing.title }} · 第 {{ editing.week }} 周</p><el-radio-group v-model="editScope" aria-label="调整范围"><el-radio-button value="once">仅修改这一次</el-radio-button><el-radio-button value="schedule">修改整条安排</el-radio-button></el-radio-group><p class="course-planner-subtitle">{{ editScope==='once'?'只调整本周这一次上课，其他周不变。':'修改该安排的常规时间与地点；已单独调整的周次继续保留。' }}</p><el-form label-position="top"><el-form-item label="星期"><el-select v-model="editTime.day" aria-label="调整上课星期"><el-option v-for="(d,i) in days" :key="d" :label="'星期'+d" :value="i+1" /></el-select></el-form-item><div class="form-columns"><el-form-item label="开始时间"><el-time-picker v-model="editTime.start" format="HH:mm" value-format="HH:mm" :clearable="false" aria-label="调整开始时间" /></el-form-item><el-form-item label="结束时间"><el-time-picker v-model="editTime.end" format="HH:mm" value-format="HH:mm" :clearable="false" aria-label="调整结束时间" /></el-form-item></div><el-form-item label="教室 / 地点"><el-input v-model="editTime.room" aria-label="调整教室" maxlength="100" /></el-form-item><el-checkbox v-if="editScope==='once'" v-model="cancelled">本次停课</el-checkbox></el-form><p class="course-planner-subtitle">应用后，请在主窗口保存课程表。</p></template>
