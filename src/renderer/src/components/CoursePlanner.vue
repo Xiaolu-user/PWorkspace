@@ -188,7 +188,7 @@ async function save(): Promise<void> {
       <span class="course-font-label">首页课程文字大小</span>
       <el-input-number v-model="courseFont" aria-label="首页课程文字大小" :min="80" :max="160" :step="5" :disabled="saving" />
       <span class="course-font-unit" aria-hidden="true">%</span>
-      <span class="course-font-preview" aria-hidden="true" title="首页课程块效果预览" :style="{ '--preview-scale': courseFont / 100 }"><strong>机器学习</strong><small>13:30–15:05 · 獐子岛 226</small></span>
+      <span class="course-font-preview" aria-hidden="true" title="虚拟课程示例，仅用于预览文字大小" :style="{ '--preview-scale': courseFont / 100 }"><strong>示例课程</strong><small>09:00–10:30 · 教学楼 A201</small></span>
       <el-button text :disabled="saving || courseFont === 100" @click="courseFont = 100">恢复默认</el-button>
       <small class="course-font-hint">只影响首页“本周课程”中的课程名称、时间与教室，保存课程表后生效。</small>
     </div>
