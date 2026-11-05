@@ -32,7 +32,6 @@ const days = computed(() => Array.from({ length: 7 }, (_, index) => {
 const weekDateRange = computed(() => { if (!days.value[0].date) return ''; return `${days.value[0].date.slice(5).replace('-', '/')} – ${days.value[6].date.slice(5).replace('-', '/')}` })
 const planCount = computed(() => active.value.courses.reduce((sum, course) => sum + course.schedules.length, 0))
 const lessonCount = computed(() => occurrences.value.filter(item => !item.cancelled).length)
-const weekCourseCount = computed(() => active.value.courses.filter(course => course.schedules.some(schedule => schedule.weeks.includes(viewWeek.value))).length)
 // A long break in the middle of the day becomes a dashed rule instead of an empty band of rows.
 const breaks = computed(() => slots.value.slice(1).flatMap((slot, index) => {
   const gap = slotMinutes(slot.start) - slotMinutes(slots.value[index].end)

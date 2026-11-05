@@ -33,7 +33,6 @@ watchEffect(() => {
   style.setProperty('--dialog-scale', String(appearance.dialogScale / 100))
   style.setProperty('--dialog-text-scale', String(appearance.fontScale * appearance.dialogFontScale / 10000))
 })
-const todayLabel = computed(() => now.value.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' }))
 // The rail is icon-only; each item grows into a labelled card on hover, and its neighbours swell with it.
 const navigation = computed(() => [
   { path: '/', icon: 'grid', label: '今日概览', hint: '待办、课程与入口' },

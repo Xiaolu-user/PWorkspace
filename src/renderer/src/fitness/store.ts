@@ -2,14 +2,15 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { ElMessage } from 'element-plus'
 import { emptyFitness, clone, newDay, newSet, type Exercise, type FitnessData, type FitnessItem } from '../../../shared/fitness'
+import { artworkPath } from './artwork'
 import catalog from './catalog.json'
 import { unwrap, report } from '../lib/api'
-export const DEFAULT_EXERCISE_IMAGE = 'fitness/cartoon/default-exercise.png'
+export const DEFAULT_EXERCISE_IMAGE = 'fitness/cartoon/default-exercise.webp'
 const presetIds = new Set(catalog.map(e => e.id))
 const isCustom = (e: Exercise): boolean => !e.sourceName && /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(e.id)
 export function withExerciseImage(e: Exercise): Exercise {
   const matched = (catalog as Exercise[]).find(base => base.name === e.name || !!base.alias && base.alias === e.name)
-  const image = (!e.image || e.image === DEFAULT_EXERCISE_IMAGE) && matched ? matched.image : e.image || DEFAULT_EXERCISE_IMAGE
+  const image = (!e.image || artworkPath(e.image) === DEFAULT_EXERCISE_IMAGE) && matched ? matched.image : e.image || DEFAULT_EXERCISE_IMAGE
   return { ...e, image, images: image !== e.image ? [image] : e.image && e.images.length ? e.images : [image], artworkStatus: 'ready' }
 }
 export const useFitness = defineStore('fitness', () => {
@@ -56,5 +57,5 @@ export const useFitness = defineStore('fitness', () => {
   function editExercise(e: Exercise): void { const value = withExerciseImage(clone(e)); const n = data.value.exercises.findIndex(x => x.id === e.id); if (n < 0) data.value.exercises.push(value); else data.value.exercises[n] = value }
   return { data, loaded, exercises, availableExercises, exercise, item, load, save, editExercise }
 })
-export const asset = (path: string): string => path.startsWith('data:') ? path : new URL(import.meta.env.BASE_URL + path, location.href).href
+export const asset = (path: string): string => path.startsWith('data:') ? path : new URL(import.meta.env.BASE_URL + artworkPath(path), location.href).href
 export const tone = (type: string): string => ({ 推: 'mint', 拉: 'lavender', 腿: 'peach', 休息: 'blue' }[type] || 'mint')

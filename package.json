@@ -21,25 +21,25 @@
     "pack": "node scripts/build.cjs pack"
   },
   "dependencies": {
-    "@element-plus/icons-vue": "^2.3.2",
-    "better-sqlite3": "^12.4.1",
-    "element-plus": "^2.11.5",
-    "lunar-typescript": "^1.8.6",
-    "pinia": "^3.0.3",
-    "vue": "^3.5.22",
-    "vue-router": "^4.6.3"
+    "better-sqlite3": "^12.4.1"
   },
   "devDependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.18.10",
     "@vitejs/plugin-vue": "^6.0.1",
     "electron": "42.11.16",
     "electron-builder": "^26.0.12",
     "electron-vite": "^5.0.0",
+    "element-plus": "^2.11.5",
+    "lunar-typescript": "^1.8.6",
+    "pinia": "^3.0.3",
     "playwright": "^1.56.1",
     "typescript": "^5.9.3",
     "vite": "^7.1.12",
     "vitest": "^3.2.4",
+    "vue": "^3.5.22",
+    "vue-router": "^4.6.3",
     "vue-tsc": "^3.1.1"
   },
   "build": {
@@ -51,7 +51,17 @@
     },
     "files": [
       "out/**/*",
-      "package.json"
+      "package.json",
+      "!node_modules/better-sqlite3/src/**",
+      "!node_modules/better-sqlite3/deps/**",
+      "!node_modules/better-sqlite3/build/Release/obj/**",
+      "!node_modules/better-sqlite3/build/Release/obj.target/**",
+      "!node_modules/better-sqlite3/build/test_extension*",
+      "!node_modules/better-sqlite3/build/Release/test_extension*",
+      "!node_modules/**/test/**",
+      "!node_modules/**/tests/**",
+      "!node_modules/**/*.map",
+      "!node_modules/**/*.d.ts"
     ],
     "extraResources": [
       {
@@ -78,6 +88,10 @@
         "zh_CN",
         "en_US"
       ]
-    }
+    },
+    "electronLanguages": [
+      "zh-CN",
+      "en-US"
+    ]
   }
 }

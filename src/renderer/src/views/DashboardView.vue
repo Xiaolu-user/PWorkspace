@@ -17,7 +17,7 @@ import PlannerDialogs from '../components/PlannerDialogs.vue'
 import TaskCalendar from '../components/TaskCalendar.vue'
 import WeatherWidget from '../components/WeatherWidget.vue'
 import ShortcutBoard from '../components/ShortcutBoard.vue'
-import { unwrap, report, openLink, formatTime } from '../lib/api'
+import { unwrap, report, formatTime } from '../lib/api'
 const ws = useWorkspace(); const editor = useEditor(); const router = useRouter(); const route = useRoute()
 const fitness = useFitness()
 const now = ref(new Date()); const today = computed(() => localDate(now.value))

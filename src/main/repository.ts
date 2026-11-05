@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import type { Bookmark, BookmarkInput, Dashboard, Note, NoteInput, Preferences, SearchResults, Task, TaskInput } from '../shared/types'
+import type { Bookmark, Dashboard, Note, Preferences, SearchResults, Task } from '../shared/types'
 import { localDate } from '../shared/date'
 import { reminderTimestamp, isReminderActive } from '../shared/reminders'
 import { normalizeAppearance } from '../shared/appearance'

@@ -160,6 +160,12 @@ git push
 - 动作库：876 个动作元数据，其中当前仅开放六个配有已核对专属卡通图的动作；包含中文目标肌肉简介、主要/辅助肌肉、器械、计量方式和离线图片。全部预置动作均为中文名称，原英文名仅作为可选检索别名；可编辑、收藏、新建和上传个人图片。
 - 记录：日历、统计、动作对比、明细四种视图；手动补录快速摘要或逐组明细，支持从计划/模板带入。
 - 导入导出：CSV（可下载导入模板）和 JSON；导入需预览确认。时长可留空，统计只使用填写的数据。记录、计划、个人动作均保存在现有 SQLite settings 中，并随原有整库备份保存。
-- 插画与动作资料来源见 `src/renderer/public/fitness/ARTWORK.md` 和 `SOURCES.md`。原始动作数据处理脚本为 `scripts/fitness-catalog.py`，输入为 `names.zh-CN.json` 中文名表和 `cartoon/PROMPTS.json` 已核对插图清单。
+- 插画与动作资料来源见 `resources/fitness/ARTWORK.md` 和 `SOURCES.md`。原始动作数据处理脚本为 `scripts/fitness-catalog.py`，输入为当前动作目录和 `resources/fitness/cartoon/PROMPTS.json` 已核对插图清单。
 
 动作元数据来自公开的 [Free Exercise DB](https://github.com/yuhonas/free-exercise-db)（Unlicense）。真人动作图片已全部删除；当前六张专属卡通图以批准设计稿的人物形象生成，其余870个动作待配图完成再开放。应用运行时无需联网获取素材。
+
+## 打包体积
+
+前端依赖由 Vite 编译到 `out/renderer`，只作为开发依赖安装，发布包只保留主进程实际需要的 SQLite 运行依赖。构建保留中文和英文 Electron 语言包，排除依赖中的测试、源码映射、类型声明及 SQLite 编译源码。
+
+健身插画使用逐像素核对过的无损 WebP；`artwork.ts` 兼容旧备份中的预置 PNG 路径。设计稿、测试、生成提示词、图标原图及本地缓存不属于发布文件。
