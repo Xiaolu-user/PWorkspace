@@ -139,7 +139,7 @@ async function removeEntry(entry: Pick<LocalEntry, 'id' | 'title'>, kind = 'file
       </section>
     </div>
     <div class="home-column home-right">
-      <section class="home-card courses-card" :style="{ ...ws.moduleStyle('courses'), '--course-text-scale': courseFontScale }"><header><h2><AppIcon name="notebook" />本周课程</h2><button class="text-link" @click="plan = 'courses'">＋ 学期课程</button></header><p class="home-caption">{{ data.semester.title || '还没有设置学期' }}<span v-if="data.semester.startDate"> · {{ week < 1 ? '尚未开学' : week > data.semester.weeks ? '学期已结束' : `第 ${week} 周` }}</span></p>
+      <section class="home-card courses-card" :style="{ ...ws.moduleStyle('courses'), '--course-text-scale': courseFontScale }"><header><h2><AppIcon name="notebook" />本周课程</h2></header><p class="home-caption">{{ data.semester.title || '还没有设置学期' }}<span v-if="data.semester.startDate"> · {{ week < 1 ? '尚未开学' : week > data.semester.weeks ? '学期已结束' : `第 ${week} 周` }}</span></p>
         <div class="week-nav"><strong>{{ viewWeek < 1 ? '未开学' : `第 ${viewWeek} 周` }}</strong><span class="week-range">{{ viewRange }}</span><div class="week-nav-buttons"><button :disabled="viewWeek <= 1" aria-label="查看上一周" title="上一周" @click="viewOffset--">‹</button><button :class="{ active: viewOffset === 0 }" :disabled="viewOffset === 0" @click="viewOffset = 0">本周</button><button :disabled="viewWeek >= data.semester.weeks" aria-label="查看下一周" title="下一周" @click="viewOffset++">›</button></div></div>
         <div class="week-grid-head"><i aria-hidden="true"></i><div v-for="d in viewDays" :key="d.date" :class="{ today: d.date === today }"><small>{{ d.date === today ? '今天' : '周' + d.label }}</small><strong>{{ d.short }}</strong></div></div>
         <div class="week-grid-body" :class="{ empty: !weekSlots.length }" :style="gridStyle">
@@ -153,7 +153,7 @@ async function removeEntry(entry: Pick<LocalEntry, 'id' | 'title'>, kind = 'file
             </template>
             <div v-if="nowLine && todayIndex >= 0" class="now-slot" :style="{ gridColumn: String(todayIndex + 2), gridRow: String(nowLine.row) }" aria-hidden="true"><div class="now-line" :style="{ top: nowLine.percent + '%' }"><i>{{ nowLine.label }}</i></div></div>
           </template>
-          <p v-else class="week-empty">该周还没有课程安排，点击“学期课程”添加。</p>
+          <p v-else class="week-empty">该周还没有课程安排，点击“编辑课表”添加。</p>
         </div>
         <div class="course-foot"><span>{{ viewOffset === 0 ? '本周' : '该周' }}共 {{ viewCourseCount }} 节课</span><button class="text-link" @click="plan = 'courses'">编辑课表 →</button></div>
       </section>
