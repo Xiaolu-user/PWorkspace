@@ -19,9 +19,10 @@ import { externalUrl } from './validation'
 import { entryIcon, readWebLink } from './shortcuts'
 import { normalizeCategory, shortcutKindOf, UNCATEGORIZED, ICON_VERSION } from '../shared/shortcuts'
 
-app.setName('PersonalWorkbench')
+app.setName('大内总管')
 if (process.platform === 'win32') app.setAppUserModelId('local.personal.workbench')
 const customData = process.env.WORKBENCH_DATA_DIR
+// Preserve the existing data directory across the product rename.
 const userData = customData && isAbsolute(customData) ? customData : join(app.getPath('appData'), 'PersonalWorkbench')
 mkdirSync(userData, { recursive: true })
 app.setPath('userData', userData)
@@ -237,7 +238,7 @@ function registerHandlers(): void {
   })
   handle(channels.backupCreate, async () => {
     if (store.maintenance) throw new AppError('BUSY', '已有备份或恢复正在进行')
-    const selection = await dialog.showSaveDialog(window!, { title: '保存工作台备份（请选择新文件名）', defaultPath: join(app.getPath('documents'), `拾光备份-${new Date().toISOString().replace(/[:.]/g, '-')}.db`), filters: [{ name: '工作台数据库备份', extensions: ['db'] }] })
+    const selection = await dialog.showSaveDialog(window!, { title: '保存工作台备份（请选择新文件名）', defaultPath: join(app.getPath('documents'), `大内总管备份-${new Date().toISOString().replace(/[:.]/g, '-')}.db`), filters: [{ name: '工作台数据库备份', extensions: ['db'] }] })
     if (selection.canceled || !selection.filePath) return null
     return backup.create(selection.filePath)
   })
@@ -264,7 +265,7 @@ function createWindow(): void {
   }
   const iconPath = app.isPackaged ? join(process.resourcesPath, 'icon.png') : join(app.getAppPath(), 'resources/icon.png')
   const icon = existsSync(iconPath) ? nativeImage.createFromPath(iconPath) : nativeImage.createEmpty()
-  window = new BrowserWindow({ width, height, x, y, minWidth: 960, minHeight: 640, title: '拾光工作台', backgroundColor: nativeTheme.shouldUseDarkColors ? '#151c24' : '#eef1f5', show: false, icon, autoHideMenuBar: true,
+  window = new BrowserWindow({ width, height, x, y, minWidth: 960, minHeight: 640, title: '大内总管', backgroundColor: nativeTheme.shouldUseDarkColors ? '#151c24' : '#eef1f5', show: false, icon, autoHideMenuBar: true,
     webPreferences: { preload: join(__dirname, '../preload/index.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, spellcheck: false }
   })
   Menu.setApplicationMenu(null)
@@ -296,14 +297,14 @@ function createWindow(): void {
       window?.hide()
       const preferences = repository.preferences()
       if (!preferences.trayExplained) {
-        tray.displayBalloon({ title: '拾光工作台仍在运行', content: '点击托盘图标可以重新打开；右键菜单可以退出。' })
+        tray.displayBalloon({ title: '大内总管仍在运行', content: '点击托盘图标可以重新打开；右键菜单可以退出。' })
         repository.writeSetting('preferences', { ...preferences, trayExplained: true })
       }
     } else requestQuit()
   })
   tray = new Tray(icon.resize({ width: 24, height: 24 }))
-  tray.setToolTip('拾光工作台')
-  tray.setContextMenu(Menu.buildFromTemplate([{ label: '打开拾光工作台', click: reveal }, { type: 'separator' }, { label: '退出', click: requestQuit }]))
+  tray.setToolTip('大内总管')
+  tray.setContextMenu(Menu.buildFromTemplate([{ label: '打开大内总管', click: reveal }, { type: 'separator' }, { label: '退出', click: requestQuit }]))
   tray.on('click', reveal)
   tray.on('balloon-click', reveal)
   if (process.env.ELECTRON_RENDERER_URL) void window.loadURL(rendererURL)
@@ -331,7 +332,7 @@ else {
       checkReminders()
     } catch (error) {
       logger.error('startup', error)
-      dialog.showErrorBox('拾光工作台无法启动', `${error instanceof AppError ? error.message : '无法打开或初始化数据库，请检查磁盘空间及目录权限。'}\n\n原有文件已保留，数据位置：\n${join(userData, 'data')}\n\n日志位置：\n${join(userData, 'logs')}`)
+      dialog.showErrorBox('大内总管无法启动', `${error instanceof AppError ? error.message : '无法打开或初始化数据库，请检查磁盘空间及目录权限。'}\n\n原有文件已保留，数据位置：\n${join(userData, 'data')}\n\n日志位置：\n${join(userData, 'logs')}`)
       forceQuit = true; app.exit(1)
     }
   })

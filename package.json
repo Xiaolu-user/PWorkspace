@@ -1,10 +1,10 @@
 {
   "name": "personal-workbench",
-  "productName": "拾光工作台",
+  "productName": "大内总管",
   "version": "0.1.0",
   "private": true,
   "description": "离线优先的个人桌面工作台：待办、笔记与常用链接",
-  "author": "Personal Workbench",
+  "author": "大内总管",
   "license": "MIT",
   "type": "module",
   "main": "./out/main/index.cjs",
@@ -44,7 +44,7 @@
   },
   "build": {
     "appId": "local.personal.workbench",
-    "productName": "拾光工作台",
+    "productName": "大内总管",
     "directories": {
       "output": "release",
       "buildResources": "resources"
@@ -73,7 +73,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "deleteAppDataOnUninstall": false,
-      "artifactName": "PersonalWorkbench-${version}-Setup.${ext}",
+      "artifactName": "大内总管-${version}-Setup.${ext}",
       "installerLanguages": [
         "zh_CN",
         "en_US"

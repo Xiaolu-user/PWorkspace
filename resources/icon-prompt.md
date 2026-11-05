@@ -1,0 +1,7 @@
+# 大内总管应用图标
+
+Generated with the built-in image_gen tool. Original: `icon-source.png`; app PNG: `icon.png`; Windows multi-resolution icon: `icon.ico` (16–256 px). PNG/ICO exports preserve the generated transparent corners.
+
+## Generation prompt
+
+Use case: logo-brand. Create one polished square desktop application icon for a Chinese personal organizer app named 大内总管 (a playful imperial chief steward who organizes everything). Subject: a charming confident orange tabby cat palace steward, face and upper chest only, wearing a simplified dark jade-green Chinese official hat with two short horizontal wings and a small warm gold ornament. Friendly slightly mischievous smile, cream muzzle, expressive large eyes, tiny coral nose. One compact cream checklist tablet with a bold jade checkmark tucked at the lower edge, visually subordinate to the face. Style: premium friendly 3D clay illustration, very clean simplified shapes, soft rounded bevels, refined controlled highlights, excellent silhouette at 32px. Composition: single centered large mascot filling a deep emerald rounded-square app tile with subtle jade gradient, generous safe padding around ears and hat, tile fills 92% of square canvas. Palette: jade emerald, warm cream, tangerine orange, restrained gold. Transparent only outside the rounded-square tile. No letters, no Chinese text, no watermark, no desktop mockup, no extra icons, no busy background. Deliver one finished 1024x1024 icon.

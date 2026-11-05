@@ -44,7 +44,7 @@ describe('备份、恢复、升级与回退', () => {
     await expect(f.backup.restore(corrupt)).rejects.toThrow()
     const foreign = join(f.root, 'foreign.db')
     const foreignDb = new Database(foreign); foreignDb.exec('CREATE TABLE unrelated(id TEXT)'); foreignDb.close()
-    await expect(f.backup.restore(foreign)).rejects.toThrow('不是拾光')
+    await expect(f.backup.restore(foreign)).rejects.toThrow('不是大内总管')
     const future = join(f.root, 'future.db')
     await f.backup.create(future)
     const futureDb = new Database(future); futureDb.pragma(`user_version = ${SCHEMA_VERSION + 1}`); futureDb.close()

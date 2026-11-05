@@ -14,7 +14,7 @@ const schemas: Record<string, string[]> = {
 }
 
 export function validateDatabase(db: Database.Database): number {
-  if (db.pragma('application_id', { simple: true }) !== APPLICATION_ID) throw new AppError('INCOMPATIBLE', '这不是拾光工作台的数据库备份')
+  if (db.pragma('application_id', { simple: true }) !== APPLICATION_ID) throw new AppError('INCOMPATIBLE', '这不是大内总管的数据库备份')
   const version = Number(db.pragma('user_version', { simple: true }))
   if (version < 1 || version > SCHEMA_VERSION) throw new AppError('INCOMPATIBLE', version > SCHEMA_VERSION ? '备份来自更新版本，请先升级工作台' : '不支持这个数据库版本')
   if (db.pragma('quick_check', { simple: true }) !== 'ok') throw new AppError('DATABASE', '数据库完整性检查失败，请使用其他备份')

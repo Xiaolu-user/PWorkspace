@@ -4,7 +4,7 @@ import { LoginStartupService } from '../src/main/loginStartup'
 function fixture(packaged=true,platform:NodeJS.Platform='win32') {
  let registered=false,approved=true
  const app={isPackaged:packaged,getLoginItemSettings:vi.fn(()=>({openAtLogin:registered,executableWillLaunchAtLogin:registered&&approved})),setLoginItemSettings:vi.fn((options:{openAtLogin?:boolean;enabled?:boolean})=>{registered=!!options.openAtLogin;approved=!!options.enabled})}
- return {app,service:new LoginStartupService(app as unknown as App,platform,'C:\\Program Files\\拾光工作台\\PersonalWorkbench.exe'),block:()=>{approved=false},register:()=>{registered=true}}
+ return {app,service:new LoginStartupService(app as unknown as App,platform,'C:\\Program Files\\大内总管\\PersonalWorkbench.exe'),block:()=>{approved=false},register:()=>{registered=true}}
 }
 describe('Windows 开机自动启动',()=>{
  it('开启和关闭后读取系统实际状态，设置与查询使用相同的可执行文件',()=>{
@@ -12,8 +12,8 @@ describe('Windows 开机自动启动',()=>{
   expect(service.get()).toEqual({supported:true,enabled:false})
   expect(service.set(true).enabled).toBe(true)
   const options=app.setLoginItemSettings.mock.calls[0][0]
-  expect(options).toMatchObject({openAtLogin:true,enabled:true,args:[],path:'C:\\Program Files\\拾光工作台\\PersonalWorkbench.exe'})
-  expect(app.getLoginItemSettings).toHaveBeenLastCalledWith({path:'C:\\Program Files\\拾光工作台\\PersonalWorkbench.exe',args:[]})
+  expect(options).toMatchObject({openAtLogin:true,enabled:true,args:[],path:'C:\\Program Files\\大内总管\\PersonalWorkbench.exe'})
+  expect(app.getLoginItemSettings).toHaveBeenLastCalledWith({path:'C:\\Program Files\\大内总管\\PersonalWorkbench.exe',args:[]})
   expect(service.set(false).enabled).toBe(false)
  })
  it('Windows 外部禁用启动项后读取为关闭，用户开启时重新启用',()=>{
