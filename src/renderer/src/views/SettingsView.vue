@@ -5,6 +5,7 @@ import { defaultAppearance, defaultCalendarColors, calendarColorLabels, moduleLa
 import { ElMessage } from 'element-plus'
 import { useWorkspace } from '../stores/workspace'
 import { useEditor } from '../stores/editor'
+import { useFitness } from '../fitness/store'
 import { unwrap, report, openLink } from '../lib/api'
 import type { LoginStartup } from '../../../shared/types'
 import AppIcon from '../components/AppIcon.vue'
@@ -84,7 +85,7 @@ async function restoreBackup(): Promise<void> {
   operation.value = 'restore'
   try {
     const result = unwrap(await window.workbench.backup.restore())
-    if (result) { editor.select(null); await workspace.refresh(); recoveryBackup.value = result.safetyBackup || ''; ElMessage.success('备份已恢复，全部内容已刷新') }
+    if (result) { editor.select(null); const fitness = useFitness(); fitness.loaded = false; await fitness.load(); await workspace.refresh(); recoveryBackup.value = result.safetyBackup || ''; ElMessage.success('备份已恢复，全部内容已刷新') }
   } catch (error) { report(error) }
   finally { operation.value = null }
 }
