@@ -27,7 +27,9 @@ const weekdayLabel = computed(() => now.value.toLocaleDateString('zh-CN', { week
 const data = ref<PlannerData>({ semester: emptySemester(), semesters: [], homeSemesterId: '', workouts: [], entries: [], categories: [] })
 const plan = ref<'courses' | 'fitness' | null>(null); const taskDialog = ref(false); const selected = ref<Task | null>(null)
 const calendarOpen = ref(false)
-const todayTasks = computed(() => ws.tasks.filter(t => t.dueDate === today.value || isReminderActive(t, ws.now)).sort((a, b) => compareReminderTasks(a, b, ws.now)))
+const todayTasks = computed(() => ws.tasks.filter(t => t.category==='daily' || t.dueDate === today.value || isReminderActive(t, ws.now)).sort((a, b) => compareReminderTasks(a, b, ws.now)))
+const taskCategory=ref<'normal'|'daily'>('normal')
+const displayedTasks=computed(()=>taskCategory.value==='daily'?todayTasks.value.filter(t=>t.category==='daily'):todayTasks.value)
 const done = computed(() => todayTasks.value.filter(t => t.status === 'done').length)
 const percent = computed(() => todayTasks.value.length ? Math.round(done.value / todayTasks.value.length * 100) : 0)
 const files = computed(() => data.value.entries.filter(e => e.kind === 'file'))
@@ -96,7 +98,7 @@ function closeQuick(): void { quickEditing.value = false; quickTitle.value = '' 
 async function submitQuick(): Promise<void> {
   const title = quickTitle.value.trim(); if (!title || quickSaving.value) return
   quickSaving.value = true
-  const ok = await ws.mutate(() => window.workbench.tasks.create({ title, description: '', status: 'todo', dueDate: today.value, priority: 'normal', dueTime: null, remindBefore: null }), '已添加新任务')
+  const ok = await ws.mutate(() => window.workbench.tasks.create({ category: taskCategory.value, title, description: '', status: 'todo', dueDate: today.value, priority: 'normal', dueTime: null, remindBefore: null }), '已添加新任务')
   quickSaving.value = false
   if (ok) closeQuick()
 }
@@ -116,8 +118,8 @@ async function removeEntry(entry: Pick<LocalEntry, 'id' | 'title'>, kind = 'file
   <div class="home-grid">
     <div class="home-column home-left">
       <section class="home-card time-card" :style="ws.moduleStyle('time')"><div class="card-label"><AppIcon name="clock" />此刻</div><div class="time-weather"><div class="clock-content"><time>{{ clock }}</time><div class="time-date-row"><p class="time-date-label">{{ dateLabel }}</p><span class="time-weekday">{{ weekdayLabel }}</span><button class="icon-button calendar-trigger" aria-label="打开日历" title="打开日历，安排待办" aria-haspopup="dialog" :aria-expanded="calendarOpen" @click="calendarOpen = true"><AppIcon name="calendar" :size="20" /></button></div></div><WeatherWidget /></div></section>
-      <section class="home-card home-tasks" :class="{ 'is-quick-adding': quickEditing }" :style="ws.moduleStyle('todos')"><header><h2><AppIcon name="done" />今日待办</h2><span class="muted">{{ done }} / {{ todayTasks.length }}</span><button class="icon-button" aria-label="添加任务" @click="addTask"><AppIcon name="plus" /></button></header><p class="home-caption">今天的重点，逐一完成。已触发的提醒会置顶显示。</p>
-        <div class="home-task-list"><div v-for="task in todayTasks" :key="task.id" class="home-task" :class="{ completed: task.status === 'done', 'reminder-active': isReminderActive(task, ws.now), 'reminder-flashing': isReminderActive(task, ws.now) && !task.reminderAcknowledgedAt }"><input type="checkbox" :checked="task.status === 'done'" :disabled="toggling.has(task.id)" :aria-label="'完成任务：' + task.title" @change="toggle(task)" /><button @click="editTask(task)"><strong>{{ task.title }}<i v-if="task.priority === 'high'" class="priority-dot"></i></strong><small>{{ task.description || '给今天留一点进步' }}</small><small v-if="task.dueTime">{{ task.dueDate !== today ? task.dueDate + ' ' : '' }}{{ task.dueTime }}<template v-if="task.remindBefore !== null"> · {{ reminderLabel(task.remindBefore) }}</template></small></button><button class="icon-button" :aria-label="'编辑' + task.title" @click="editTask(task)"><AppIcon name="more" :size="15" /></button><ReminderNotice :task="task" /></div></div>
+      <section class="home-card home-tasks" :class="{ 'is-quick-adding': quickEditing }" :style="ws.moduleStyle('todos')"><header><h2><AppIcon name="done" />今日待办</h2><span class="muted">{{ done }} / {{ todayTasks.length }}</span><button class="icon-button" aria-label="添加任务" @click="addTask"><AppIcon name="plus" /></button></header><p class="home-caption">每日必做未完成时置顶，勾选后次日重新开始。</p>
+        <div class="home-task-tabs" aria-label="今日待办分类"><button :class="{active:taskCategory==='normal'}" @click="taskCategory='normal'">全部待办</button><button :class="{active:taskCategory==='daily'}" @click="taskCategory='daily'">每日必做 <span>{{ todayTasks.filter(t=>t.category==='daily'&&t.status==='todo').length }}</span></button></div><div class="home-task-list"><div v-for="task in displayedTasks" :key="task.id" class="home-task" :class="{ completed: task.status === 'done', 'reminder-active': isReminderActive(task, ws.now), 'reminder-flashing': isReminderActive(task, ws.now) && !task.reminderAcknowledgedAt }"><input type="checkbox" :checked="task.status === 'done'" :disabled="toggling.has(task.id)" :aria-label="'完成任务：' + task.title" @change="toggle(task)" /><button @click="editTask(task)"><strong>{{ task.title }}<span v-if="task.category==='daily'" class="daily-task-badge">每日必做</span><i v-if="task.priority === 'high'" class="priority-dot"></i></strong><small>{{ task.description || '给今天留一点进步' }}</small><small v-if="task.dueTime">{{ task.dueDate !== today ? task.dueDate + ' ' : '' }}{{ task.dueTime }}<template v-if="task.remindBefore !== null"> · {{ reminderLabel(task.remindBefore) }}</template></small></button><button class="icon-button" :aria-label="'编辑' + task.title" @click="editTask(task)"><AppIcon name="more" :size="15" /></button><ReminderNotice :task="task" /></div></div>
         <button v-if="!quickEditing" type="button" class="task-add-zone" @click="openQuick">
           <span class="task-zone-ring"><AppIcon name="plus" :size="15" /></span>
           <span class="task-zone-label">{{ todayTasks.length ? '添加今日待办' : '今天还没有待办' }}</span>
@@ -159,7 +161,7 @@ async function removeEntry(entry: Pick<LocalEntry, 'id' | 'title'>, kind = 'file
       <section id="home-files" class="home-card files-card" :style="ws.moduleStyle('files')"><header><h2><AppIcon name="folder" />常用资料</h2><el-dropdown trigger="click" @command="pick"><button class="icon-button" aria-label="添加资料"><AppIcon name="plus" /></button><template #dropdown><el-dropdown-menu><el-dropdown-item command="file">选择文件</el-dropdown-item><el-dropdown-item command="folder">选择文件夹</el-dropdown-item></el-dropdown-menu></template></el-dropdown></header><div class="file-list"><div v-for="f in files" :key="f.id" class="file-row"><button :title="f.path" @click="openLocal(f.id)"><img v-if="f.icon" :src="f.icon" alt="" /><AppIcon v-else name="document" /><span><strong>{{ f.title }}</strong><small>{{ f.path }}</small></span></button><button class="icon-button" :aria-label="'移除' + f.title" @click="removeEntry(f)">×</button></div></div><button class="file-add" @click="pick('file')"><AppIcon name="add" :size="17" />点击添加文件入口</button><small class="file-hint">文件保留在原位置，移除入口不会删除文件。</small></section>
     </div>
   </div>
-  <TaskDialog v-model="taskDialog" :task="selected" :default-date="today" :default-title="taskDraft" />
+  <TaskDialog v-model="taskDialog" :task="selected" :default-date="today" :default-title="taskDraft" :default-category="taskCategory==='daily'?'daily':'normal'" />
   <TaskCalendar v-model="calendarOpen" :today="today" />
   <PlannerDialogs v-model="plan" :data="data" @saved="load" />
 </template>

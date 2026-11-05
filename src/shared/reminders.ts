@@ -5,6 +5,8 @@ export function isReminderActive(task: Task, now = Date.now()): boolean {
   return task.status === 'todo' && time !== null && time <= now
 }
 export function compareReminderTasks(a: Task, b: Task, now = Date.now()): number {
+  const daily = Number(b.category === 'daily' && b.status === 'todo') - Number(a.category === 'daily' && a.status === 'todo')
+  if (daily) return daily
   return Number(isReminderActive(b, now)) - Number(isReminderActive(a, now))
 }
 

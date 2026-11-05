@@ -44,7 +44,7 @@ describe('显示偏好与待办提醒确认', () => {
   })
   it('版本 3 升级保留旧提醒；旧偏好补全默认值并约束显示范围', () => {
     const original = f.repository.createTask(due()); f.store.close()
-    const legacy = new Database(f.store.path); legacy.exec('ALTER TABLE tasks DROP COLUMN reminderAcknowledgedAt; PRAGMA user_version = 3'); legacy.close()
+    const legacy = new Database(f.store.path); legacy.exec('ALTER TABLE tasks DROP COLUMN category; ALTER TABLE tasks DROP COLUMN reminderAcknowledgedAt; PRAGMA user_version = 3'); legacy.close()
     const reopened = new DatabaseStore(f.store.path)
     try { const restored = new Repository(reopened).task(original.id); expect(restored.remindBefore).toBe(10); expect(restored.reminderAcknowledgedAt).toBeNull() } finally { reopened.close() }
     expect(normalizeAppearance(null)).toEqual(defaultAppearance())

@@ -1,6 +1,6 @@
 export type Status = 'todo' | 'done'
 export type Priority = 'low' | 'normal' | 'high'
-export interface TaskInput { title: string; description: string; status: Status; dueDate: string | null; priority: Priority; dueTime?: string | null; remindBefore?: number | null }
+export interface TaskInput { category?: 'normal' | 'daily'; title: string; description: string; status: Status; dueDate: string | null; priority: Priority; dueTime?: string | null; remindBefore?: number | null }
 export interface Task extends TaskInput { id: string; createdAt: string; updatedAt: string; dueTime: string | null; remindBefore: number | null; reminderSentAt: string | null; reminderAcknowledgedAt: string | null }
 export interface NoteInput { title: string; body: string }
 export interface Note extends NoteInput { id: string; createdAt: string; updatedAt: string }

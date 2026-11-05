@@ -84,7 +84,7 @@ describe('日历事项与本地提醒', () => {
     expect(f.repository.task(created.id)).toEqual(created)
     f.store.close()
     const legacy = new Database(f.store.path)
-    legacy.exec('ALTER TABLE tasks DROP COLUMN reminderAcknowledgedAt; ALTER TABLE tasks DROP COLUMN dueTime; ALTER TABLE tasks DROP COLUMN remindBefore; ALTER TABLE tasks DROP COLUMN reminderSentAt; PRAGMA user_version = 2')
+    legacy.exec('ALTER TABLE tasks DROP COLUMN category; ALTER TABLE tasks DROP COLUMN reminderAcknowledgedAt; ALTER TABLE tasks DROP COLUMN dueTime; ALTER TABLE tasks DROP COLUMN remindBefore; ALTER TABLE tasks DROP COLUMN reminderSentAt; PRAGMA user_version = 2')
     legacy.close()
     const reopened = new DatabaseStore(f.store.path)
     try {

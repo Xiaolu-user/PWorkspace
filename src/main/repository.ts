@@ -9,25 +9,31 @@ import * as validate from './validation'
 
 export class Repository {
   constructor(readonly store: DatabaseStore) {}
-  tasks(): Task[] { return this.store.connection.prepare("SELECT * FROM tasks ORDER BY status DESC, CASE priority WHEN 'high' THEN 0 WHEN 'normal' THEN 1 ELSE 2 END, dueDate IS NULL, dueDate, createdAt DESC, id").all() as Task[] }
+  private resetDailyTasks(today = localDate()): void {
+    this.store.connection.prepare("UPDATE tasks SET status='todo',dueDate=?,reminderSentAt=NULL,reminderAcknowledgedAt=NULL,updatedAt=? WHERE category='daily' AND (dueDate IS NULL OR dueDate<>?)").run(today,new Date().toISOString(),today)
+  }
+  tasks(): Task[] { this.resetDailyTasks(); return this.store.connection.prepare("SELECT * FROM tasks ORDER BY CASE WHEN category='daily' AND status='todo' THEN 0 ELSE 1 END, status DESC, CASE priority WHEN 'high' THEN 0 WHEN 'normal' THEN 1 ELSE 2 END, dueDate IS NULL, dueDate, createdAt DESC, id").all() as Task[] }
   task(taskId: unknown): Task {
+    this.resetDailyTasks()
     const row = this.store.connection.prepare('SELECT * FROM tasks WHERE id = ?').get(validate.id(taskId)) as Task | undefined
     if (!row) throw new AppError('NOT_FOUND', '这条任务已不存在')
     return row
   }
   createTask(input: unknown): Task {
     const data = validate.taskInput(input)
+    if (data.category === 'daily') data.dueDate = localDate()
     const now = new Date().toISOString()
     const row: Task = { ...data, dueTime: data.dueTime ?? null, remindBefore: data.remindBefore ?? null, reminderSentAt: null, reminderAcknowledgedAt: null, id: randomUUID(), createdAt: now, updatedAt: now }
-    this.store.connection.prepare('INSERT INTO tasks (id,title,description,status,dueDate,priority,dueTime,remindBefore,reminderSentAt,reminderAcknowledgedAt,createdAt,updatedAt) VALUES (@id,@title,@description,@status,@dueDate,@priority,@dueTime,@remindBefore,@reminderSentAt,@reminderAcknowledgedAt,@createdAt,@updatedAt)').run(row)
+    this.store.connection.prepare('INSERT INTO tasks (id,title,description,status,dueDate,priority,dueTime,remindBefore,reminderSentAt,reminderAcknowledgedAt,createdAt,updatedAt,category) VALUES (@id,@title,@description,@status,@dueDate,@priority,@dueTime,@remindBefore,@reminderSentAt,@reminderAcknowledgedAt,@createdAt,@updatedAt,@category)').run(row)
     return row
   }
   updateTask(taskId: unknown, input: unknown): Task {
     const old = this.task(taskId)
     const data = validate.taskInput(input)
+    if (data.category === 'daily') data.dueDate = localDate()
     const row = { ...old, ...data, updatedAt: new Date().toISOString() }
     if (old.dueDate !== row.dueDate || old.dueTime !== row.dueTime || old.remindBefore !== row.remindBefore) { row.reminderSentAt = null; row.reminderAcknowledgedAt = null }
-    this.store.connection.prepare('UPDATE tasks SET title=@title,description=@description,status=@status,dueDate=@dueDate,priority=@priority,dueTime=@dueTime,remindBefore=@remindBefore,reminderSentAt=@reminderSentAt,reminderAcknowledgedAt=@reminderAcknowledgedAt,updatedAt=@updatedAt WHERE id=@id').run(row)
+    this.store.connection.prepare('UPDATE tasks SET category=@category,title=@title,description=@description,status=@status,dueDate=@dueDate,priority=@priority,dueTime=@dueTime,remindBefore=@remindBefore,reminderSentAt=@reminderSentAt,reminderAcknowledgedAt=@reminderAcknowledgedAt,updatedAt=@updatedAt WHERE id=@id').run(row)
     return row
   }
   removeTask(taskId: unknown): void { this.remove('tasks', taskId) }
@@ -38,6 +44,7 @@ export class Repository {
     return this.task(task.id)
   }
   dueReminders(now = Date.now()): Task[] {
+    this.resetDailyTasks(localDate(new Date(now)))
     const tasks = this.store.connection.prepare("SELECT * FROM tasks WHERE status='todo' AND remindBefore IS NOT NULL AND reminderSentAt IS NULL AND reminderAcknowledgedAt IS NULL").all() as Task[]
     return tasks.filter(task => { const time = reminderTimestamp(task); return time !== null && time <= now }).sort((a, b) => reminderTimestamp(a)! - reminderTimestamp(b)!)
   }
@@ -88,10 +95,11 @@ export class Repository {
     if (!result.changes) throw new AppError('NOT_FOUND', '这条内容已不存在')
   }
   dashboard(today = localDate()): Dashboard {
+    this.resetDailyTasks(today)
     const db = this.store.connection
     const count = (sql: string) => (db.prepare(sql).get() as { count: number }).count
     return {
-      today: db.prepare("SELECT * FROM tasks WHERE status='todo' AND dueDate=? ORDER BY CASE priority WHEN 'high' THEN 0 WHEN 'normal' THEN 1 ELSE 2 END, createdAt DESC").all(today) as Task[],
+      today: db.prepare("SELECT * FROM tasks WHERE status='todo' AND dueDate=? ORDER BY CASE WHEN category='daily' THEN 0 ELSE 1 END, CASE priority WHEN 'high' THEN 0 WHEN 'normal' THEN 1 ELSE 2 END, createdAt DESC").all(today) as Task[],
       overdue: db.prepare("SELECT * FROM tasks WHERE status='todo' AND dueDate < ? ORDER BY dueDate, createdAt").all(today) as Task[],
       recentNotes: db.prepare('SELECT * FROM notes ORDER BY updatedAt DESC, id LIMIT 4').all() as Note[],
       bookmarks: db.prepare('SELECT * FROM bookmarks ORDER BY updatedAt DESC, id LIMIT 6').all() as Bookmark[],
@@ -100,6 +108,7 @@ export class Repository {
     }
   }
   search(term: unknown): SearchResults {
+    this.resetDailyTasks()
     const query = validate.searchTerm(term)
     if (!query) return { tasks: [], notes: [], bookmarks: [] }
     const pattern = `%${query.replace(/[!%_]/g, '!$&')}%`

@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto'
 import { AppError } from './errors'
 
 export const APPLICATION_ID = 0x57424b31
-export const SCHEMA_VERSION = 4
+export const SCHEMA_VERSION = 5
 const schemas: Record<string, string[]> = {
   tasks: ['id', 'title', 'description', 'status', 'dueDate', 'priority', 'createdAt', 'updatedAt'],
   notes: ['id', 'title', 'body', 'createdAt', 'updatedAt'],
@@ -27,6 +27,7 @@ export function validateDatabase(db: Database.Database): number {
     if (!['dueTime', 'remindBefore', 'reminderSentAt'].every(name => columns.some(column => column.name === name))) throw new AppError('INCOMPATIBLE', '备份的提醒数据结构不完整')
   }
   if (version >= 4 && !(db.prepare('PRAGMA table_info(tasks)').all() as { name: string }[]).some(column => column.name === 'reminderAcknowledgedAt')) throw new AppError('INCOMPATIBLE', '备份的提醒确认数据结构不完整')
+  if (version >= 5 && !(db.prepare('PRAGMA table_info(tasks)').all() as { name: string }[]).some(column => column.name === 'category')) throw new AppError('INCOMPATIBLE', '备份的任务分类数据结构不完整')
   return version
 }
 
@@ -60,6 +61,10 @@ export function migrateDatabase(db: Database.Database): void {
     if (version < 4) {
       db.exec('ALTER TABLE tasks ADD COLUMN reminderAcknowledgedAt TEXT')
       db.pragma('user_version = 4')
+    }
+    if (version < 5) {
+      db.exec("ALTER TABLE tasks ADD COLUMN category TEXT NOT NULL DEFAULT 'normal' CHECK(category IN ('normal','daily'))")
+      db.pragma('user_version = 5')
     }
   })()
 }

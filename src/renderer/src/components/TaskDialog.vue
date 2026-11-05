@@ -2,22 +2,24 @@
 import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { Task, TaskInput } from '../../../shared/types'
-import { isValidDate } from '../../../shared/date'
+import { isValidDate, localDate } from '../../../shared/date'
 import { reminderTimestamp, reminderLabel } from '../../../shared/reminders'
 import { useWorkspace } from '../stores/workspace'
-const props = defineProps<{ modelValue: boolean; task?: Task | null; defaultDate?: string; defaultTitle?: string }>()
+const props = defineProps<{ modelValue: boolean; task?: Task | null; defaultDate?: string; defaultTitle?: string; defaultCategory?: 'normal' | 'daily' }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 const workspace = useWorkspace(); const saving = ref(false)
-const form = reactive<TaskInput>({ title: '', description: '', status: 'todo', dueDate: null, priority: 'normal', dueTime: null, remindBefore: null })
+const form = reactive<TaskInput>({ category: 'normal', title: '', description: '', status: 'todo', dueDate: null, priority: 'normal', dueTime: null, remindBefore: null })
 const reminderOptions = [0, 5, 10, 15, 30, 60, 1440]
 const reminderChoice = ref<number | 'custom' | 'off'>('off')
 const reminderPreview = computed(() => { const time = reminderTimestamp(form); return time === null ? '' : new Date(time).toLocaleString('zh-CN', { hour12: false }) })
 function setVisible(value: boolean): void { if (!saving.value) emit('update:modelValue', value) }
 watch(() => props.modelValue, value => {
   if (!value) return
-  Object.assign(form, props.task ? { title: props.task.title, description: props.task.description, status: props.task.status, dueDate: props.task.dueDate, priority: props.task.priority, dueTime: props.task.dueTime, remindBefore: props.task.remindBefore } : { title: props.defaultTitle || '', description: '', status: 'todo', dueDate: props.defaultDate || null, priority: 'normal', dueTime: null, remindBefore: null })
+  Object.assign(form, props.task ? { category: props.task.category || 'normal', title: props.task.title, description: props.task.description, status: props.task.status, dueDate: props.task.dueDate, priority: props.task.priority, dueTime: props.task.dueTime, remindBefore: props.task.remindBefore } : { category: props.defaultCategory || 'normal', title: props.defaultTitle || '', description: '', status: 'todo', dueDate: props.defaultDate || null, priority: 'normal', dueTime: null, remindBefore: null })
+  if (form.category === 'daily') form.dueDate = localDate()
   reminderChoice.value = form.remindBefore == null ? 'off' : reminderOptions.includes(form.remindBefore) ? form.remindBefore : 'custom'
 })
+watch(() => form.category, value => { if (value === 'daily') form.dueDate = localDate() })
 watch(() => form.dueDate, value => { if (!value) { form.dueTime = null; reminderChoice.value = 'off'; form.remindBefore = null } })
 watch(() => form.dueTime, value => { if (!value) { reminderChoice.value = 'off'; form.remindBefore = null } })
 function changeReminder(value: number | 'custom' | 'off'): void { form.remindBefore = value === 'off' ? null : value === 'custom' ? 20 : value }
@@ -40,8 +42,9 @@ async function submit(): Promise<void> {
   <el-dialog :model-value="modelValue" :title="task ? '编辑任务' : '添加一件要做的事'" width="640px" class="task-editor-dialog" :close-on-click-modal="false" :close-on-press-escape="!saving" :show-close="!saving" @update:model-value="setVisible">
     <el-form label-position="top" :disabled="saving" @submit.prevent="submit">
       <el-form-item label="任务标题" required><el-input v-model="form.title" placeholder="接下来，想完成什么？" maxlength="200" autofocus @keydown.enter.prevent="submit" /></el-form-item>
+      <el-form-item label="任务分类"><el-radio-group v-model="form.category"><el-radio-button value="normal">普通待办</el-radio-button><el-radio-button value="daily">每日必做</el-radio-button></el-radio-group><p v-if="form.category==='daily'" class="daily-task-hint">每天自动加入今日待办，未完成时置顶；次日恢复为未完成。</p></el-form-item>
       <el-form-item label="任务说明"><el-input v-model="form.description" type="textarea" :rows="3" maxlength="10000" placeholder="补充一些细节（选填）" /></el-form-item>
-      <div class="form-columns"><el-form-item label="截止日期"><el-date-picker v-model="form.dueDate" type="date" value-format="YYYY-MM-DD" placeholder="不设置日期" style="width:100%" /></el-form-item><el-form-item label="优先级"><el-select v-model="form.priority"><el-option label="高优先级" value="high" /><el-option label="普通" value="normal" /><el-option label="低优先级" value="low" /></el-select></el-form-item></div>
+      <div class="form-columns"><el-form-item label="截止日期"><el-date-picker v-model="form.dueDate" :disabled="form.category==='daily'" type="date" value-format="YYYY-MM-DD" placeholder="不设置日期" style="width:100%" /></el-form-item><el-form-item label="优先级"><el-select v-model="form.priority"><el-option label="高优先级" value="high" /><el-option label="普通" value="normal" /><el-option label="低优先级" value="low" /></el-select></el-form-item></div>
       <div class="form-columns"><el-form-item label="事项时间"><el-time-picker v-model="form.dueTime" :disabled="!form.dueDate" format="HH:mm" value-format="HH:mm" placeholder="选择具体时间（选填）" style="width:100%" /></el-form-item><el-form-item label="提前提醒"><el-select v-model="reminderChoice" aria-label="提前提醒" :disabled="!form.dueDate || !form.dueTime" @change="changeReminder"><el-option label="不提醒" value="off" /><el-option v-for="minutes in reminderOptions" :key="minutes" :label="reminderLabel(minutes)" :value="minutes" /><el-option label="自定义提前时间" value="custom" /></el-select></el-form-item></div>
       <el-form-item v-if="reminderChoice === 'custom'" label="提前多少分钟"><el-input-number v-model="form.remindBefore" aria-label="提前分钟数" :min="0" :max="43200" :precision="0" /><span class="reminder-unit">分钟（最多 30 天）</span></el-form-item>
       <p v-if="reminderPreview" class="reminder-preview">将于 {{ reminderPreview }} 提醒</p>
