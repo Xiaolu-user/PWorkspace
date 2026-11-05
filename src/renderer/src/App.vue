@@ -78,7 +78,7 @@ onBeforeUnmount(() => { clearInterval(clock); unsubscribe?.(); window.removeEven
 <template>
   <div class="app-shell compact-shell" :class="{ 'is-dashboard': route.path === '/', 'is-fitness': route.path === '/fitness' }">
     <aside class="sidebar">
-      <router-link to="/" class="brand" aria-label="大内总管首页" :class="waveOf(0)" @mouseenter="hoverIndex = 0" @mouseleave="hoverIndex = -1"><img class="brand-mark brand-image" :src="appIcon" alt="大内总管图标" /><span class="nav-label"><strong>大内总管</strong><em>本地个人空间</em></span></router-link>
+      <div class="sidebar-brand"><img class="brand-mark brand-image" :src="appIcon" alt="大内总管图标" /></div>
       <nav class="primary-nav" aria-label="主要导航"><router-link v-for="(item, index) in navigation" :key="item.path" :to="item.path" :aria-label="item.label" :class="[waveOf(index + 1), { active: route.path === item.path }]" @mouseenter="hoverIndex = index + 1" @mouseleave="hoverIndex = -1"><AppIcon :name="item.icon" :size="20" /><span class="nav-label"><strong>{{ item.label }}</strong><em>{{ item.hint }}</em></span><small v-if="item.path === '/tasks' && workspace.dashboard.totalTodo">{{ workspace.dashboard.totalTodo }}</small></router-link></nav>
       <div class="sidebar-divider"></div>
       <button class="quick-create" aria-label="快速添加任务" :class="waveOf(quickIndex)" @mouseenter="hoverIndex = quickIndex" @mouseleave="hoverIndex = -1" @click="addTask = true"><AppIcon name="plus" :size="19" /><span class="nav-label"><strong>快速添加</strong><em>新建一条待办</em></span></button>
