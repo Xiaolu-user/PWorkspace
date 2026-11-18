@@ -26,7 +26,7 @@
 
 ## 安装与首次使用
 
-从 [Releases](https://github.com/Xiaolu-user/PWorkspace/releases) 下载 `大内总管-1.0.0-Setup.exe`，适用于 Windows 10/11 x64。安装包未进行代码签名，Windows 可能提示未知发布者；请核对来源及随版本提供的 SHA-256 校验值。
+从 [Releases](https://github.com/Xiaolu-user/PWorkspace/releases) 下载 `DaneiZongguan-1.0.0-Setup.exe`，适用于 Windows 10/11 x64。安装包未进行代码签名，Windows 可能提示未知发布者；请核对来源及随版本提供的 SHA-256 校验值。
 
 首次使用从空数据开始。覆盖安装或卸载后重装会保留已有本机数据，避免丢失内容；如需重置或迁移，参阅[使用说明](docs/使用说明.md)。
 
