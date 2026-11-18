@@ -14,6 +14,7 @@ function run(script, args = []) {
   if (result.status !== 0) process.exit(result.status || 1)
 }
 run('scripts/icons.cjs')
+run('scripts/third-party-notices.cjs')
 run('node_modules/vue-tsc/bin/vue-tsc.js', ['--noEmit'])
 run('node_modules/electron-vite/bin/electron-vite.js', ['build'])
 const mode = process.argv[2]

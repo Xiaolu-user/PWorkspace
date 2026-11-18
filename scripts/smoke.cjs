@@ -36,7 +36,7 @@ async function launch() {
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
   await page.waitForFunction(() => !!window.workbench)
   await page.locator('.home-grid').waitFor()
-  await page.waitForFunction(() => document.querySelector('.page-footer')?.textContent.includes('v0.1.0'))
+  await page.waitForFunction(version => document.querySelector('.page-footer')?.textContent.includes('v' + version), require('../package.json').version)
   assert.equal(await page.locator('.error-banner').count(), 0)
 }
 async function forceClose() {

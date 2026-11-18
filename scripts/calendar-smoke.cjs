@@ -17,7 +17,7 @@ async function api(method, ...args) {
 async function launch() {
   app = await electron.launch({ executablePath: require('electron'), args: [root], cwd: root, env })
   page = await app.firstWindow(); page.on('pageerror', error => errors.push(error.message))
-  await page.waitForFunction(() => document.querySelector('.page-footer')?.textContent.includes('v0.1.0'))
+  await page.waitForFunction(version => document.querySelector('.page-footer')?.textContent.includes('v' + version), require('../package.json').version)
 }
 async function stop() {
   if (app) { await app.evaluate(({ app }) => app.exit(0)).catch(() => {}); await app.close().catch(() => {}); app = null }

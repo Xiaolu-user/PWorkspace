@@ -8,7 +8,7 @@ mkdirSync(output, { recursive: true }); mkdirSync(data, { recursive: true })
 const env = { ...process.env, WORKBENCH_DATA_DIR: data }; delete env.ELECTRON_RUN_AS_NODE; delete env.ELECTRON_RENDERER_URL
 let app, page; const errors = [], checks = []
 async function api(group, method, ...args) { const r = await page.evaluate(async ({ group, method, args }) => window.workbench[group][method](...args), { group, method, args }); assert.equal(r.ok, true, JSON.stringify(r)); return r.data }
-async function launch() { app = await electron.launch({ executablePath: require('electron'), args: [root], cwd: root, env }); page = await app.firstWindow(); page.on('pageerror', e => errors.push(e.message)); await page.waitForFunction(() => document.querySelector('.page-footer')?.textContent.includes('v0.1.0')); }
+async function launch() { app = await electron.launch({ executablePath: require('electron'), args: [root], cwd: root, env }); page = await app.firstWindow(); page.on('pageerror', e => errors.push(e.message)); await page.waitForFunction(version => document.querySelector('.page-footer')?.textContent.includes('v' + version), require('../package.json').version); }
 async function stop() { if (app) { await app.evaluate(({ app }) => app.exit(0)).catch(() => {}); await app.close().catch(() => {}); app = null } }
 async function size(width, height) { await app.evaluate(({ BrowserWindow }, s) => BrowserWindow.getAllWindows()[0].setContentSize(...s), [width, height]); await page.waitForTimeout(420) }
 const card = () => page.locator('.shortcut-card')

@@ -8,7 +8,7 @@ mkdirSync(output, { recursive: true }); mkdirSync(data, { recursive: true })
 const env = { ...process.env, WORKBENCH_DATA_DIR: data }; delete env.ELECTRON_RUN_AS_NODE; delete env.ELECTRON_RENDERER_URL
 let app, page; const errors = [], checks = []
 async function api(group, method, ...args) { const result = await page.evaluate(async ({ group, method, args }) => window.workbench[group][method](...args), { group, method, args }); assert.equal(result.ok, true, JSON.stringify(result)); return result.data }
-async function launch() { app = await electron.launch({ executablePath: require('electron'), args: [root], cwd: root, env }); page = await app.firstWindow(); page.on('pageerror', e => errors.push(e.message)); await page.waitForFunction(() => document.querySelector('.page-footer')?.textContent.includes('v0.1.0')); }
+async function launch() { app = await electron.launch({ executablePath: require('electron'), args: [root], cwd: root, env }); page = await app.firstWindow(); page.on('pageerror', e => errors.push(e.message)); await page.waitForFunction(version => document.querySelector('.page-footer')?.textContent.includes('v' + version), require('../package.json').version); }
 async function stop() { if (app) { await app.evaluate(({ app }) => app.exit(0)).catch(() => {}); await app.close().catch(() => {}); app = null } }
 async function shot(name) { await page.mouse.move(0,0); await page.locator('.el-message').last().waitFor({state:'hidden',timeout:5000}).catch(()=>{}); await page.screenshot({ animations:'disabled',path:join(output,name+'.png') }) }
 async function main() {

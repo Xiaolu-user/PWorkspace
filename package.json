@@ -1,9 +1,9 @@
 {
   "name": "personal-workbench",
   "productName": "大内总管",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "离线优先的个人桌面工作台：待办、笔记与常用链接",
+  "description": "离线优先的个人桌面工作台：待办、笔记、快捷方式、课程和健身",
   "author": "大内总管",
   "license": "MIT",
   "type": "module",
@@ -18,7 +18,8 @@
     "icons": "node scripts/icons.cjs",
     "postinstall": "electron-builder install-app-deps",
     "dist": "node scripts/build.cjs dist",
-    "pack": "node scripts/build.cjs pack"
+    "pack": "node scripts/build.cjs pack",
+    "licenses": "node scripts/third-party-notices.cjs"
   },
   "dependencies": {
     "better-sqlite3": "^12.4.1"
@@ -52,6 +53,8 @@
     "files": [
       "out/**/*",
       "package.json",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.txt",
       "!node_modules/better-sqlite3/src/**",
       "!node_modules/better-sqlite3/deps/**",
       "!node_modules/better-sqlite3/build/Release/obj/**",
@@ -93,5 +96,13 @@
       "zh-CN",
       "en-US"
     ]
+  },
+  "homepage": "https://github.com/Xiaolu-user/PWorkspace",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Xiaolu-user/PWorkspace.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Xiaolu-user/PWorkspace/issues"
   }
 }
